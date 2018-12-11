@@ -1,0 +1,5 @@
+package socialNetwork;
+
+class Utente {
+
+}
