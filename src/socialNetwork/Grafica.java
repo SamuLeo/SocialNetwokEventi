@@ -1,7 +1,10 @@
 package socialNetwork;
 
 import java.awt.*;
+import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
 import javax.swing.*;
 
@@ -9,71 +12,147 @@ public class Grafica {
 	private static Grafica me;
 	private Grafica() {}
 	public static Grafica getIstance() {
-		if (me==null) {me = new Grafica(); return me; }
+		if (me==null) {me = new Grafica(); return me;}
 		else return me;
 	}
 	
 	JFrame frame;
-	JButton btnNuovoEvento = new JButton("Aggiungi Evento"), btnBacheca = new JButton ("Bacheca");
-	JPanel toolbarBacheca = new JPanel(), barraFunzioni = new JPanel();
+	JButton btnNuovoEvento = new JButton("Aggiungi Evento"), btnBacheca = new JButton ("Bacheca"), btnConfermaCreazioneEvento = new JButton("Conferma"), btnAnnullaCreazioneEvento = new JButton("Annulla");
+	JPanel toolbarBacheca = new JPanel(), barraFunzioni = new JPanel(), barraForm = new JPanel();
 	Login loginPane;
+	JScrollPane pannelloCentrale = new JScrollPane();
+	Bacheca bacheca;
+	CreazioneEvento form;
 	
-	AdjustmentListener listenerBacheca = null;
+	private AdjustmentListener listenerScroll = new listenerScroll();
+	private ComponentListener listenerRidimensionamento = new listenerRidimensionamento();
 	
-	static final Color coloreBottoni = new Color(255,255,255);
-	static final Color coloreSfondo = new Color(240,240,240);
-	static final Color coloreBarra = new Color(200,200,200);
 	Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
 	int screenW = (int)(screenSize.getWidth());
 	int screenH = (int)(screenSize.getHeight());
+	private int larghezzaStrPassword, altezzaStringhe, larghezzaCampiUtentePswd;
 	static final Font testoBottoni=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/5);
 	static final Font testo=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+	static final Color coloreBottoni = new Color(255,255,255);
+	static final Color coloreSfondo = new Color(240,240,240);
+	static final Color coloreBarra = new Color(200,200,200);
 	
 	public void crea() {
-		//Operazioni iniziali sul Frame
+		//Operazioni iniziali sul Frame e sulle variabili di classe
 			frame = new JFrame();
 			frame.setMinimumSize(new Dimension(screenH/3, (int) (screenH/2.25)));
-			frame.setTitle("Login");
 			frame.setIconImage(new ImageIcon("Icona.jpg").getImage());
 			frame.setBounds(screenW/2-(int)(screenH/4.4), screenH/2-(int)(screenH/4.4), (int)(screenH/2.2), (int)(screenH/1.8));
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setVisible(true);
+			frame.getContentPane().setBackground(coloreBottoni);
+			frame.addComponentListener(listenerRidimensionamento);
+			calcolaDimensioniStringhe();
+			UIManager.put("OptionPane.messageFont", testo);
+			UIManager.put("OptionPane.buttonFont", testoBottoni);
 		//Inizializzazione componenti
 			btnNuovoEvento.setFont(testoBottoni);
 			btnNuovoEvento.setBackground(coloreBottoni);
+			btnNuovoEvento.addActionListener(e -> iniziaCreazioneEvento());
 			btnBacheca.setBackground(coloreBottoni);
 			btnBacheca.setFont(testoBottoni);
-			//btnBacheca.setBorderPainted(false);
+			btnConfermaCreazioneEvento.setFont(testoBottoni);
+			btnConfermaCreazioneEvento.setBackground(coloreBottoni);
+			btnAnnullaCreazioneEvento.setFont(testoBottoni);
+			btnAnnullaCreazioneEvento.setBackground(coloreBottoni);
+			btnAnnullaCreazioneEvento.addActionListener(e -> visualizzaBacheca());
 			toolbarBacheca.setLayout(new BorderLayout(0, 0));
 			toolbarBacheca.setBackground(coloreSfondo);
 			toolbarBacheca.add(btnNuovoEvento, BorderLayout.EAST);
 			barraFunzioni.setLayout(new BorderLayout(0, 0));
 			barraFunzioni.add(btnBacheca, BorderLayout.CENTER);
-		//Creazione schermata di login
-			frame.setLayout(null);
-			frame.setResizable(false);
-			frame.setVisible(true);
-			FontRenderContext frc = ((Graphics2D)frame.getGraphics()).getFontRenderContext();
-			loginPane=new Login(testoBottoni, testo, (int)testo.getStringBounds("Password: ", frc).getWidth(), (int)testo.getStringBounds("abj", frc).getHeight(), (int)testo.getStringBounds("abcdefghijklmnopqrst", frc).getWidth());
-			loginPane.setBounds((int)((screenH/2.2-loginPane.getWidth())/2), (int)((screenH/1.8-loginPane.getHeight())/2), loginPane.getWidth(), loginPane.getHeight());
-			frame.getContentPane().setBackground(coloreBottoni);
-			frame.getContentPane().add(loginPane);
-			loginPane.focus();
+			barraForm.setLayout(new BorderLayout(0, 0));
+			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
+			barraForm.add(btnAnnullaCreazioneEvento, BorderLayout.EAST);
+			pannelloCentrale.getVerticalScrollBar().addAdjustmentListener(listenerScroll);
 			//JOptionPane.showMessageDialog(null, loginPane.getX() + " " + loginPane.getY(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
-			UIManager.put("OptionPane.messageFont", testo);
-			UIManager.put("OptionPane.buttonFont", testoBottoni);
+	}
+	
+	public void svuotaFrame() {
+		if (loginPane != null) {
+			try {frame.getContentPane().remove(loginPane);} catch (Exception e) {}
+			loginPane=null;
+			frame.getContentPane().setLayout(new BorderLayout(0, 0));
+		}
+		try {frame.getContentPane().remove(toolbarBacheca);} catch (Exception e) {}
+		try {frame.getContentPane().remove(barraFunzioni);} catch (Exception e) {}
+		try {frame.getContentPane().remove(barraForm);} catch (Exception e) {}
+		try {frame.getContentPane().remove(pannelloCentrale);} catch (Exception e) {}
+		frame.getContentPane().revalidate();
+	}
+	
+	public void mostraLogin() {
+		frame.setTitle("Login");
+		frame.setLayout(null);
+		loginPane=new Login(testoBottoni, testo, larghezzaStrPassword , altezzaStringhe, larghezzaCampiUtentePswd);
+		loginPane.setBounds((int)((frame.getContentPane().getWidth()-loginPane.getWidth())/2), (int)((frame.getContentPane().getHeight()-loginPane.getHeight())/2), loginPane.getWidth(), loginPane.getHeight());
+		frame.getContentPane().add(loginPane);
+		loginPane.focus();
+		frame.repaint();
 	}
 	
 	public void visualizzaBacheca() {
+		/*
+		LinkedList<Evento> le = Sessione.mostraBacheca(); 
+		*/
+		//Riconfigurazione del Frame
 		frame.setTitle("Bacheca");
-		frame.setResizable(true);
-		loginPane.setVisible(false);
-		frame.getContentPane().setLayout(new BorderLayout(0, 0));
+		svuotaFrame();
 		frame.getContentPane().add(toolbarBacheca, BorderLayout.NORTH);
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
-		JScrollPane pannelloBacheca = new JScrollPane(new Bacheca(frame.getWidth()-45));
-		pannelloBacheca.getVerticalScrollBar().addAdjustmentListener(listenerBacheca);
-		pannelloBacheca.setPreferredSize(new Dimension(frame.getWidth(),frame.getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
-		frame.getContentPane().add(pannelloBacheca, BorderLayout.CENTER);
+		if (form != null) form.setVisible(false);
+		if (bacheca != null) bacheca.setVisible(true);
+		//Creazione pannello principale
+		bacheca = new Bacheca(frame.getWidth()-45);
+		pannelloCentrale = new JScrollPane(bacheca);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+	}
+	
+	public void iniziaCreazioneEvento() {
+		//Riconfigurazione del Frame
+		frame.setTitle("Crea evento");
+		svuotaFrame();
+		frame.getContentPane().add(barraForm, BorderLayout.SOUTH);
+		if (form != null) form.setVisible(true);
+		if (bacheca != null) bacheca.setVisible(false);
+		//Creazione pannello principale
+		//form = new CreazioneEvento(testoBottoni, testo, frame.getWidth()-45, altezzaStringhe);
+		pannelloCentrale = new JScrollPane(form);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+	}
+	
+	private void calcolaDimensioniStringhe() {
+		FontRenderContext frc = ((Graphics2D)frame.getGraphics()).getFontRenderContext();
+		larghezzaStrPassword = (int)testo.getStringBounds("Password: ", frc).getWidth();
+		altezzaStringhe = (int)testo.getStringBounds("abj", frc).getHeight();
+		larghezzaCampiUtentePswd = (int)testo.getStringBounds("abcdefghijklmnopqrst", frc).getWidth();
+	}
+	
+	private class listenerRidimensionamento implements ComponentListener{
+		public void componentHidden(ComponentEvent arg0) {}
+		public void componentShown(ComponentEvent arg0) {}
+		public void componentMoved(ComponentEvent arg0) {}
+		public void componentResized(ComponentEvent arg0) {
+			if (loginPane != null && loginPane.isVisible()) {
+				loginPane.setBounds((int)((frame.getContentPane().getWidth()-loginPane.getWidth())/2), (int)((frame.getContentPane().getHeight()-loginPane.getHeight())/2), loginPane.getWidth(), loginPane.getHeight());
+			} else if (bacheca != null && pannelloCentrale.isVisible() && bacheca.isVisible()) {
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
+				bacheca.ridimensiona(frame.getWidth()-45);
+			}
+		}
+	}
+	
+	class listenerScroll implements AdjustmentListener{
+		public void adjustmentValueChanged(AdjustmentEvent e) {
+			//Listener attivato quando faccio scroll sulla bacheca
+		}
 	}
 	
 	public void accedi(String utente, String password) {

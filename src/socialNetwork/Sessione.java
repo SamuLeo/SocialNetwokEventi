@@ -7,6 +7,7 @@ public class Sessione {
 	public static void main(String[] args) {
 		DB.caricaUtenti();
 		Grafica.getIstance().crea();
+		Grafica.getIstance().mostraLogin();
 	}
 	
 	public static boolean creaUtente(String utente, String password) {

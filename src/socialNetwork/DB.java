@@ -32,6 +32,7 @@ final class DB {
 		else return false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	static void caricaUtenti() {
 		try (ObjectInputStream ingresso = new ObjectInputStream(new FileInputStream(new File("DB\\UtDB.dat")));) {
 			utenti = (HashMap<String, Utente>) ingresso.readObject();}
