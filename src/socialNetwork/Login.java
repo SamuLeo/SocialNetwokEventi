@@ -1,6 +1,8 @@
 package socialNetwork;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -14,6 +16,9 @@ public class Login extends JPanel {
 	private int X=0, Y=0;
 	private JTextField utente;
 	private JPasswordField password;
+	
+	private final ActionListener accediLambda = e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword()));
+	private final ActionListener creaUtLambda = e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword()));
 	
 	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) {
 		setLayout(null);
@@ -37,9 +42,9 @@ public class Login extends JPanel {
 		password.setBounds(20+labelX+20, 40+labelY+20, utenteX, utenteY);
 		accedi.setBounds(20, 40+labelY+20+labelY+20, bottoneX, bottoneY);
 		nuovoUt.setBounds(20+bottoneX+20, 40+labelY+20+labelY+20, bottoneX, bottoneY);
-		accedi.addActionListener(e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword())));
-		nuovoUt.addActionListener(e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword())));
-		password.addActionListener(e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword())));
+		accedi.addActionListener(accediLambda);
+		nuovoUt.addActionListener(creaUtLambda);
+		password.addActionListener(accediLambda);
 		this.add(utlabel);this.add(pswdlabel);
 		this.add(utente);this.add(password);
 		this.add(nuovoUt);this.add(accedi);

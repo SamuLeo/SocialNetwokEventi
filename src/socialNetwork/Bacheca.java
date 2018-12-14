@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 public class Bacheca extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private JLabel[] labels =new JLabel[30];
+	private int X=0, Y=0;
 	
 	Bacheca(int larghezza) {
 		super();
@@ -16,9 +17,18 @@ public class Bacheca extends JPanel {
 			labels[i].setBounds(0, 50*i, larghezza, 50);
 			this.add(labels[i]);
 		}
+		X=larghezza; Y=1500;
 		this.setPreferredSize(new Dimension(larghezza,1500));
 	}
 	
-	public int getHeight() {return 1500;}
-	public int getWidth() {return 500;}
+	public int getHeight() {return Y;}
+	public int getWidth() {return X;}
+	
+	void ridimensiona(int larghezza) {
+		for (int i=0; i<30; i++) {
+			labels[i].setBounds(0, 50*i, larghezza, 50);
+		}
+		X=larghezza; Y=1500;
+		this.setPreferredSize(new Dimension(larghezza,1500));
+	}
 }
