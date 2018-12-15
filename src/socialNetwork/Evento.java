@@ -8,6 +8,9 @@ public abstract class Evento implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
+	private String titolo;
+	private String descrizione;
+	
 	private HashMap<String, Campo> campi;
 	
 	/**
@@ -142,4 +145,8 @@ public abstract class Evento implements Serializable
 			return false;
 	}
 
+	public String getTitolo() {return titolo;}
+	public void setTitolo(String titolo) {this.titolo = titolo;}
+	public String getDescrizione() {return descrizione;}
+	public void setDescrizione(String descrizione) {this.descrizione = descrizione;}	
 }
