@@ -1,4 +1,5 @@
 package socialNetwork.view;
+import socialNetwork.controller.*;
 
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
@@ -7,8 +8,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
 import javax.swing.*;
-
-import socialNetwork.controller.Sessione;
 
 public class Grafica {
 	private static Grafica me;
@@ -25,6 +24,7 @@ public class Grafica {
 	JScrollPane pannelloCentrale = new JScrollPane();
 	Bacheca bacheca;
 	CreazioneEvento form;
+	JComboBox<String> selettoreCategoria = new JComboBox<>();
 	
 	private AdjustmentListener listenerScroll = new listenerScroll();
 	private ComponentListener listenerRidimensionamento = new listenerRidimensionamento();
@@ -56,6 +56,11 @@ public class Grafica {
 			btnNuovoEvento.setFont(testoBottoni);
 			btnNuovoEvento.setBackground(coloreBottoni);
 			btnNuovoEvento.addActionListener(e -> iniziaCreazioneEvento());
+			selettoreCategoria.setFont(testo);
+			selettoreCategoria.insertItemAt("Calcio", 0);
+			selettoreCategoria.setSelectedIndex(0);
+			selettoreCategoria.setBackground(coloreBottoni);
+			selettoreCategoria.setFocusable(false);
 			btnBacheca.setBackground(coloreBottoni);
 			btnBacheca.setFont(testoBottoni);
 			btnConfermaCreazioneEvento.setFont(testoBottoni);
@@ -66,12 +71,15 @@ public class Grafica {
 			toolbarBacheca.setLayout(new BorderLayout(0, 0));
 			toolbarBacheca.setBackground(coloreSfondo);
 			toolbarBacheca.add(btnNuovoEvento, BorderLayout.EAST);
+			toolbarBacheca.add(selettoreCategoria,BorderLayout.CENTER);
 			barraFunzioni.setLayout(new BorderLayout(0, 0));
 			barraFunzioni.add(btnBacheca, BorderLayout.CENTER);
 			barraForm.setLayout(new BorderLayout(0, 0));
 			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
 			barraForm.add(btnAnnullaCreazioneEvento, BorderLayout.EAST);
 			pannelloCentrale.getVerticalScrollBar().addAdjustmentListener(listenerScroll);
+			pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
 			//JOptionPane.showMessageDialog(null, loginPane.getX() + " " + loginPane.getY(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
@@ -110,10 +118,15 @@ public class Grafica {
 		if (form != null) form.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(true);
 		//Creazione pannello principale
-		bacheca = new Bacheca(frame.getWidth()-45);
+		bacheca = new Bacheca(frame.getWidth(),testo, testoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		barraFunzioni.repaint(200);
+		frame.getContentPane().revalidate();
+		toolbarBacheca.repaint(200);
 	}
 	
 	public void iniziaCreazioneEvento() {
@@ -124,10 +137,14 @@ public class Grafica {
 		if (form != null) form.setVisible(true);
 		if (bacheca != null) bacheca.setVisible(false);
 		//Creazione pannello principale
-		//form = new CreazioneEvento(testoBottoni, testo, frame.getWidth()-45, altezzaStringhe);
+		form = new CreazioneEvento(testo, frame.getWidth(), altezzaStringhe);
 		pannelloCentrale = new JScrollPane(form);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		frame.getContentPane().revalidate();
+		barraForm.repaint(200);
 	}
 	
 	private void calcolaDimensioniStringhe() {
@@ -146,7 +163,11 @@ public class Grafica {
 				loginPane.setBounds((int)((frame.getContentPane().getWidth()-loginPane.getWidth())/2), (int)((frame.getContentPane().getHeight()-loginPane.getHeight())/2), loginPane.getWidth(), loginPane.getHeight());
 			} else if (bacheca != null && pannelloCentrale.isVisible() && bacheca.isVisible()) {
 				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
-				bacheca.ridimensiona(frame.getWidth()-45);
+				bacheca.ridimensiona(frame.getWidth());
+			} else if (form != null && pannelloCentrale.isVisible() && form.isVisible()) {
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
+				form.ridimensiona(frame.getWidth());
+				form.repaint(200);
 			}
 		}
 	}

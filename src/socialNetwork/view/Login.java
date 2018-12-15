@@ -1,4 +1,5 @@
 package socialNetwork.view;
+import socialNetwork.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionListener;

@@ -2,9 +2,12 @@ package socialNetwork.controller;
 
 import java.util.Calendar;
 
+import javax.swing.JOptionPane;
+
 import socialNetwork.content.DB;
 import socialNetwork.content.Utente;
 import socialNetwork.view.Grafica;
+import socialNetwork.content.*;
 
 public class Sessione {
 
@@ -17,7 +20,9 @@ public class Sessione {
 	public static boolean creaUtente(String utente, String password) {
 		try {
 			return DB.inserisciUtente(new Utente(utente, password));
-		} catch (IllegalArgumentException e) {return false;}
+		} catch (IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE);
+			return false;}
 	}
 	
 	public static boolean accedi(String utente, String password) {
