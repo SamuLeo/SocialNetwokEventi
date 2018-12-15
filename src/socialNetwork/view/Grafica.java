@@ -1,4 +1,4 @@
-package socialNetwork;
+package socialNetwork.view;
 
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
@@ -7,6 +7,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
 import javax.swing.*;
+
+import socialNetwork.controller.Sessione;
 
 public class Grafica {
 	private static Grafica me;

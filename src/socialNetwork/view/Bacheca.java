@@ -1,4 +1,4 @@
-package socialNetwork;
+package socialNetwork.view;
 import java.awt.Dimension;
 
 import javax.swing.JLabel;

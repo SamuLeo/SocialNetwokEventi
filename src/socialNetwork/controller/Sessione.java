@@ -1,6 +1,10 @@
-package socialNetwork;
+package socialNetwork.controller;
 
 import java.util.Calendar;
+
+import socialNetwork.content.DB;
+import socialNetwork.content.Utente;
+import socialNetwork.view.Grafica;
 
 public class Sessione {
 
@@ -23,7 +27,7 @@ public class Sessione {
 		else {log("Password errata " + password + " " + io.getPassword()); return false;}
 	}
 	
-	static void log(String l) {
+	public static void log(String l) {
 		System.out.println(String.format("%-70s %02d.%02d.%02d,%04d", l, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND), Calendar.getInstance().get(Calendar.MILLISECOND)));
 		}
 }

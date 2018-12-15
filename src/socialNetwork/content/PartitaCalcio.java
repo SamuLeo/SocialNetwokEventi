@@ -1,6 +1,8 @@
-package socialNetwork;
+package socialNetwork.content;
 
 import java.util.Calendar;
+
+import socialNetwork.view.NomeCampi;
 
 public class PartitaCalcio extends Evento 
 {
@@ -25,10 +27,9 @@ public class PartitaCalcio extends Evento
 		super(luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, compreso_nella_quota, data_ora_termine_evento);
 		
 		if(eta_minima <= 0 || eta_massima <= 0 || eta_minima==null || eta_massima==null)     throw new IllegalArgumentException("Necessario inserire un età minima, massima dei partecipanti superiore a 0");
-		if(genere == null || !(genere.equalsIgnoreCase("M") && genere.equalsIgnoreCase("F") && genere.equalsIgnoreCase("MF")))throw new IllegalArgumentException("Necessario inserire il genere dei partecipanti");
-		
-		aggiungiCampo(eta_minima, true, "Età minima", "Età minima per poter partecipare all'evento");
-		aggiungiCampo(eta_massima, true, "Età massima", "Età massima per poter partecipare all'evento");
-		aggiungiCampo(genere, true, "Genere", "Genere richiesto per poter partecipare all'evento");	
+		if(genere == null || !(genere.equalsIgnoreCase("M") || genere.equalsIgnoreCase("F") || genere.equalsIgnoreCase("MF")))throw new IllegalArgumentException("Necessario inserire il genere dei partecipanti");		
+		aggiungiCampo(eta_minima, true, NomeCampi.ETA_MINIMA, "Età minima per poter partecipare all'evento");
+		aggiungiCampo(eta_massima, true, NomeCampi.ETA_MASSIMA, "Età massima per poter partecipare all'evento");
+		aggiungiCampo(genere, true, NomeCampi.GENERE, "Genere richiesto per poter partecipare all'evento");	
 	}
 }

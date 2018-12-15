@@ -1,4 +1,4 @@
-package socialNetwork;
+package socialNetwork.content;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,14 +7,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-final class DB {
+import socialNetwork.controller.Sessione;
+
+public final class DB {
 	static HashMap<String, Utente> utenti = new HashMap<>();
 	
-	static Utente trovaUtente(String nome) {
+	public static Utente trovaUtente(String nome) {
 		return utenti.get(nome);
 	}
 	
-	static boolean inserisciUtente(Utente utente) {
+	public static boolean inserisciUtente(Utente utente) {
 		if (utenti.containsKey(utente.getNome())) {
 			Sessione.log("Utente già presente");
 			return false;
@@ -33,6 +35,7 @@ final class DB {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public
 	static void caricaUtenti() {
 		try (ObjectInputStream ingresso = new ObjectInputStream(new FileInputStream(new File("DB\\UtDB.dat")));) {
 			utenti = (HashMap<String, Utente>) ingresso.readObject();}

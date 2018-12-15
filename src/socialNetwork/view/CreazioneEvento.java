@@ -1,4 +1,4 @@
-package socialNetwork;
+package socialNetwork.view;
 
 import javax.swing.JPanel;
 

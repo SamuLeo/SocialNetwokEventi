@@ -1,4 +1,4 @@
-package socialNetwork;
+package socialNetwork.content;
 
 import java.io.Serializable;
 
