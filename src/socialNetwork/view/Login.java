@@ -1,9 +1,13 @@
 package socialNetwork.view;
-import socialNetwork.*;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -24,6 +28,9 @@ public class Login extends JPanel {
 	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) {
 		setLayout(null);
 		this.setBackground(coloreSfondo);
+		JLabel img;
+		try {img = new JLabel(new ImageIcon(ImageIO.read(new File("IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
+		} catch (IOException e) {e.printStackTrace();img =new JLabel();}
 		JButton accedi = new JButton("Accedi"), nuovoUt = new JButton("Registrati");
 		utente = new JTextField(); password = new JPasswordField();
 		JLabel utlabel = new JLabel("Utente: "), pswdlabel = new JLabel("Password: ");
@@ -36,16 +43,18 @@ public class Login extends JPanel {
 		utenteY=labelY=Math.max(utenteY,labelY);
 		int bottoneX = (labelX+utenteX+20)/2-10, bottoneY = (int)(utenteY*1.2);
 		X=20+labelX+20+utenteX+20;
-		Y=40+utenteY+20+labelY+20+bottoneY+40;
-		utlabel.setBounds(20, 40, labelX, labelY);
-		pswdlabel.setBounds(20, 40+labelY+20, labelX, labelY);
-		utente.setBounds(20+labelX+20, 40, utenteX, utenteY);
-		password.setBounds(20+labelX+20, 40+labelY+20, utenteX, utenteY);
-		accedi.setBounds(20, 40+labelY+20+labelY+20, bottoneX, bottoneY);
-		nuovoUt.setBounds(20+bottoneX+20, 40+labelY+20+labelY+20, bottoneX, bottoneY);
+		Y=240+utenteY+20+labelY+20+bottoneY+40;
+		img.setBounds(Math.max(10, X/2-Math.min(pswdWidth+fieldWidth,180)/2),10,Math.min(pswdWidth+fieldWidth,180),Math.min(pswdWidth+fieldWidth,180));
+		utlabel.setBounds(20, 240, labelX, labelY);
+		pswdlabel.setBounds(20, 240+labelY+20, labelX, labelY);
+		utente.setBounds(20+labelX+20, 240, utenteX, utenteY);
+		password.setBounds(20+labelX+20, 240+labelY+20, utenteX, utenteY);
+		accedi.setBounds(20, 240+labelY+20+labelY+20, bottoneX, bottoneY);
+		nuovoUt.setBounds(20+bottoneX+20, 240+labelY+20+labelY+20, bottoneX, bottoneY);
 		accedi.addActionListener(accediLambda);
 		nuovoUt.addActionListener(creaUtLambda);
 		password.addActionListener(accediLambda);
+		this.add(img);
 		this.add(utlabel);this.add(pswdlabel);
 		this.add(utente);this.add(password);
 		this.add(nuovoUt);this.add(accedi);

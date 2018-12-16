@@ -93,6 +93,7 @@ public class CreazioneEvento extends JPanel {
 				testoCampiPartitaCalcio[i].setFont(testo);
 				Y+=20+(int)(fontHeight*1.1)*2;
 			}
+			Y+=20;
 		}
 		this.setPreferredSize(new Dimension(frameWidth,Y));
 	}
