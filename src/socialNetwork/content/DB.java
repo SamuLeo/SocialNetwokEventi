@@ -16,7 +16,7 @@ public final class DB {
 		return utenti.get(nome);
 	}
 	
-	public static boolean inserisciUtente(Utente utente) {
+	public static boolean inserisciUtente(Utente utente) throws IllegalArgumentException {
 		if (utenti.containsKey(utente.getNome())) {
 			Sessione.log("Utente già presente");
 			return false;
