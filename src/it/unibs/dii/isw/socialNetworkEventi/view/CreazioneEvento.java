@@ -1,13 +1,11 @@
 package it.unibs.dii.isw.socialNetworkEventi.view;
 
+import it.unibs.dii.isw.socialNetworkEventi.model.*;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import it.unibs.dii.isw.socialNetworkEventi.model.*;
-
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -95,6 +93,7 @@ public class CreazioneEvento extends JPanel {
 				testoCampiPartitaCalcio[i].setFont(testo);
 				Y+=20+(int)(fontHeight*1.1)*2;
 			}
+			Y+=20;
 		}
 		this.setPreferredSize(new Dimension(frameWidth,Y));
 	}
