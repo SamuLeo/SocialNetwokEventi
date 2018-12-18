@@ -73,17 +73,17 @@ public class Bacheca extends JPanel {
 			if (titolo==null) {titolo = new JLabel("Evento"); this.add(titolo);}
 			titolo.setFont(testoBottoni);
 			titolo.setBounds(w/10, 15, (int)(w*0.8), altezzaStringhe/5*6);
-			Calendar dataOra= (Calendar)e.getCampi().get(NomeCampi.D_O_INIZIO_EVENTO).getCampo();
+			Calendar dataOra= (Calendar)e.getCampi().get(NomeCampi.D_O_INIZIO_EVENTO).getContenuto();
 			if (data==null) {data = new JLabel("Data: " + dataOra.getTime().getDay() + '/'+ dataOra.getTime().getMonth() + '/' + (dataOra.getTime().getYear()+1900)); this.add(data);}
 			data.setFont(testo);
 			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.6), altezzaStringhe);
 			if (ora==null) {ora = new JLabel("Orario: " + '\t' + dataOra.getTime().getHours() + '.'+ dataOra.getTime().getMinutes()); this.add(ora);}
 			ora.setFont(testo);
 			ora.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
-			if (sesso==null) {sesso = new JLabel("Sesso: " + e.getCampi().get(NomeCampi.GENERE).getCampo()); this.add(sesso);}
+			if (sesso==null) {sesso = new JLabel("Sesso: " + e.getCampi().get(NomeCampi.GENERE).getContenuto()); this.add(sesso);}
 			sesso.setFont(testo);
 			sesso.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
-			int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getCampo();
+			int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();
 			int iscritti=(int)(rand*partecipanti);
 			g.setColor(sfondoAnello);
 			g.fillOval(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3);
