@@ -9,6 +9,7 @@ public class PartitaCalcio extends Evento
 	private String titolo="Partita di Calcio";
 	private String descrizione="";
 	public PartitaCalcio(
+			Integer utente,
 			String luogo,
 			Calendar data_ora_termine_ultimo_iscrizione,	
 			Calendar data_ora_inizio_evento,
@@ -26,7 +27,7 @@ public class PartitaCalcio extends Evento
 			)
 	throws IllegalArgumentException
 	{
-		super(luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento);
+		super(utente, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento);
 		
 		if(eta_minima <= 0 || eta_massima <= 0 || eta_minima==null || eta_massima==null)     throw new IllegalArgumentException("Necessario inserire un età minima, massima dei partecipanti superiore a 0");
 		if(genere == null || !(genere.equalsIgnoreCase("M") || genere.equalsIgnoreCase("F") || genere.equalsIgnoreCase("MF")))throw new IllegalArgumentException("Necessario inserire il genere dei partecipanti");		

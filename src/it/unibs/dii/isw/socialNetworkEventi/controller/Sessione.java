@@ -2,7 +2,7 @@ package it.unibs.dii.isw.socialNetworkEventi.controller;
 
 import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -14,7 +14,7 @@ public class Sessione
 {
 	Logger logger;
 	static DataBase db;
-	static Vector<PartitaCalcio> partiteCalcio;
+	static ArrayList<PartitaCalcio> partiteCalcio;
 
 	public static void main(String[] args) 
 	{
