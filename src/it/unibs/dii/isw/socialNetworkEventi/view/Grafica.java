@@ -1,5 +1,6 @@
 package it.unibs.dii.isw.socialNetworkEventi.view;
 import it.unibs.dii.isw.socialNetworkEventi.controller.*;
+import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
@@ -179,12 +180,16 @@ public class Grafica {
 		}
 	}
 	
-	public void accedi(String utente, String password) {
-		if (Sessione.accedi(utente, password)) visualizzaBacheca();
-		else loginPane.ripulisci();
+	public void accedi(String utente, String password)
+	{
+		utente_corrente = Sessione.accedi(new Utente(utente, password));
+		if (utente_corrente != null) 
+			visualizzaBacheca();
+		else 
+			loginPane.ripulisci();
 	}
 	public void creaUtente(String utente, String password) {
-		if (Sessione.creaUtente(utente, password)) visualizzaBacheca();
+		if (Sessione.creaUtente((new Utente(utente, password)) visualizzaBacheca();
 		else loginPane.ripulisci();
 	}
 }

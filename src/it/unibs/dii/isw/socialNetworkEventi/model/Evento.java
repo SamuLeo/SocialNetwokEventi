@@ -41,11 +41,11 @@ public abstract class Evento implements Serializable
 		if(id_creatore == null) 																		throw new IllegalArgumentException("Necessario inserire un utente creatore");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
-		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Data-ora chiusura iscrizioni");
-		aggiungiCampo(data_ora_inizio_evento, true, NomeCampi.D_O_INIZIO_EVENTO, "Data-ora inizio evento");
+		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
+		aggiungiCampo(data_ora_inizio_evento, true, NomeCampi.D_O_INIZIO_EVENTO, "Inizio evento");
 		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
 		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
-		this.id_creatore=id_creatore;
+		this.setId_creatore(id_creatore);
 	}
 	
 	/*
@@ -78,7 +78,7 @@ public abstract class Evento implements Serializable
 		if(data_ora_termine_evento != null)		
 		{
 			if(!dataSuccessivaInizioEvento(data_ora_inizio_evento, data_ora_termine_evento)) throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di inizio evento");
-			aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Data-ora fine evento");						
+			aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Fine evento");						
 		}	
 	}
 	
@@ -90,6 +90,7 @@ public abstract class Evento implements Serializable
 
 	
 	public HashMap<NomeCampi, Campo> getCampi()						{ return campi;}
+//	public LinkedList
 	
 	public Campo 					 getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
 	
@@ -155,4 +156,12 @@ public abstract class Evento implements Serializable
 	 {
 		 return fruitori;
 	 }
+
+	public int getId_creatore() {
+		return id_creatore;
+	}
+
+	public void setId_creatore(int id_creatore) {
+		this.id_creatore = id_creatore;
+	}
 }

@@ -1,6 +1,7 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.io.Serializable;
+import java.sql.Date;
 import java.util.Calendar;
 
 import it.unibs.dii.isw.socialNetworkEventi.utility.TipoNotifica;
@@ -23,9 +24,9 @@ public class Notifica implements Serializable
 		this.contenuto=contenuto;
 	}
 	
-	public Notifica(String titolo, String contenuto, Calendar data)
+	Notifica(String titolo, String contenuto, Calendar data)
 	{
-		this(titolo,contenuto);
+		this(titolo, contenuto);
 		this.data = data;
 	}
 	

@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
+import java.util.LinkedList;
+
 import com.mysql.cj.jdbc.MysqlDataSource;
 import java.util.ArrayList;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
@@ -14,6 +16,8 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 public class DataBase 
 {
 	private Connection con;
+	private ArrayList<Evento> eventi;
+	private ArrayList<Utente> utenti;
 	
 //	Connessione a mysql creata tramite pattern Singleton
 	public Connection getConnection() throws SQLException
@@ -29,71 +33,87 @@ public class DataBase
 			dataSource.setPassword("StefanoLoveLinux");
 			
 			con = dataSource.getConnection();
+
 		}
 		return con;
 	}
 	
 	
-	public int insertPartitaDiCalcio(Evento partitaCalcio) throws SQLException
+	public void refreshDatiRAM() throws SQLException
 	{
-//		Estrazione campi dall'oggetto PartitaDiCalcio
-		int id_creatore							= partitaCalcio.getFruitori().get(0).getId_utente();					
-		String luogo 							= (String) partitaCalcio.getCampo(NomeCampi.LUOGO).getContenuto();
-		Date data_ora_termine_ultimo_iscrizione	= (Date) ((Calendar)partitaCalcio.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()).getTime();
-		Date data_ora_inizio_evento 			= (Date) ((Calendar)partitaCalcio.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime();
-		int partecipanti						= (Integer) partitaCalcio.getCampo(NomeCampi.PARTECIPANTI).getContenuto();
-		int costo								= (Integer) partitaCalcio.getCampo(NomeCampi.COSTO).getContenuto();   
-		String titolo							= (String) partitaCalcio.getCampo(NomeCampi.TITOLO).getContenuto();
-		String note								= (String) partitaCalcio.getCampo(NomeCampi.NOTE).getContenuto();
-		String benefici_quota					= (String) partitaCalcio.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto();
-	    Date data_ora_termine_evento			= (Date) ((Calendar)partitaCalcio.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()).getTime();  
-	    int eta_minima							= (Integer) partitaCalcio.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
-	    int eta_massima							= (Integer) partitaCalcio.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
-	    String genere							= (String) partitaCalcio.getCampo(NomeCampi.GENERE).getContenuto();
-	    
-//		Stringa contenente uno script sql per inserire la partita di calcio
-		String sql = "INSERT INTO partita_calcio "
-				+ "(luogo, "
-				+ "data_ora_termine_ultimo_iscrizione, "
-				+ "data_ora_inizio_evento,"
-				+ "partecipanti"
-				+ "costo,"
-				+ "titolo,"
-				+ "note,"
-				+ "benefici_quota,"
-				+ "data_ora_termine_evento,"
-				+ "eta_minima,"
-				+ "eta_massima,"
-				+ "genere,"
-				+ "id_creatore)" 
-				+ " VALUES "
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		
-//		script contenente la stringa sql precedentemente specificata inviato al DB, con prevenzione SQL Injection	
-		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-		ps.setString(1, luogo);
-		ps.setDate(2, data_ora_termine_ultimo_iscrizione);		
-		ps.setDate(3, data_ora_inizio_evento);	
-		ps.setInt(4, partecipanti);
-		ps.setInt(5, costo);
-		ps.setString(6, titolo);
-		ps.setString(7, note);
-		ps.setString(8, benefici_quota);
-		ps.setDate(9, data_ora_termine_evento);
-		ps.setInt(10, eta_minima);
-		ps.setInt(11, eta_massima);
-		ps.setString(12, genere);
-		ps.setInt(12, id_creatore);
-		
-		ps.executeUpdate();
-//		il return restituisce la primary key della riga appena aggiunta		
-		ResultSet rs = ps.getGeneratedKeys();	
-		return rs.getInt(1);
+		eventi = selectEventiAll();
+		utenti = selectUtentiAll();
 	}
 	
-	public ArrayList<PartitaCalcio> selectPartiteCalcioAll() throws SQLException
+	public void insertEvento(Evento evento) throws SQLException
 	{
-		ArrayList<PartitaCalcio> partite = new ArrayList<>();
+		switch(evento.getClass().getSimpleName())
+		{
+		case "PartitaCalcio" : 
+			{
+//				Estrazione campi dall'oggetto evento
+				int id_creatore							= evento.getFruitori().get(0).getId_utente();					
+				String luogo 							= (String) evento.getCampo(NomeCampi.LUOGO).getContenuto();
+				Date data_ora_termine_ultimo_iscrizione	= (Date) ((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()).getTime();
+				Date data_ora_inizio_evento 			= (Date) ((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime();
+				int partecipanti						= (Integer) evento.getCampo(NomeCampi.PARTECIPANTI).getContenuto();
+				int costo								= (Integer) evento.getCampo(NomeCampi.COSTO).getContenuto();   
+				String titolo							= (String) evento.getCampo(NomeCampi.TITOLO).getContenuto();
+				String note								= (String) evento.getCampo(NomeCampi.NOTE).getContenuto();
+				String benefici_quota					= (String) evento.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto();
+			    Date data_ora_termine_evento			= (Date) ((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()).getTime();  
+			    int eta_minima							= (Integer) evento.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
+			    int eta_massima							= (Integer) evento.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
+			    String genere							= (String) evento.getCampo(NomeCampi.GENERE).getContenuto();
+			    
+//				Stringa contenente uno script sql per inserire la partita di calcio
+				String sql = "INSERT INTO partita_calcio "
+						+ "(luogo, "
+						+ "data_ora_termine_ultimo_iscrizione, "
+						+ "data_ora_inizio_evento,"
+						+ "partecipanti"
+						+ "costo,"
+						+ "titolo,"
+						+ "note,"
+						+ "benefici_quota,"
+						+ "data_ora_termine_evento,"
+						+ "eta_minima,"
+						+ "eta_massima,"
+						+ "genere,"
+						+ "id_creatore)" 
+						+ " VALUES "
+						+ "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				
+//				script contenente la stringa sql precedentemente specificata inviato al DB, con prevenzione SQL Injection	
+				PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				ps.setString(1, luogo);
+				ps.setDate(2, data_ora_termine_ultimo_iscrizione);		
+				ps.setDate(3, data_ora_inizio_evento);	
+				ps.setInt(4, partecipanti);
+				ps.setInt(5, costo);
+				ps.setString(6, titolo);
+				ps.setString(7, note);
+				ps.setString(8, benefici_quota);
+				ps.setDate(9, data_ora_termine_evento);
+				ps.setInt(10, eta_minima);
+				ps.setInt(11, eta_massima);
+				ps.setString(12, genere);
+				ps.setInt(12, id_creatore);
+				
+				ps.executeUpdate();
+				
+				refreshDatiRAM();
+//				il return restituisce la primary key della riga appena aggiunta		
+
+			}
+		default : return ;
+		}
+
+	}
+	
+	public ArrayList<Evento> selectEventiAll() throws SQLException
+	{
+		ArrayList<Evento> eventi = new ArrayList<>();
 		
 		String sql = "SELECT id, "
 				+ "luogo, "
@@ -113,6 +133,8 @@ public class DataBase
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		
 		ResultSet rs = ps.executeQuery();
+		
+		rs.beforeFirst();
 		
 		while(rs.next())
 		{
@@ -136,15 +158,15 @@ public class DataBase
 					rs.getString(13));
 			partita.setId(rs.getInt(1));
 			
-			partite.add(partita);
+			eventi.add(partita);
 		}
 		
-		return partite;
+		return eventi;
 	}
 	
 	public PartitaCalcio selectPartitaCalcio(int id_partita) throws SQLException
 	{
-		
+
 		String sql = "SELECT id, "
 				+ "luogo, "
 				+ "data_ora_termine_ultimo_iscrizione, "
@@ -159,41 +181,55 @@ public class DataBase
 				+ "eta_massima,"
 				+ "genere"
 				+ "FROM partita_calcio WHERE id LIKE " + id_partita;
-		
+
 		PreparedStatement ps = getConnection().prepareStatement(sql);
-		
+
 		ResultSet rs = ps.executeQuery();
 		
-		Calendar data_termine = Calendar.getInstance(); data_termine.setTime(rs.getDate(3));
-		Calendar data_inizio = Calendar.getInstance(); data_inizio.setTime(rs.getDate(4));		
-		Calendar data_fine = Calendar.getInstance(); data_fine.setTime(rs.getDate(10));
+		rs.beforeFirst();
 
-		PartitaCalcio partita = new PartitaCalcio(
-				rs.getInt(14),
-				rs.getString(2),
-				data_termine,
-				data_inizio,
-				(Integer)rs.getInt(5),
-				(Integer)rs.getInt(6), 
-				rs.getString(7),
-				rs.getString(8),
-				rs.getString(9),
-				data_fine,
-				(Integer)rs.getInt(11),
-				(Integer)rs.getInt(12),
-				rs.getString(13));
-		partita.setId(rs.getInt(1));
-		
-		return partita;
+		if(rs.next())
+		{
+
+			Calendar data_termine = Calendar.getInstance(); data_termine.setTime(rs.getDate(3));
+			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTime(rs.getDate(4));		
+			Calendar data_fine = Calendar.getInstance(); data_fine.setTime(rs.getDate(10));
+
+			PartitaCalcio partita = new PartitaCalcio(
+					rs.getInt(14),
+					rs.getString(2),
+					data_termine,
+					data_inizio,
+					(Integer)rs.getInt(5),
+					(Integer)rs.getInt(6), 
+					rs.getString(7),
+					rs.getString(8),
+					rs.getString(9),
+					data_fine,
+					(Integer)rs.getInt(11),
+					(Integer)rs.getInt(12),
+					rs.getString(13));
+			partita.setId(rs.getInt(1));
+			return partita;
+		}
+		else
+			return null;
 	}
 	
-	public void deletePartitaDiCalcio(int id_partita) throws SQLException
+	public void deleteEvento(Evento evento) throws SQLException
 	{
-		String sql = "DELETE FROM partita_calcio WHERE id = " + id_partita;
-		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		
-		ps.executeUpdate();
+		switch(evento.getClass().getSimpleName())
+		{
+		case "PartitaCalcio" : 
+			{
+				String sql = "DELETE FROM partita_calcio WHERE id = " + evento.getId();
+				PreparedStatement ps = getConnection().prepareStatement(sql);
+				ps.executeUpdate();
+				refreshDatiRAM();
+				break;
+			}
+		default : return;
+		}
 	}
 	
 	
@@ -217,6 +253,9 @@ public class DataBase
 	
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
+		
+		refreshDatiRAM();
+		
 		return rs.getInt(1);
 	}
 	
@@ -233,6 +272,8 @@ public class DataBase
 		
 		ResultSet rs = ps.executeQuery();
 		
+		rs.beforeFirst();
+		
 		while(rs.next())
 		{		
 			Utente utente = new Utente(rs.getString(2), rs.getString(3));
@@ -244,6 +285,33 @@ public class DataBase
 		return utenti;
 	}
 	
+	public Utente selectUtentel(int id_utente) throws SQLException
+	{
+		Utente utente = null;
+		
+		String sql = "SELECT id,"
+				+ "nome,"
+				+ "password"
+				+ "FROM utente";
+		
+		PreparedStatement ps = getConnection().prepareStatement(sql);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		rs.beforeFirst();
+		
+		if(rs.next())
+		{		
+			utente = new Utente(rs.getString(2), rs.getString(3));
+			utente.setId_utente(rs.getInt(1));
+			
+			utenti.add(utente);
+			return utente;
+		}
+		else
+			return null;
+	}
+	
 	public void deleteUtente(int id_utente) throws SQLException
 	{
 		String sql = "DELETE FROM utente WHERE id = " + id_utente;
@@ -251,10 +319,26 @@ public class DataBase
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		
 		ps.executeUpdate();
+		
+		refreshDatiRAM();
+	}
+	
+	public boolean existUtente(Utente utente) throws SQLException
+	{
+		refreshDatiRAM();
+		if(utenti == null)
+			return false;
+		
+		for(Utente utente1 : utenti)
+		{
+			if(utente1.equals(utente))
+				return true;
+		}
+		return false;
 	}
 	
 	
-	
+
 	
 	
 	
@@ -286,12 +370,17 @@ public class DataBase
 		
 		ResultSet rs = ps.executeQuery();
 
-		Calendar data = Calendar.getInstance(); data.setTime(rs.getDate(4));
-		Notifica notifica = new Notifica(rs.getString(2), rs.getString(3), data);
-		notifica.setIdNotifica(rs.getInt(1));
-			
+		rs.beforeFirst();
 		
-		return notifica;
+		if(rs.next())
+		{
+			Calendar data = Calendar.getInstance(); data.setTime(rs.getDate(4));
+			Notifica notifica = new Notifica(rs.getString(2), rs.getString(3), data);
+			notifica.setIdNotifica(rs.getInt(1));
+			return notifica;
+		}
+		else
+			return null;
 	}
 	
 	public void deleteNotifica(int id_notifica) throws SQLException
@@ -335,9 +424,21 @@ public class DataBase
 		return rs.getInt(1);
 	}
 	
-	public ArrayList<Notifica> selectNotificheUtente(int id_utente) throws SQLException
+	public boolean existUtenteInPartita(Utente utente, PartitaCalcio partita) throws SQLException
 	{
-		ArrayList<Notifica> notifiche = new ArrayList<>();
+		ArrayList<PartitaCalcio> partite = selectPartiteUtente(utente.getId_utente());
+
+		for(PartitaCalcio elemento : partite)
+		{
+			if(elemento.getId() == partita.getId())
+				return true;
+		}
+		return false;
+	}
+	
+	public LinkedList<Notifica> selectNotificheUtente(int id_utente) throws SQLException
+	{
+		LinkedList<Notifica> notifiche = new LinkedList<>();
 		
 		String sql = "SELECT id, id_user, id_notifica"
 				+ "FROM relazione_utente_notifica";
@@ -345,6 +446,8 @@ public class DataBase
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		
 		ResultSet rs = ps.executeQuery();
+		
+		rs.beforeFirst();
 		
 		while(rs.next())
 		{		
@@ -366,6 +469,8 @@ public class DataBase
 		
 		ResultSet rs = ps.executeQuery();
 		
+		rs.beforeFirst();
+		
 		while(rs.next())
 		{		
 			if(rs.getInt(2) == id_utente);
@@ -374,4 +479,12 @@ public class DataBase
 		
 		return partite;
 	}
+
+
+	public ArrayList<Evento> getEventi() {return eventi;}
+
+
+	public ArrayList<Utente> getUtenti() {return utenti;}
+	
+	
 }

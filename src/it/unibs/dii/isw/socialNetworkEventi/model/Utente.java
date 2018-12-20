@@ -38,7 +38,6 @@ public class Utente implements Serializable
 	 
 	 public boolean rimuoviNotifica(Utente notifica)
 	 {
-
 		 if(notifiche.contains(notifica))
 		 	{notifiche.remove(notifica); return true;}
 		 else
@@ -56,4 +55,17 @@ public class Utente implements Serializable
 	void setPassword(String password) {this.password = password;}
 	public int getId_utente() {return id_utente;}
 	public void setId_utente(int id_utente) {this.id_utente = id_utente;}
+
+	public LinkedList<Evento> getEventi() {
+		return eventi;
+	}
+
+	public void setEventi(LinkedList<Evento> eventi) {
+		this.eventi = eventi;
+	}
+
+	public void setNotifiche(LinkedList<Notifica> notifiche) {
+		this.notifiche = notifiche;
+	}
+	
 }
