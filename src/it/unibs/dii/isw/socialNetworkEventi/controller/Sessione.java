@@ -1,6 +1,5 @@
 package it.unibs.dii.isw.socialNetworkEventi.controller;
 
-import java.awt.HeadlessException;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -20,6 +19,33 @@ public class Sessione
 	public static void main(String[] args) 
 	{
 		connettiDB();
+//		Utente utente = new Utente("Samuele","pwsicura123");
+//		accedi(utente);
+//		Calendar data_termine = Calendar.getInstance(); data_termine.set(2018, 12, 25, 24, 00);
+//		Calendar data_inizio = Calendar.getInstance(); data_inizio.set(2018, 12, 28, 15, 00);		
+//		Calendar data_fine = Calendar.getInstance(); data_fine.set(2018, 12, 28, 16, 00);
+//
+//		PartitaCalcio partita_calcio = new PartitaCalcio(
+//				Sessione.getUtente_corrente(),
+//				"Mompiano",
+//				data_termine,
+//				data_inizio,
+//				10,
+//				5,
+//				null,
+//				null,
+//				null,
+//				data_fine,
+//				18,
+//				25,
+//				"maschi"
+//						);
+//		
+//		aggiungiEventoAlDB(partita_calcio);
+		
+		ArrayList<Evento> e = selectEventi();
+		for(Evento el : e)
+			System.out.println(el);
 
 //		Grafica.getIstance().crea();
 //		Grafica.getIstance().mostraLogin();		
@@ -41,7 +67,10 @@ public class Sessione
 		try
 		{db.insertEvento(evento); return true;}
 		catch(SQLException e)
-		{return false;}
+		{
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	
@@ -84,12 +113,12 @@ public class Sessione
 		{
 			if(db.existUtente(utente))
 				return false;
-			db.insertUtente(utente);
-			utente_corrente = utente;
+			utente_corrente = db.insertUtente(utente);
 		} 
 		catch (SQLException e) 
 		{
 			System.out.println("L'inserzione utente non è andata a buon fine");
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE);
 		}
 		return true;
@@ -124,7 +153,7 @@ public class Sessione
 		
 		try 
 		{
-			notifiche = db.selectNotificheUtente(utente.getId_utente());
+			notifiche = db.selectNotificheDiUtente(utente.getId_utente());
 			utente.setNotifiche(notifiche);
 		} 
 		catch (SQLException e) 

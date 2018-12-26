@@ -11,7 +11,7 @@ public abstract class Evento implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	private int id_evento;
-	private int id_creatore;
+	private Utente utente_creatore;
 	
 	private HashMap<NomeCampi, Campo> campi;
 	private LinkedList<Utente> fruitori;
@@ -20,7 +20,7 @@ public abstract class Evento implements Serializable
 	 * Costruttore con parametri obbligatori
 	 */
 	public Evento(
-			Integer id_creatore,
+			Utente creatore,
 			String luogo,
 			Calendar data_ora_termine_ultimo_iscrizione,	
 			Calendar data_ora_inizio_evento,
@@ -38,21 +38,22 @@ public abstract class Evento implements Serializable
 		if(!dataNelFuturo(data_ora_termine_ultimo_iscrizione)) 											throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni posteriore alla data odierna");
 		if(!dataSuccessivaTermineIscrizioni(data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento))throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di termine iscrizione");
 		if(partecipanti <= 1) 																			throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
-		if(id_creatore == null) 																		throw new IllegalArgumentException("Necessario inserire un utente creatore");
+		if(creatore == null) 																		throw new IllegalArgumentException("Necessario inserire un utente creatore");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
 		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
 		aggiungiCampo(data_ora_inizio_evento, true, NomeCampi.D_O_INIZIO_EVENTO, "Inizio evento");
 		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
 		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
-		this.setId_creatore(id_creatore);
+		this.setUtenteCreatore(creatore);
+		fruitori.add(creatore);
 	}
 	
 	/*
 	 * Costruttore con parametri obbligatori e facoltativi
 	 */
 	public Evento(
-			Integer creatore,
+			Utente creatore,
 			String luogo,
 			Calendar data_ora_termine_ultimo_iscrizione,	
 			Calendar data_ora_inizio_evento,
@@ -82,6 +83,25 @@ public abstract class Evento implements Serializable
 		}	
 	}
 	
+	public Evento(
+			Integer id,
+			Utente creatore,
+			String luogo,
+			Calendar data_ora_termine_ultimo_iscrizione,	
+			Calendar data_ora_inizio_evento,
+			Integer partecipanti,
+			Integer costo,
+		    
+			String titolo,				
+			String note,
+			String benefici_quota,
+		    Calendar data_ora_termine_evento
+			)
+	{
+		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento);
+		id_evento= id;
+	}
+	
 	
 	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampi titolo, String descrizione)
 	{
@@ -89,10 +109,13 @@ public abstract class Evento implements Serializable
 	}
 
 	
-	public HashMap<NomeCampi, Campo> getCampi()						{ return campi;}
-//	public LinkedList
+	public HashMap<NomeCampi, Campo> getCampi()	{ return campi;}
+
 	
-	public Campo 					 getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
+	public Campo getCampo(NomeCampi nomeCampo)	
+	{
+		return campi.get(nomeCampo);
+	}
 	
 	
 	public <T>void setCampo(NomeCampi nome_campo, Campo campo)
@@ -104,20 +127,8 @@ public abstract class Evento implements Serializable
 	}
 	
 	
-	private boolean dataNelFuturo(Calendar data)
-	 {
-	  return Calendar.getInstance().compareTo(data) < 0;
-	 }
-	
-	 
-	 
-	 public int getId() {
-		return id_evento;
-	}
-
-	public void setId(int id) {
-		this.id_evento = id;
-	}
+	private boolean dataNelFuturo(Calendar data) { return Calendar.getInstance().compareTo(data) < 0; }
+		 
 
 	private boolean dataSuccessivaTermineIscrizioni(Calendar data_termine, Calendar data_da_controllare)
 	 {
@@ -152,16 +163,38 @@ public abstract class Evento implements Serializable
 			 return false;
 	 }
 	 
-	 public LinkedList<Utente> getFruitori()
-	 {
-		 return fruitori;
-	 }
+	 public LinkedList<Utente> getFruitori() { return fruitori; }
 
-	public int getId_creatore() {
-		return id_creatore;
-	}
+	public Utente getUtenteCreatore() { return utente_creatore; }
 
-	public void setId_creatore(int id_creatore) {
-		this.id_creatore = id_creatore;
+	public void setUtenteCreatore
+	(Utente utente_creatore) {
+		this.utente_creatore = utente_creatore;
 	}
+	
+	public int getId() {return id_evento;}
+
+	public void setId(int id) {this.id_evento = id;}
+
+	@Override
+	public String toString() 
+	{
+		StringBuffer stringa = new StringBuffer();
+		Collection<Campo> v = campi.values();
+		for (Campo c : v)
+		{
+			if(c.getContenuto().getClass().getSimpleName().equals("GregorianCalendar"))
+				{
+					java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+					stringa.append(c.getDescrizione_campo() + " : " + sdf.format(((Calendar) c.getContenuto()).getTime()) + "\n");
+
+				}
+			else	
+				stringa.append(c.getDescrizione_campo() + " : " + c.getContenuto() + "\n");
+
+		}
+		return stringa.toString();
+	}
+	
+	
 }

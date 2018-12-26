@@ -17,6 +17,7 @@ class SessioneTest {
 	void testCreaUtente() 
 	{
 		Utente utente= new Utente("Samuele", "pwsicura123");
+		Sessione.main(null);
 		Sessione.creaUtente(utente);
 		assertEquals(utente, Sessione.getUtente_corrente());
 	}
@@ -24,12 +25,13 @@ class SessioneTest {
 	@Test
 	void testAggiungiPartitaCalcioAlDB() 
 	{
+		Sessione.main(null);
 		Calendar data_termine = Calendar.getInstance(); data_termine.set(2018, 12, 25, 24, 00);
 		Calendar data_inizio = Calendar.getInstance(); data_inizio.set(2018, 12, 28, 15, 00);		
 		Calendar data_fine = Calendar.getInstance(); data_fine.set(2018, 12, 28, 16, 00);
 
 		PartitaCalcio partita_calcio = new PartitaCalcio(
-				Sessione.getUtente_corrente().getId_utente(),
+				Sessione.getUtente_corrente(),
 				"Mompiano",
 				data_termine,
 				data_inizio,
@@ -50,12 +52,13 @@ class SessioneTest {
 	@Test
 	void testRimuoviPartitaCalcio() 
 	{
+		Sessione.main(null);
 		Calendar data_termine = Calendar.getInstance(); data_termine.set(2018, 12, 25, 24, 00);
 		Calendar data_inizio = Calendar.getInstance(); data_inizio.set(2018, 12, 28, 15, 00);		
 		Calendar data_fine = Calendar.getInstance(); data_fine.set(2018, 12, 28, 16, 00);
 
 		PartitaCalcio partita_calcio = new PartitaCalcio(
-				Sessione.getUtente_corrente().getId_utente(),
+				Sessione.getUtente_corrente(),
 				"Mompiano",
 				data_termine,
 				data_inizio,
@@ -77,12 +80,13 @@ class SessioneTest {
 	@Test
 	void testMostraBacheca() 
 	{
+		Sessione.main(null);
 		Calendar data_termine = Calendar.getInstance(); data_termine.set(2018, 12, 25, 24, 00);
 		Calendar data_inizio = Calendar.getInstance(); data_inizio.set(2018, 12, 28, 15, 00);		
 		Calendar data_fine = Calendar.getInstance(); data_fine.set(2018, 12, 28, 16, 00);
 
 		PartitaCalcio partita_calcio1 = new PartitaCalcio(
-				Sessione.getUtente_corrente().getId_utente(),
+				Sessione.getUtente_corrente(),
 				"Mompiano",
 				data_termine,
 				data_inizio,
@@ -98,7 +102,7 @@ class SessioneTest {
 						);
 		
 		PartitaCalcio partita_calcio2 = new PartitaCalcio(
-				Sessione.getUtente_corrente().getId_utente(),
+				Sessione.getUtente_corrente(),
 				"San Polo",
 				data_termine,
 				data_inizio,
@@ -124,31 +128,37 @@ class SessioneTest {
 	@Test
 	void testCaricaPartita() {
 		fail("Not yet implemented");
+		Sessione.main(null);
 	}
 
 	@Test
 	void testAccedi() {
 		fail("Not yet implemented");
+		Sessione.main(null);
 	}
 
 	@Test
 	void testGetNotificheUtente() {
 		fail("Not yet implemented");
+		Sessione.main(null);
 	}
 
 	@Test
 	void testEliminaNotificaUtente() {
 		fail("Not yet implemented");
+		Sessione.main(null);
 	}
 
 	@Test
 	void testIscrizionePartita() {
 		fail("Not yet implemented");
+		Sessione.main(null);
 	}
 
 	@Test
 	void testUtenteIscrittoAllaPartita() {
 		fail("Not yet implemented");
+		Sessione.main(null);
 	}
 
 }

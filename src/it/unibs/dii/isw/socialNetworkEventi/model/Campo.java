@@ -20,8 +20,10 @@ public class Campo<T> implements Serializable
 	/*
 	 * Getters and setters
 	 */
-	public T 		getContenuto() {return contenuto;}
+	public T 		getContenuto() {return contenuto != null ? contenuto : null;}
 	public void 	setContenuto(T campo) {this.contenuto = campo;}
 	public boolean 	isObbligatorio() {return obbligatorio;}
 	public void 	setObbligatorio(boolean obbligatorio) {this.obbligatorio = obbligatorio;}
+	public String getDescrizione_campo() {return descrizione_campo;}
+	public void setDescrizione_campo(String descrizione_campo) {this.descrizione_campo = descrizione_campo;}
 }
