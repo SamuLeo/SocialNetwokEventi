@@ -6,9 +6,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.TimeZone;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import java.util.ArrayList;
@@ -91,14 +96,14 @@ public class DataBase
 				PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				ps.setInt(1, id_creatore);				
 				ps.setString(2, luogo);
-				ps.setTimestamp(3, new java.sql.Timestamp(data_ora_termine_ultimo_iscrizione.getTimeInMillis()));		
-				ps.setTimestamp(4, new java.sql.Timestamp(data_ora_inizio_evento.getTimeInMillis()));	
+				ps.setTimestamp(3, this.creaTimestamp(data_ora_termine_ultimo_iscrizione));	
+				ps.setTimestamp(4, this.creaTimestamp(data_ora_inizio_evento));	
 				ps.setInt(5, partecipanti);
 				ps.setInt(6, costo);
 				ps.setString(7, titolo);
 				ps.setString(8, note);
 				ps.setString(9, benefici_quota);
-				ps.setTimestamp(10, new java.sql.Timestamp(data_ora_termine_evento.getTimeInMillis()));
+				ps.setTimestamp(10, this.creaTimestamp(data_ora_termine_evento));
 				ps.setInt(11, eta_minima);
 				ps.setInt(12, eta_massima);
 				ps.setString(13, (String)genere);
@@ -124,10 +129,7 @@ public class DataBase
 		String nome = utente.getNome();
 		String password = utente.getPassword();
 	    
-		String sql = "INSERT INTO utente "
-				+ "(nome, password)" 
-				+ " VALUES "
-				+ "(?,?)";
+		String sql = "INSERT INTO utente (nome, password) VALUES (?,?)";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, nome);
@@ -136,11 +138,11 @@ public class DataBase
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
 		
-		refreshDatiRAM();
-		
-		rs.beforeFirst();
+		rs.next();
 		utente.setId_utente(rs.getInt(1));
 		
+		refreshDatiRAM();
+
 		return utente;
 	}
 	
@@ -156,26 +158,23 @@ public class DataBase
 		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, titolo);
 		ps.setString(2, contenuto);		
-		ps.setTimestamp(3, new java.sql.Timestamp(data.getTimeInMillis()));
+		ps.setTimestamp(3, this.creaTimestamp(data));
 		
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
 
-		refreshDatiRAM();
-		
-		rs.beforeFirst();
+		rs.next();
 		notifica.setIdNotifica(rs.getInt(1));
 		
+		refreshDatiRAM();
+
 		return notifica;
 	}
 	
 	
 	public int collegaUtenteNotifica(int id_utente, int id_notifica) throws SQLException
 	{	    
-		String sql = "INSERT INTO relazione_utente_notifica "
-				+ "(id_user, id_notifica)" 
-				+ " VALUES "
-				+ "(?,?)";
+		String sql = "INSERT INTO relazione_utente_notifica (id_user, id_notifica) VALUES (?,?)";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setInt(1, id_utente);
@@ -183,24 +182,21 @@ public class DataBase
 		
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();
-		rs.beforeFirst();
+		rs.next();
 		return rs.getInt(1);
 	}
 	
-	public int collegaUtentePartita(int id_utente, int id_partita) throws SQLException
+	public int collegaUtentePartita(Utente utente, PartitaCalcio partita_calcio) throws SQLException
 	{	    
-		String sql = "INSERT INTO relazione_utente_partita "
-				+ "(id_utente, id_partita)" 
-				+ " VALUES "
-				+ "(?,?)";
+		String sql = "INSERT INTO relazione_utente_partita (id_utente, id_partita) VALUES (?,?)";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-		ps.setInt(1, id_utente);
-		ps.setInt(2, id_partita);		
+		ps.setInt(1, utente.getId_utente());
+		ps.setInt(2, partita_calcio.getId());		
 		
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
-		rs.beforeFirst();
+		rs.next();
 		return rs.getInt(1);
 	}
 	
@@ -263,11 +259,11 @@ public class DataBase
 		return eventi;
 	}
 	
-	public PartitaCalcio selectPartitaCalcio(int id_partita) throws SQLException
+	public PartitaCalcio selectPartitaCalcio(int  id_partita_calcio) throws SQLException
 	{
 
 		String sql = "SELECT id, "
-				+ " id_creatore"
+				+ " id_creatore,"
 				+ " luogo, "
 				+ " data_ora_termine_ultimo_iscrizione, "
 				+ " data_ora_inizio_evento, "
@@ -280,9 +276,11 @@ public class DataBase
 				+ " eta_minima,"
 				+ " eta_massima,"
 				+ " genere"
-				+ " FROM partita_calcio WHERE id LIKE " + id_partita;
+				+ " FROM partita_calcio WHERE id LIKE ?";
+
 
 		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, id_partita_calcio);
 		
 		ResultSet rs = ps.executeQuery();
 		
@@ -292,7 +290,7 @@ public class DataBase
 		{
 			Calendar data_termine = Calendar.getInstance(); data_termine.setTimeInMillis(rs.getTimestamp(4).getTime());
 			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
-			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(5).getTime());
+			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(11).getTime());
 			Utente creatore = selectUtente(rs.getInt(2));
 			
 			PartitaCalcio partita = new PartitaCalcio(
@@ -309,7 +307,9 @@ public class DataBase
 					data_fine,
 					(Integer)rs.getInt(12),
 					(Integer)rs.getInt(13),
-					rs.getString(14));
+					(String)rs.getString(14));
+
+			eventi.add(partita);
 			return partita;
 		}
 		else
@@ -321,10 +321,7 @@ public class DataBase
 	{
 		ArrayList<Utente> utenti = new ArrayList<>();
 		
-		String sql = "SELECT id,"
-				+ "nome,"
-				+ "password"
-				+ " FROM utente";
+		String sql = "SELECT id,nome, password FROM utente";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		
@@ -334,9 +331,7 @@ public class DataBase
 		
 		while(rs.next())
 		{		
-			Utente utente = new Utente(rs.getString(2), rs.getString(3));
-			utente.setId_utente(rs.getInt(1));
-			
+			Utente utente = new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));			
 			utenti.add(utente);
 		}
 		
@@ -348,10 +343,7 @@ public class DataBase
 	{
 		Utente utente = null;
 		
-		String sql = "SELECT id,"
-				+ "nome,"
-				+ "password"
-				+ " FROM utente";
+		String sql = "SELECT id, nome, password FROM utente";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		
@@ -361,8 +353,7 @@ public class DataBase
 		
 		if(rs.next())
 		{		
-			utente = new Utente(rs.getString(2), rs.getString(3));
-			utente.setId_utente(rs.getInt(1));
+			utente = new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));
 			
 			utenti.add(utente);
 			return utente;
@@ -372,55 +363,12 @@ public class DataBase
 	}	
 	
 	
-	public LinkedList<Notifica> selectNotificheDiUtente(int id_utente) throws SQLException
-	{
-		LinkedList<Notifica> notifiche = new LinkedList<>();
-		
-		String sql = "SELECT id, id_user, id_notifica FROM relazione_utente_notifica";
-		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		
-		ResultSet rs = ps.executeQuery();
-		
-		rs.beforeFirst();
-		
-		while(rs.next())
-		{		
-			if(rs.getInt(2) == id_utente);
-				notifiche.add(selectNotifica(rs.getInt(3)));
-		}
-		
-		return notifiche;
-	}
-	
-	
-	public ArrayList<PartitaCalcio> selectPartiteDiUtente(int id_utente) throws SQLException
-	{
-		ArrayList<PartitaCalcio> partite = new ArrayList<>();
-		
-		String sql = "SELECT id, id_utente, id_partita FROM relazione_utente_partita";
-		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		
-		ResultSet rs = ps.executeQuery();
-		
-		rs.beforeFirst();
-		
-		while(rs.next())
-		{		
-			if(rs.getInt(2) == id_utente);
-				partite.add(selectPartitaCalcio(rs.getInt(3)));
-		}
-		
-		return partite;
-	}
-	
-	
 	public Notifica selectNotifica(int id_notifica) throws SQLException
 	{		
-		String sql = "SELECT id, titolo, contenuto, data FROM notifica";
+		String sql = "SELECT titolo, contenuto, data FROM notifica WHERE id=?";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, id_notifica);
 		
 		ResultSet rs = ps.executeQuery();
 
@@ -428,14 +376,61 @@ public class DataBase
 		
 		if(rs.next())
 		{
-			Calendar data = Calendar.getInstance(); data.setTimeInMillis(rs.getTimestamp(4).getTime());
-			Notifica notifica = new Notifica(rs.getString(2), rs.getString(3), data);
-			notifica.setIdNotifica(rs.getInt(1));
+			Calendar data = Calendar.getInstance(); data.setTimeInMillis(rs.getTimestamp(3).getTime());
+			Notifica notifica = new Notifica(id_notifica,rs.getString(1), rs.getString(2), data);
 			return notifica;
 		}
 		else
 			return null;
 	}
+	
+	
+	public LinkedList<Notifica> selectNotificheDiUtente(int id_utente) throws SQLException
+	{
+		LinkedList<Notifica> notifiche = new LinkedList<>();
+		
+		String sql = "SELECT id_notifica FROM relazione_utente_notifica WHERE id_user=?";
+		
+		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, id_utente);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		rs.beforeFirst();
+		
+		while(rs.next())
+		{		
+			Notifica notifica = selectNotifica(rs.getInt(1));
+			notifiche.add(notifica);
+		}
+		
+		return notifiche;
+	}
+	
+	
+	public ArrayList<PartitaCalcio> selectPartiteDiUtente(Utente utente) throws SQLException
+	{
+		ArrayList<PartitaCalcio> partite = new ArrayList<>();
+		
+		String sql = "SELECT id_partita FROM relazione_utente_partita WHERE id_utente=?";
+		
+		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, utente.getId_utente());
+		
+		ResultSet rs = ps.executeQuery();
+		
+		rs.beforeFirst();
+		
+		while(rs.next())
+		{		
+			partite.add(selectPartitaCalcio(rs.getInt(1)));
+		}
+		
+		return partite;
+	}
+	
+	
+
 	
 	
 	
@@ -450,8 +445,9 @@ public class DataBase
 		{
 		case "PartitaCalcio" : 
 			{
-				String sql = "DELETE FROM partita_calcio WHERE id = " + evento.getId();
+				String sql = "DELETE FROM partita_calcio WHERE id = ?" ;
 				PreparedStatement ps = getConnection().prepareStatement(sql);
+				ps.setInt(1, evento.getId());
 				ps.executeUpdate();
 				refreshDatiRAM();
 				break;
@@ -463,9 +459,10 @@ public class DataBase
 	
 	public void deleteUtente(int id_utente) throws SQLException
 	{
-		String sql = "DELETE FROM utente WHERE id = " + id_utente;
+		String sql = "DELETE FROM utente WHERE id = ?";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, id_utente);
 		
 		ps.executeUpdate();
 		
@@ -483,30 +480,65 @@ public class DataBase
 	}
 	
 	
+	public void deleteCollegamentoNotificaUtente(Utente utente, Notifica notifica) throws SQLException
+	{
+//		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
+		String sql = "DELETE FROM relazione_utente_notifica WHERE id_user=? AND id_notifica=?" ;
+		
+		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, utente.getId_utente());
+		ps.setInt(2, notifica.getIdNotifica());
+		ps.executeUpdate();
+//		Controllo per verificare che la notifica da cui è stato tolto il collegamento abbia almeno ancora un utente che la referenzi, in caso non ci siano utenti la si elimina
+		String sql2 = "SELECT id data FROM relazione_utente_notifica WHERE id_notifica=?";
+		PreparedStatement ps2 = getConnection().prepareStatement(sql2);
+		ps2.setInt(1, notifica.getIdNotifica());	
+		
+		ResultSet rs = ps2.executeQuery();
+		
+		rs.beforeFirst();
+		
+		if(!rs.next())
+			deleteNotifica(notifica.getIdNotifica());
+	}
 	
+	
+	public void deleteCollegamentoPartitaCalcioUtente(Utente utente, PartitaCalcio partita_calcio) throws SQLException
+	{
+//		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
+		String sql = "DELETE FROM relazione_utente_partita WHERE id_utente=? AND id_partita=?" ;
+		
+		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, utente.getId_utente());
+		ps.setInt(2, partita_calcio.getId());
+		ps.executeUpdate();
+	}
 /*
  *  METODI DI UTILITY
  */
 	
 	
-	public boolean existUtente(Utente utente) throws SQLException
+	public Integer existUtente(Utente utente) throws SQLException
 	{
 		refreshDatiRAM();
 		if(utenti.isEmpty())
-			return false;
+			return null;
 		
 		for(Utente utente1 : utenti)
 		{
 			if(utente1.equals(utente))
-				return true;
+				return utente1.getId_utente();
 		}
-		return false;
+		return null;
 	}
 
 	
 	public boolean existUtenteInPartita(Utente utente, PartitaCalcio partita) throws SQLException
 	{
-		ArrayList<PartitaCalcio> partite = selectPartiteDiUtente(utente.getId_utente());
+		ArrayList<PartitaCalcio> partite = selectPartiteDiUtente(utente);
+		
+		if(partite == null)
+			return false;
 
 		for(PartitaCalcio elemento : partite)
 		{
@@ -516,17 +548,25 @@ public class DataBase
 		return false;
 	}
 	
-//	public String (Calendar calendar)
-//	{
-//
-//		java.util.Date dt = calendar.getTime();
-//
-//		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-//
-//		String dateTime = sdf.format(dt);
-//		
-//		return dateTime;
-//	}
+	
+	public Timestamp creaTimestamp(Calendar cal)
+	{	
+	      LocalDateTime ldt = LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
+	      return Timestamp.valueOf(ldt);
+	}
+
+
+	public String convertiCalendar (Calendar calendar)
+	{
+
+		java.util.Date dt = calendar.getTime();
+
+		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+		String dateTime = sdf.format(dt);
+		
+		return dateTime;
+	}
 
 	public ArrayList<Evento> getEventi() {return eventi;}
 

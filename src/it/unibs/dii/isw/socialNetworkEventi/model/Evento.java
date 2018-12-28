@@ -185,7 +185,7 @@ public abstract class Evento implements Serializable
 		{
 			if(c.getContenuto().getClass().getSimpleName().equals("GregorianCalendar"))
 				{
-					java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+					java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
 					stringa.append(c.getDescrizione_campo() + " : " + sdf.format(((Calendar) c.getContenuto()).getTime()) + "\n");
 
 				}

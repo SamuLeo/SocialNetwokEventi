@@ -2,6 +2,7 @@ package it.unibs.dii.isw.socialNetworkEventi.controller;
 
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
@@ -19,36 +20,9 @@ public class Sessione
 	public static void main(String[] args) 
 	{
 		connettiDB();
-//		Utente utente = new Utente("Samuele","pwsicura123");
-//		accedi(utente);
-//		Calendar data_termine = Calendar.getInstance(); data_termine.set(2018, 12, 25, 24, 00);
-//		Calendar data_inizio = Calendar.getInstance(); data_inizio.set(2018, 12, 28, 15, 00);		
-//		Calendar data_fine = Calendar.getInstance(); data_fine.set(2018, 12, 28, 16, 00);
-//
-//		PartitaCalcio partita_calcio = new PartitaCalcio(
-//				Sessione.getUtente_corrente(),
-//				"Mompiano",
-//				data_termine,
-//				data_inizio,
-//				10,
-//				5,
-//				null,
-//				null,
-//				null,
-//				data_fine,
-//				18,
-//				25,
-//				"maschi"
-//						);
-//		
-//		aggiungiEventoAlDB(partita_calcio);
-		
-		ArrayList<Evento> e = selectEventi();
-		for(Evento el : e)
-			System.out.println(el);
 
-//		Grafica.getIstance().crea();
-//		Grafica.getIstance().mostraLogin();		
+		Grafica.getIstance().crea();
+		Grafica.getIstance().mostraLogin();		
 	}
 	
 	
@@ -66,6 +40,37 @@ public class Sessione
 	{
 		try
 		{db.insertEvento(evento); return true;}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public static boolean insertNotificaUtenteCorrente(Notifica notifica)
+	{
+		try
+		{
+			notifica = db.insertNotifica(notifica); 
+			db.collegaUtenteNotifica(utente_corrente.getId_utente(), notifica.getIdNotifica());
+			return true;
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	
+	public static boolean insertNotifica(Notifica notifica, Utente utente)
+	{
+		try
+		{
+			notifica = db.insertNotifica(notifica); 
+			db.collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			return true;
+		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
@@ -107,11 +112,11 @@ public class Sessione
 	}
 	
 	
-	public static boolean creaUtente(Utente utente) 
+	public static boolean insertUtente(Utente utente) 
 	{
 		try 
 		{
-			if(db.existUtente(utente))
+			if(db.existUtente(utente) != null)
 				return false;
 			utente_corrente = db.insertUtente(utente);
 		} 
@@ -130,9 +135,11 @@ public class Sessione
 
 		 try 
 		 {
-			if(db.existUtente(utente))
+			 Integer id_utente = db.existUtente(utente);
+			if(id_utente != null)
 			 {
-				 utente_corrente = utente;
+				utente.setId_utente(id_utente);
+				utente_corrente = utente;
 				 return true;
 			 }
 			 else
@@ -146,7 +153,7 @@ public class Sessione
 	}
 	
 	
-	public LinkedList<Notifica> getNotificheUtente(Utente utente) 
+	public static LinkedList<Notifica> getNotificheUtente(Utente utente) 
 	{
 		
 		LinkedList<Notifica> notifiche = null;
@@ -159,20 +166,22 @@ public class Sessione
 		catch (SQLException e) 
 		{
 			System.out.println("Errore durante il caricamento delle notifiche utente");
+			e.printStackTrace();
 		}
 		
 		return notifiche;
 	}
 	
 	
-	public LinkedList<Notifica> eliminaNotificaUtente(Notifica notifica)
+	public static LinkedList<Notifica> eliminaNotificaUtente(Notifica notifica)
 	{
 		try 
 		{
-			db.deleteNotifica(notifica.getIdNotifica());
+			db.deleteCollegamentoNotificaUtente(utente_corrente, notifica);
 		} 
 		catch (SQLException e) 
 		{
+			e.printStackTrace();
 			System.out.println("Errore durante l'eliminazione della notifica selezionata");
 		}
 		
@@ -180,10 +189,13 @@ public class Sessione
 	}
 	
 	
-	public void iscrizionePartita(PartitaCalcio partita)
+	public static void iscrizioneUtenteInPartita(PartitaCalcio partita)
 	{
 		if(utente_corrente == null)
+		{
 			System.out.println("L'utente corrente è null");
+			return;
+		}
 		
 		try
 		{
@@ -192,16 +204,43 @@ public class Sessione
 				System.out.println("Utente già iscritto alla partita");
 				return;
 			}	
-			db.collegaUtentePartita(utente_corrente.getId_utente(), partita.getId());
+			db.collegaUtentePartita(utente_corrente, partita);
 		} 
 		catch (SQLException e) 
 		{
 			System.out.println("Errore durante l'iscrizione dell'utente corrente alla partita selezionata");
+			e.printStackTrace();
 		}
 	}
 	
 	
-	public boolean utenteIscrittoAllaPartita(PartitaCalcio partita)
+	public static void disiscrizioneUtenteInPartita(PartitaCalcio partita)
+	{
+		if(utente_corrente == null)
+		{
+			System.out.println("L'utente corrente è null");
+			return;
+		}
+		
+		try
+		{
+			if(!utenteIscrittoAllaPartita(partita))
+			{
+				System.out.println("Utente non iscritto alla partita");
+				return;
+			}	
+			db.deleteCollegamentoPartitaCalcioUtente(utente_corrente, partita);
+		} 
+		catch (SQLException e) 
+		{
+			System.out.println("Errore durante l'eliminazione dell'utente corrente dalla partita selezionata");
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	public static boolean utenteIscrittoAllaPartita(PartitaCalcio partita)
 	{
 		if(utente_corrente == null)
 			System.out.println("L'utente corrente è null");
@@ -213,11 +252,26 @@ public class Sessione
 		catch (SQLException e) 
 		{
 			System.out.println("L'utente non è iscritto alla partita selezionata");
+			e.printStackTrace();
 		}
 		
 		return false;
 	}
 
+	
+	public static ArrayList<PartitaCalcio> getEventiUtenteCorrente()
+	{
+		try
+		{
+			return db.selectPartiteDiUtente(utente_corrente);
+		} 
+		catch (SQLException e) 
+		{
+			System.out.println("Errore durante il caricamento degli eventi utente");
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	public static Utente getUtente_corrente() {
 		return utente_corrente;
@@ -227,27 +281,4 @@ public class Sessione
 	public static void setUtente_corrente(Utente utente_corrente) {
 		Sessione.utente_corrente = utente_corrente;
 	}
-	
-	
-//	public static boolean creaUtente(String utente, String password) 
-//	{
-//		try 
-//		{
-//			return DB.inserisciUtente(new Utente(utente, password));
-//		} catch (IllegalArgumentException e) {
-//			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE);
-//			return false;}
-//	}
-//	
-//	public static boolean accedi(String utente, String password) {
-//		Utente io = DB.trovaUtente(utente);
-//		if (io == null) {log("Utente non trovato"); return false;}
-//		else if (io.getPassword().equals(password)) {log ("Accesso eseguito"); return true;}
-//		else {log("Password errata " + password + " " + io.getPassword()); return false;}
-//	}
-	
-//	public static void log(String l) {
-//		System.out.println(String.format("%-70s %02d.%02d.%02d,%04d", l, Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-//				Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND), Calendar.getInstance().get(Calendar.MILLISECOND)));
-//		}
 }

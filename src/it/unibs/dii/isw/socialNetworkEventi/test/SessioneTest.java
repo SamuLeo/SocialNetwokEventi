@@ -18,7 +18,7 @@ class SessioneTest {
 	{
 		Utente utente= new Utente("Samuele", "pwsicura123");
 		Sessione.main(null);
-		Sessione.creaUtente(utente);
+		Sessione.insertUtente(utente);
 		assertEquals(utente, Sessione.getUtente_corrente());
 	}
 	

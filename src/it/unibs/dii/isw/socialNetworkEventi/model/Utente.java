@@ -19,10 +19,16 @@ public class Utente implements Serializable
 	public Utente (String nome, String password) throws IllegalArgumentException 
 	{
 		if (nome==null || password == null) throw new IllegalArgumentException("Inserisca i campi necessari");
-		if (password.length()<5) throw new IllegalArgumentException("Password troppo breve (minimo 5 caratteri)");
-		if (nome.length()<3) throw new IllegalArgumentException("Nome utente troppo breve (minimo 3 caratteri)");
+		if (password.length()<5 || password.length() > 50) throw new IllegalArgumentException("La password deve avere una lunghezza compresa tra 5 e 50 caratteri");
+		if (nome.length()<5 || nome.length() > 100) throw new IllegalArgumentException("Il nome utente deve avere una lunghezza compresa tra 5 e 100 caratteri");
 		this.nome = nome;
 		this.password = password;
+	}
+	
+	public Utente(int id, String nome, String password)
+	{
+		this(nome, password);
+		id_utente = id;
 	}
 	
 	public boolean equals(Utente utente)
@@ -67,5 +73,19 @@ public class Utente implements Serializable
 	public void setNotifiche(LinkedList<Notifica> notifiche) {
 		this.notifiche = notifiche;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Utente \nid_utente=");
+		builder.append(id_utente);
+		builder.append("\n nome=");
+		builder.append(nome);
+		builder.append("\n password=");
+		builder.append(password + "\n");
+		return builder.toString();
+	}
+	
+	
 	
 }
