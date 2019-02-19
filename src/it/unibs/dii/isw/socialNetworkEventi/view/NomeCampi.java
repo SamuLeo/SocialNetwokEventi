@@ -1,4 +1,4 @@
-package socialNetwork.view;
+package it.unibs.dii.isw.socialNetworkEventi.view;
 
 public enum NomeCampi
 {

@@ -1,6 +1,5 @@
 package it.unibs.dii.isw.socialNetworkEventi.view;
-import it.unibs.dii.isw.socialNetworkEventi.controller.*;
-import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
+
 
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
@@ -8,7 +7,15 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
+import java.util.LinkedList;
+
 import javax.swing.*;
+
+import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
+import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
+import it.unibs.dii.isw.socialNetworkEventi.model.Notifica;
+import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
+import it.unibs.dii.isw.socialNetworkEventi.view.PannelloNotifiche.CardNotifica;
 
 public class Grafica {
 	private static Grafica me;
@@ -19,23 +26,24 @@ public class Grafica {
 	}
 	
 	JFrame frame;
-	JButton btnNuovoEvento = new JButton("Aggiungi Evento"), btnBacheca = new JButton ("Bacheca"), btnConfermaCreazioneEvento = new JButton("Conferma"), btnAnnullaCreazioneEvento = new JButton("Annulla");
+	JButton btnNuovoEvento = new JButton("Aggiungi Evento"), btnBacheca = new JButton ("Bacheca"), btnConfermaCreazioneEvento = new JButton("Conferma"), btnAnnullaCreazioneEvento = new JButton("Annulla"), btnNotifiche = new JButton("Notifiche");
 	JPanel toolbarBacheca = new JPanel(), barraFunzioni = new JPanel(), barraForm = new JPanel();
 	Login loginPane;
 	JScrollPane pannelloCentrale = new JScrollPane();
 	Bacheca bacheca;
 	CreazioneEvento form;
+	PannelloNotifiche pannelloNotifiche;
+	SchedaEvento schedaEvento;
 	JComboBox<String> selettoreCategoria = new JComboBox<>();
 	
-	private AdjustmentListener listenerScroll = new listenerScroll();
 	private ComponentListener listenerRidimensionamento = new listenerRidimensionamento();
 	
 	Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
 	int screenW = (int)(screenSize.getWidth());
 	int screenH = (int)(screenSize.getHeight());
 	private int larghezzaStrPassword, altezzaStringhe, larghezzaCampiUtentePswd;
-	static final Font testoBottoni=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/5);
-	static final Font testo=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+	static final Font fontTestoBottoni=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/5);
+	static final Font fontTesto=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
 	static final Color coloreBottoni = new Color(255,255,255);
 	static final Color coloreSfondo = new Color(240,240,240);
 	static final Color coloreBarra = new Color(200,200,200);
@@ -51,37 +59,40 @@ public class Grafica {
 			frame.getContentPane().setBackground(coloreBottoni);
 			frame.addComponentListener(listenerRidimensionamento);
 			calcolaDimensioniStringhe();
-			UIManager.put("OptionPane.messageFont", testo);
-			UIManager.put("OptionPane.buttonFont", testoBottoni);
+			UIManager.put("OptionPane.messageFont", fontTesto);
+			UIManager.put("OptionPane.buttonFont", fontTestoBottoni);
 		//Inizializzazione componenti
-			btnNuovoEvento.setFont(testoBottoni);
+			btnNuovoEvento.setFont(fontTestoBottoni);
 			btnNuovoEvento.setBackground(coloreBottoni);
 			btnNuovoEvento.addActionListener(e -> iniziaCreazioneEvento());
-			selettoreCategoria.setFont(testo);
+			selettoreCategoria.setFont(fontTesto);
 			selettoreCategoria.insertItemAt("Calcio", 0);
 			selettoreCategoria.setSelectedIndex(0);
 			selettoreCategoria.setBackground(coloreBottoni);
 			selettoreCategoria.setFocusable(false);
 			btnBacheca.setBackground(coloreBottoni);
-			btnBacheca.setFont(testoBottoni);
-			btnConfermaCreazioneEvento.setFont(testoBottoni);
+			btnBacheca.setFont(fontTestoBottoni);
+			btnBacheca.addActionListener(e -> visualizzaBacheca());
+			btnNotifiche.setBackground(coloreBottoni);
+			btnNotifiche.setFont(fontTestoBottoni);
+			btnNotifiche.addActionListener(e -> visualizzaPannelloNotifiche());
+			btnConfermaCreazioneEvento.setFont(fontTestoBottoni);
 			btnConfermaCreazioneEvento.setBackground(coloreBottoni);
-			btnAnnullaCreazioneEvento.setFont(testoBottoni);
+			btnAnnullaCreazioneEvento.setFont(fontTestoBottoni);
 			btnAnnullaCreazioneEvento.setBackground(coloreBottoni);
 			btnAnnullaCreazioneEvento.addActionListener(e -> visualizzaBacheca());
 			toolbarBacheca.setLayout(new BorderLayout(0, 0));
 			toolbarBacheca.setBackground(coloreSfondo);
 			toolbarBacheca.add(btnNuovoEvento, BorderLayout.EAST);
 			toolbarBacheca.add(selettoreCategoria,BorderLayout.CENTER);
-			barraFunzioni.setLayout(new BorderLayout(0, 0));
-			barraFunzioni.add(btnBacheca, BorderLayout.CENTER);
+			barraFunzioni.setLayout(new GridLayout(1,2));
+			barraFunzioni.add(btnBacheca);
+			barraFunzioni.add(btnNotifiche);
 			barraForm.setLayout(new BorderLayout(0, 0));
 			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
 			barraForm.add(btnAnnullaCreazioneEvento, BorderLayout.EAST);
-			pannelloCentrale.getVerticalScrollBar().addAdjustmentListener(listenerScroll);
 			pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
-			//JOptionPane.showMessageDialog(null, loginPane.getX() + " " + loginPane.getY(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public void svuotaFrame() {
@@ -100,7 +111,7 @@ public class Grafica {
 	public void mostraLogin() {
 		frame.setTitle("Login");
 		frame.setLayout(null);
-		loginPane=new Login(testoBottoni, testo, larghezzaStrPassword , altezzaStringhe, larghezzaCampiUtentePswd);
+		loginPane=new Login(fontTestoBottoni, fontTesto, larghezzaStrPassword , altezzaStringhe, larghezzaCampiUtentePswd);
 		loginPane.setBounds((int)((frame.getContentPane().getWidth()-loginPane.getWidth())/2), (int)((frame.getContentPane().getHeight()-loginPane.getHeight())/2), loginPane.getWidth(), loginPane.getHeight());
 		frame.getContentPane().add(loginPane);
 		loginPane.focus();
@@ -117,10 +128,12 @@ public class Grafica {
 		frame.getContentPane().add(toolbarBacheca, BorderLayout.NORTH);
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
 		if (form != null) form.setVisible(false);
+		if (schedaEvento != null) schedaEvento.setVisible(false);
+		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(true);
 		//Creazione pannello principale
 		//JOptionPane.showMessageDialog(null, "Frame: " + frame.getWidth() + " C.P.: " + frame.getContentPane().getWidth() + " Pannello: " +pannelloCentrale.getWidth(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
-		bacheca = new Bacheca(frame.getContentPane().getWidth(),testo, testoBottoni, altezzaStringhe);
+		bacheca = new Bacheca(frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -137,9 +150,11 @@ public class Grafica {
 		svuotaFrame();
 		frame.getContentPane().add(barraForm, BorderLayout.SOUTH);
 		if (form != null) form.setVisible(true);
+		if (schedaEvento != null) schedaEvento.setVisible(false);
+		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(false);
 		//Creazione pannello principale
-		form = new CreazioneEvento(testo, frame.getContentPane().getWidth(), altezzaStringhe);
+		form = new CreazioneEvento(fontTesto, frame.getContentPane().getWidth(), altezzaStringhe);
 		pannelloCentrale = new JScrollPane(form);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -149,11 +164,55 @@ public class Grafica {
 		barraForm.repaint(200);
 	}
 	
+	public void visualizzaPannelloNotifiche() {
+		frame.setTitle("Notifche");
+		svuotaFrame();
+		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		if (form != null) form.setVisible(false);
+		if (bacheca != null) bacheca.setVisible(false);
+		if (schedaEvento != null) schedaEvento.setVisible(false);
+		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
+		//Creazione pannello principale
+		LinkedList<Notifica> notifiche= new LinkedList<>();
+		notifiche.add(new Notifica("Prova 1", "Tante belle cose!"));
+		notifiche.add(new Notifica("Sotto", "Sono seconda"));
+		notifiche.add(new Notifica("Miao", "Leonardinooooooooo"));
+		notifiche.add(new Notifica("Sproloquoquioquochiopopoio", "Questa è la notifica più lunga che voi possiate immaginare! Sul serio"));
+		pannelloNotifiche=new PannelloNotifiche(notifiche, frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
+		pannelloCentrale = new JScrollPane(pannelloNotifiche);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		frame.getContentPane().revalidate();
+		barraFunzioni.repaint(200);
+	}
+	
+	public void visualizzaEvento(Evento e) {
+		if (e==null) return;
+		frame.setTitle((String)e.getCampi().get(NomeCampi.TITOLO).getContenuto());
+		svuotaFrame();
+		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		if (form != null) form.setVisible(false);
+		if (bacheca != null) bacheca.setVisible(false);
+		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(true);
+		if (schedaEvento != null) schedaEvento.setVisible(true);
+		//Creazione pannello principale
+		schedaEvento=new SchedaEvento(e, fontTesto, fontTestoBottoni, altezzaStringhe, frame.getContentPane().getWidth());
+		pannelloCentrale = new JScrollPane(schedaEvento);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		frame.getContentPane().revalidate();
+		barraFunzioni.repaint(200);
+	}
+	
 	private void calcolaDimensioniStringhe() {
 		FontRenderContext frc = ((Graphics2D)frame.getGraphics()).getFontRenderContext();
-		larghezzaStrPassword = (int)testo.getStringBounds("Password: ", frc).getWidth();
-		altezzaStringhe = (int)testo.getStringBounds("abj", frc).getHeight();
-		larghezzaCampiUtentePswd = (int)testo.getStringBounds("abcdefghijklmnopqrst", frc).getWidth();
+		larghezzaStrPassword = (int)fontTesto.getStringBounds("Password: ", frc).getWidth();
+		altezzaStringhe = (int)fontTesto.getStringBounds("abj", frc).getHeight();
+		larghezzaCampiUtentePswd = (int)fontTesto.getStringBounds("abcdefghijklmnopqrst", frc).getWidth();
 	}
 	
 	private class listenerRidimensionamento implements ComponentListener{
@@ -169,27 +228,42 @@ public class Grafica {
 			} else if (form != null && pannelloCentrale.isVisible() && form.isVisible()) {
 				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
 				form.ridimensiona(frame.getContentPane().getWidth());
-				form.repaint(200);
-			}
+			} else if (pannelloNotifiche != null && pannelloCentrale.isVisible() && pannelloNotifiche.isVisible()) {
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+				pannelloNotifiche.ridimensiona(frame.getContentPane().getWidth());
+			} else if (schedaEvento != null && pannelloCentrale.isVisible() && schedaEvento.isVisible()) {
+			pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+			schedaEvento.ridimensiona(frame.getContentPane().getWidth());
+		}
 		}
 	}
 	
-	class listenerScroll implements AdjustmentListener{
-		public void adjustmentValueChanged(AdjustmentEvent e) {
-			//Listener attivato quando faccio scroll sulla bacheca
-		}
-	}
-	
-	public void accedi(String utente, String password)
-	{
-		utente_corrente = Sessione.accedi(new Utente(utente, password));
-		if (utente_corrente != null) 
+	void accedi(String utente, String password) {
+		if (Sessione.accedi(new Utente(utente, password))) 
 			visualizzaBacheca();
 		else 
 			loginPane.ripulisci();
 	}
-	public void creaUtente(String utente, String password) {
-		if (Sessione.creaUtente((new Utente(utente, password)) visualizzaBacheca();
+	void creaUtente(String utente, String password) {
+		if (Sessione.insertUtente(new Utente(utente, password))) visualizzaBacheca();
 		else loginPane.ripulisci();
+	}
+	void aggiungiEvento(Evento e) {
+		//Sessione.aggiungiEvento(e);
+		visualizzaBacheca();
+	}
+	void eliminaNotifica(Notifica n) {
+		//LinkedList<Notifica> notifiche = Sessione.eliminaNotifica(n);
+		LinkedList<Notifica> notifiche = new LinkedList<>();
+		for(CardNotifica c: pannelloNotifiche.cards)
+			if (c.n != n) notifiche.add(c.n);
+		frame.getContentPane().remove(pannelloCentrale);
+		pannelloNotifiche =new PannelloNotifiche(notifiche, frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
+		pannelloCentrale = new JScrollPane(pannelloNotifiche);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		frame.getContentPane().revalidate();
 	}
 }

@@ -3,6 +3,7 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 import java.io.Serializable;
 
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 import java.util.*;
 
@@ -12,6 +13,7 @@ public abstract class Evento implements Serializable
 	
 	private int id_evento;
 	private Utente utente_creatore;
+	private StatoEvento stato; 
 	
 	private HashMap<NomeCampi, Campo> campi;
 	private LinkedList<Utente> fruitori;
@@ -38,7 +40,7 @@ public abstract class Evento implements Serializable
 		if(!dataNelFuturo(data_ora_termine_ultimo_iscrizione)) 											throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni posteriore alla data odierna");
 		if(!dataSuccessivaTermineIscrizioni(data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento))throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di termine iscrizione");
 		if(partecipanti <= 1) 																			throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
-		if(creatore == null) 																		throw new IllegalArgumentException("Necessario inserire un utente creatore");
+		if(creatore == null) 																			throw new IllegalArgumentException("Necessario inserire un utente creatore");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
 		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
@@ -47,6 +49,8 @@ public abstract class Evento implements Serializable
 		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
 		this.setUtenteCreatore(creatore);
 		fruitori.add(creatore);
+		
+		stato = StatoEvento.VALIDA;
 	}
 	
 	/*
@@ -82,6 +86,10 @@ public abstract class Evento implements Serializable
 			aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Fine evento");						
 		}	
 	}
+
+	/*
+	 * Costruttore con parametri obbligatori e facoltativi e id
+	 */
 	
 	public Evento(
 			Integer id,
@@ -95,11 +103,13 @@ public abstract class Evento implements Serializable
 			String titolo,				
 			String note,
 			String benefici_quota,
-		    Calendar data_ora_termine_evento
+		    Calendar data_ora_termine_evento,
+		    StatoEvento stato
 			)
 	{
 		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento);
 		id_evento= id;
+		this.stato = stato;
 	}
 	
 	
@@ -107,27 +117,12 @@ public abstract class Evento implements Serializable
 	{
 		campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));
 	}
-
 	
-	public HashMap<NomeCampi, Campo> getCampi()	{ return campi;}
-
 	
-	public Campo getCampo(NomeCampi nomeCampo)	
+	public boolean dataNelFuturo(Calendar data) 
 	{
-		return campi.get(nomeCampo);
+		return Calendar.getInstance().compareTo(data) < 0; 
 	}
-	
-	
-	public <T>void setCampo(NomeCampi nome_campo, Campo campo)
-			throws IllegalArgumentException
-	{
-		if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
-		if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
-			campi.put(nome_campo, campo);
-	}
-	
-	
-	private boolean dataNelFuturo(Calendar data) { return Calendar.getInstance().compareTo(data) < 0; }
 		 
 
 	private boolean dataSuccessivaTermineIscrizioni(Calendar data_termine, Calendar data_da_controllare)
@@ -162,20 +157,46 @@ public abstract class Evento implements Serializable
 		 else
 			 return false;
 	 }
+
+/**
+ * Getter and Setters
+ */
 	 
-	 public LinkedList<Utente> getFruitori() { return fruitori; }
+	public Campo getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
 
-	public Utente getUtenteCreatore() { return utente_creatore; }
+	public <T>void setCampo(NomeCampi nome_campo, Campo campo)
+			 throws IllegalArgumentException
+	{
+		 if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
+		 if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
+		 campi.put(nome_campo, campo);
+	} 
+	 
+	public HashMap<NomeCampi, Campo> getCampi()	{ return campi;}
 
-	public void setUtenteCreatore
-	(Utente utente_creatore) {
-		this.utente_creatore = utente_creatore;
+	public LinkedList<Utente> getFruitori() { return fruitori; }
+	
+	public int getNumeroFruitori()
+	{
+		return fruitori.size();
 	}
 	
+	public int getNumeroPartecipanti() {return fruitori.size();}
+
+	public Utente getUtenteCreatore() { return utente_creatore; }
+	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
+	
+	
+	public void setFruitori(LinkedList<Utente> fruitori) {
+		this.fruitori = fruitori;
+	}
+
 	public int getId() {return id_evento;}
-
 	public void setId(int id) {this.id_evento = id;}
-
+	
+	public StatoEvento getStato() {return stato;}
+	public void setStato(StatoEvento stato) {this.stato = stato;}
+	
 	@Override
 	public String toString() 
 	{

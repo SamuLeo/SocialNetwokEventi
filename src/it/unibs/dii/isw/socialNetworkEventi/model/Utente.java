@@ -55,10 +55,10 @@ public class Utente implements Serializable
 		 return notifiche;
 	 }
 	 
-	String getNome() {return nome;}
-	void setNome(String nome) {this.nome = nome;}
+	public String getNome() {return nome;}
+	public void setNome(String nome) {this.nome = nome;}
 	public String getPassword() {return password;}
-	void setPassword(String password) {this.password = password;}
+	public void setPassword(String password) {this.password = password;}
 	public int getId_utente() {return id_utente;}
 	public void setId_utente(int id_utente) {this.id_utente = id_utente;}
 

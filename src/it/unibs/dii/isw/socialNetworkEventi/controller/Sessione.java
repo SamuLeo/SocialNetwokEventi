@@ -4,16 +4,21 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
 
 public class Sessione 
 {
+	
 	private static Utente utente_corrente;
 	private static DataBase db;
 	
@@ -23,6 +28,8 @@ public class Sessione
 
 		Grafica.getIstance().crea();
 		Grafica.getIstance().mostraLogin();		
+		
+		eventStatusChecker();
 	}
 	
 	
@@ -33,6 +40,71 @@ public class Sessione
 		{db.getConnection();}
 		catch(SQLException e)
 		{e.printStackTrace();}
+	}
+	
+	
+	public static void eventStatusChecker()
+	{
+		Timer ascolto = new Timer();
+		ascolto.schedule(
+				new TimerTask()
+				{
+					public void run()
+					{	
+						try 
+						{
+							db.refreshDatiRAM();
+							ArrayList<Evento> eventi = new ArrayList<>();
+							eventi = db.getEventi();
+							
+							for(Evento evento : eventi)
+							{
+								if(controllaStatoEvento(evento) == true)
+								{
+									db.updateStatoPartitaCalcio(evento);
+									switch(evento.getStato())
+									{
+										case FALLITA : db.segnalaFallimentoEvento(evento);
+										break;
+										case CONCLUSA : db.segnalaConclusioneEvento(evento);
+										break;
+										default : return;
+									}
+								}
+							}
+						} 
+						catch (SQLException e) 
+						{
+							e.printStackTrace();
+						}
+					
+					}
+				}, 0, 15000);
+	}
+	
+	
+	/**
+	 * 
+	 * @return true se lo stato cambia
+	 * @throws SQLException 
+	 */
+	public static boolean controllaStatoEvento(Evento evento) throws SQLException
+	{
+		boolean DataChiusuraIscrizioniNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()) < 0;
+		boolean DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		StatoEvento statoEvento = evento.getStato();
+		
+		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")))
+		{
+			evento.setStato(StatoEvento.FALLITA);			
+			return true;
+		}
+		else if(DataFineEventoNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Chiusa")))
+		{
+			evento.setStato(StatoEvento.CONCLUSA);
+			return true;
+		}
+		return false;
 	}
 	
 	
@@ -204,7 +276,16 @@ public class Sessione
 				System.out.println("Utente già iscritto alla partita");
 				return;
 			}	
-			db.collegaUtentePartita(utente_corrente, partita);
+//			se il giocatoer occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
+			if(partita.getNumeroFruitori() == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
+			{
+				db.collegaUtentePartita(utente_corrente, partita);
+				db.segnalaChiusuraEvento(partita);
+			}
+			else if (partita.getNumeroFruitori() < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
+				db.collegaUtentePartita(utente_corrente, partita);
+			else
+				return;
 		} 
 		catch (SQLException e) 
 		{
@@ -259,7 +340,7 @@ public class Sessione
 	}
 
 	
-	public static ArrayList<PartitaCalcio> getEventiUtenteCorrente()
+	public static LinkedList<PartitaCalcio> getEventiUtenteCorrente()
 	{
 		try
 		{
