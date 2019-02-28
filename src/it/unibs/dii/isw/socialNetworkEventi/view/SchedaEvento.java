@@ -12,6 +12,7 @@ import javax.swing.SwingConstants;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Campo;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 
 public class SchedaEvento extends JPanel {
 	private static final long serialVersionUID = 1L;

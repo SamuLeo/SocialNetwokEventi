@@ -15,6 +15,7 @@ import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.Notifica;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.view.PannelloNotifiche.CardNotifica;
 
 public class Grafica {
@@ -119,9 +120,6 @@ public class Grafica {
 	}
 	
 	public void visualizzaBacheca() {
-		/*
-		LinkedList<Evento> le = Sessione.mostraBacheca(); 
-		*/
 		//Riconfigurazione del Frame
 		frame.setTitle("Bacheca");
 		svuotaFrame();
@@ -133,7 +131,7 @@ public class Grafica {
 		if (bacheca != null) bacheca.setVisible(true);
 		//Creazione pannello principale
 		//JOptionPane.showMessageDialog(null, "Frame: " + frame.getWidth() + " C.P.: " + frame.getContentPane().getWidth() + " Pannello: " +pannelloCentrale.getWidth(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
-		bacheca = new Bacheca(frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
+		bacheca = new Bacheca(Sessione.getEventi(), frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -173,12 +171,7 @@ public class Grafica {
 		if (schedaEvento != null) schedaEvento.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		//Creazione pannello principale
-		LinkedList<Notifica> notifiche= new LinkedList<>();
-		notifiche.add(new Notifica("Prova 1", "Tante belle cose!"));
-		notifiche.add(new Notifica("Sotto", "Sono seconda"));
-		notifiche.add(new Notifica("Miao", "Leonardinooooooooo"));
-		notifiche.add(new Notifica("Sproloquoquioquochiopopoio", "Questa è la notifica più lunga che voi possiate immaginare! Sul serio"));
-		pannelloNotifiche=new PannelloNotifiche(notifiche, frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
+		pannelloNotifiche=new PannelloNotifiche(Sessione.getNotificheUtente(), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -249,16 +242,12 @@ public class Grafica {
 		else loginPane.ripulisci();
 	}
 	void aggiungiEvento(Evento e) {
-		//Sessione.aggiungiEvento(e);
+		Sessione.aggiungiEvento(e);
 		visualizzaBacheca();
 	}
 	void eliminaNotifica(Notifica n) {
-		//LinkedList<Notifica> notifiche = Sessione.eliminaNotifica(n);
-		LinkedList<Notifica> notifiche = new LinkedList<>();
-		for(CardNotifica c: pannelloNotifiche.cards)
-			if (c.n != n) notifiche.add(c.n);
 		frame.getContentPane().remove(pannelloCentrale);
-		pannelloNotifiche =new PannelloNotifiche(notifiche, frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
+		pannelloNotifiche =new PannelloNotifiche(Sessione.eliminaNotificaUtente(n), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

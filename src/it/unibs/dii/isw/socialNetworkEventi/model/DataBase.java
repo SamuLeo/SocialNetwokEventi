@@ -310,6 +310,7 @@ public class DataBase
 			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
 			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(11).getTime());
 			Utente creatore = selectUtente(rs.getInt(2));
+			String string_stato = rs.getString(12);
 			
 			PartitaCalcio partita = new PartitaCalcio(
 					rs.getInt(1),
@@ -323,7 +324,7 @@ public class DataBase
 					rs.getString(9),
 					rs.getString(10),
 					data_fine,
-					StatoEvento.valueOf(rs.getString(12)),
+					convertiStringInStato(string_stato),
 					(Integer)rs.getInt(13),
 					(Integer)rs.getInt(14),
 					(String)rs.getString(15));
@@ -371,6 +372,8 @@ public class DataBase
 			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
 			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(11).getTime());
 			Utente creatore = selectUtente(rs.getInt(2));
+			String string_stato = rs.getString(12);
+
 			
 			 partita = new PartitaCalcio(
 					rs.getInt(1),
@@ -384,7 +387,7 @@ public class DataBase
 					rs.getString(9),
 					rs.getString(10),
 					data_fine,
-					StatoEvento.valueOf(rs.getString(12)),
+					convertiStringInStato(string_stato),
 					(Integer)rs.getInt(13),
 					(Integer)rs.getInt(14),
 					(String)rs.getString(15));
@@ -720,6 +723,19 @@ public class DataBase
 		String dateTime = sdf.format(dt);
 		
 		return dateTime;
+	}
+	
+	private StatoEvento convertiStringInStato(String string_stato)
+	{
+		switch(string_stato)
+		{
+		case "Valida" : return StatoEvento.VALIDA;
+		case "Aperta" : return StatoEvento.APERTA;
+		case "Chiusa" : return StatoEvento.CHIUSA;
+		case "Conclusa" : return StatoEvento.CONCLUSA;
+		case "Fallita" : return StatoEvento.FALLITA;
+		default : return null;
+		}
 	}
 	
 

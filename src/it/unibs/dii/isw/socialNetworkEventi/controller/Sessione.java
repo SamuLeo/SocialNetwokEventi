@@ -108,7 +108,7 @@ public class Sessione
 	}
 	
 	
-	public static boolean aggiungiEventoAlDB(Evento evento)
+	public static boolean aggiungiEvento(Evento evento)
 	{
 		try
 		{db.insertEvento(evento); return true;}
@@ -160,7 +160,7 @@ public class Sessione
 	}
 	
 	
-	public static ArrayList<Evento> selectEventi()
+	public static ArrayList<Evento> getEventi()
 	{
 		try 
 		{
@@ -225,15 +225,15 @@ public class Sessione
 	}
 	
 	
-	public static LinkedList<Notifica> getNotificheUtente(Utente utente) 
+	public static LinkedList<Notifica> getNotificheUtente() 
 	{
 		
 		LinkedList<Notifica> notifiche = null;
 		
 		try 
 		{
-			notifiche = db.selectNotificheDiUtente(utente.getId_utente());
-			utente.setNotifiche(notifiche);
+			notifiche = db.selectNotificheDiUtente(utente_corrente.getId_utente());
+			utente_corrente.setNotifiche(notifiche);
 		} 
 		catch (SQLException e) 
 		{
@@ -257,7 +257,7 @@ public class Sessione
 			System.out.println("Errore durante l'eliminazione della notifica selezionata");
 		}
 		
-		return getNotificheUtente(utente_corrente);
+		return getNotificheUtente();
 	}
 	
 	

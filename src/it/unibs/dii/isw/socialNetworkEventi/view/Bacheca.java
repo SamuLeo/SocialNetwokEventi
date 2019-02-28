@@ -15,23 +15,22 @@ import javax.swing.SwingConstants;
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 
 
 public class Bacheca extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final Color sfondoCard = new Color(220,220,220), sfondoAnello = new Color(200,200,200), sfondo = new Color(240,240,240);
 	private cardEvento[] cards;
-	private ArrayList<Evento> eventi;
 	private int X=0, Y=0;
 	
-	Bacheca(int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
+	Bacheca(ArrayList<Evento> eventi, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
 	{
 		super();
 		setLayout(null);
-		cards = new cardEvento[10];
-		eventi = Sessione.selectEventi();
+		cards = new cardEvento[eventi.size()];
 		
-		for (int i=0; i<5; i++) 
+		for (int i=0; i<eventi.size(); i++) 
 		{
 			cards[i]=new cardEvento(eventi.get(i), larghezza-60, testoBottoni, testo, altezzaStringhe);
 			cards[i].setBounds(20, 20*(i+1)+(80+altezzaStringhe/5*21)*i, larghezza-60, 80+altezzaStringhe/5*21);
@@ -47,7 +46,7 @@ public class Bacheca extends JPanel {
 	
 	void ridimensiona(int larghezza) 
 	{
-		for (int i=0; i<5; i++) 
+		for (int i=0; i<cards.length; i++) 
 		{
 			cards[i].setBounds(20, 20*(i+1)+cards[i].getHeight()*i, larghezza-60, cards[i].getHeight());
 			cards[i].ridimensiona(larghezza-60);
@@ -90,7 +89,7 @@ public class Bacheca extends JPanel {
 			titolo.setHorizontalAlignment(SwingConstants.LEFT);
 			titolo.setFont(testoBottoni);
 			titolo.setBounds(w/10, 15, (int)(w*0.8), altezzaStringhe/5*6);
-			Calendar dataOra= (Calendar)(e.getCampi().get(NomeCampi.D_O_INIZIO_EVENTO).getContenuto());
+			Calendar dataOra = (Calendar)(e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto());
 			if (data==null) {data = new JLabel("Data: " + dataOra.getTime().getDay() + '/'+ dataOra.getTime().getMonth() + '/' + (dataOra.getTime().getYear()+1900)); this.add(data);}
 			data.setFont(testo);
 			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.6), altezzaStringhe);

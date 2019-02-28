@@ -20,4 +20,5 @@ public enum StatoEvento
 	{
 		return codStatoEvento;
 	}
+	
 }
