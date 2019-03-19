@@ -25,11 +25,11 @@ public class Sessione
 	public static void main(String[] args) 
 	{
 		connettiDB();
-
+		
 		Grafica.getIstance().crea();
 		Grafica.getIstance().mostraLogin();		
 		
-		eventStatusChecker();
+		eventsStatusChecker();
 	}
 	
 	
@@ -37,13 +37,23 @@ public class Sessione
 	{
 		db = new DataBase();		
 		try
-		{db.getConnection();}
+		{
+			db.getConnection();
+			db.refreshDatiRAM();
+		}
 		catch(SQLException e)
-		{e.printStackTrace();}
+		{
+			e.printStackTrace();
+		}
+		catch(IllegalArgumentException e)
+		{
+//			gestire caso in cui all'apertura eventi sono scaduti
+			
+		}
 	}
 	
 	
-	public static void eventStatusChecker()
+	public static void eventsStatusChecker()
 	{
 		Timer ascolto = new Timer();
 		ascolto.schedule(
@@ -111,7 +121,12 @@ public class Sessione
 	public static boolean aggiungiEvento(Evento evento)
 	{
 		try
-		{db.insertEvento(evento); return true;}
+		{
+			db.insertEvento(evento); 
+			
+			iscrizioneUtenteInEvento(evento);
+			return true;
+		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
@@ -154,7 +169,7 @@ public class Sessione
 	public static boolean deleteEvento(Evento evento)
 	{
 		try
-		{db.deleteEvento(evento); return true;}
+		{db.deletePartita(evento.getId()); return true;}
 		catch(SQLException e)
 		{return false;}
 	}
@@ -261,7 +276,7 @@ public class Sessione
 	}
 	
 	
-	public static void iscrizioneUtenteInPartita(PartitaCalcio partita)
+	public static void iscrizioneUtenteInEvento(Evento evento)
 	{
 		if(utente_corrente == null)
 		{
@@ -269,28 +284,37 @@ public class Sessione
 			return;
 		}
 		
-		try
+		switch(evento.getClass().getSimpleName())
 		{
-			if(utenteIscrittoAllaPartita(partita))
+		case "PartitaCalcio" : 
 			{
-				System.out.println("Utente già iscritto alla partita");
-				return;
-			}	
-//			se il giocatoer occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-			if(partita.getNumeroFruitori() == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
-			{
-				db.collegaUtentePartita(utente_corrente, partita);
-				db.segnalaChiusuraEvento(partita);
+				PartitaCalcio partita = (PartitaCalcio)evento;
+				try
+				{
+					if(utenteIscrittoAllaPartita(partita))
+					{
+						System.out.println("Utente già iscritto alla partita");
+						return;
+					}	
+					//			se il giocatoer occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
+					if(partita.getNumeroFruitori() == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
+					{
+						db.collegaUtentePartita(utente_corrente, partita);
+						db.segnalaChiusuraEvento(partita);
+					}
+					else if (partita.getNumeroFruitori() < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
+						db.collegaUtentePartita(utente_corrente, partita);
+					else
+						return;
+				} 
+				catch (SQLException e) 
+				{
+					System.out.println("Errore durante l'iscrizione dell'utente corrente alla partita selezionata");
+					e.printStackTrace();
+				}
 			}
-			else if (partita.getNumeroFruitori() < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
-				db.collegaUtentePartita(utente_corrente, partita);
-			else
-				return;
-		} 
-		catch (SQLException e) 
-		{
-			System.out.println("Errore durante l'iscrizione dell'utente corrente alla partita selezionata");
-			e.printStackTrace();
+			break;
+		default : return;
 		}
 	}
 	
@@ -310,7 +334,7 @@ public class Sessione
 				System.out.println("Utente non iscritto alla partita");
 				return;
 			}	
-			db.deleteCollegamentoPartitaCalcioUtente(utente_corrente, partita);
+			db.deleteCollegamentoPartitaCalcioUtente(utente_corrente.getId_utente(), partita.getId());
 		} 
 		catch (SQLException e) 
 		{

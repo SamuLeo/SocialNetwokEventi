@@ -10,8 +10,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Campo;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
+import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 
 public class SchedaEvento extends JPanel {
@@ -31,11 +33,16 @@ public class SchedaEvento extends JPanel {
 		titolo.setBounds(20, 20, larghezza-40,altezzaRighe/5*6);
 		Y=20+altezzaRighe/5*6;
 		add(titolo);
+		
 		iscriviti = new JButton("Iscriviti");
 		iscriviti.setFont(testoBottoni);
 		iscriviti.setBounds(20, Y+10, larghezza-40,altezzaRighe/5*6);
 		iscriviti.setBackground(Grafica.getIstance().coloreBottoni);
 		add(iscriviti);
+		iscriviti.addActionListener(event -> 
+		{if(e.getClass().getSimpleName() == "PartitaCalcio") 
+			Sessione.iscrizioneUtenteInEvento((PartitaCalcio) e);});
+		
 		Y+=20+altezzaRighe/5*6;
 		LinkedList<Campo> llist = new LinkedList<>();
 		for (Campo c: e.getCampi().values())

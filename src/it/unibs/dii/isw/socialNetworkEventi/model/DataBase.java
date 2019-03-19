@@ -51,8 +51,8 @@ public class DataBase
 	
 	public void refreshDatiRAM() throws SQLException
 	{
-		eventi = selectEventiAll();
 		utenti = selectUtentiAll();
+		eventi = selectEventiAll();
 	}
 
 /*
@@ -83,8 +83,8 @@ public class DataBase
 				int costo										= (Integer) evento.getCampo(NomeCampi.COSTO).getContenuto(); 
 				
 				String titolo									= (String)( evento.getCampo(NomeCampi.TITOLO) != null ? evento.getCampo(NomeCampi.TITOLO).getContenuto() : null);
-				String note										= (String)( evento.getCampo(NomeCampi.NOTE) != null ? evento.getCampo(NomeCampi.TITOLO).getContenuto() : null);
-				String benefici_quota							= (String)( evento.getCampo(NomeCampi.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampi.TITOLO).getContenuto() : null);
+				String note										= (String)( evento.getCampo(NomeCampi.NOTE) != null ? evento.getCampo(NomeCampi.NOTE).getContenuto() : null);
+				String benefici_quota							= (String)( evento.getCampo(NomeCampi.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto() : null);
 				Calendar data_ora_termine_evento				= evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto() : null;
 				String stato									= evento.getStato().getCodNomeCampi();
 			   
@@ -173,8 +173,6 @@ public class DataBase
 
 		rs.next();
 		notifica.setIdNotifica(rs.getInt(1));
-		
-		refreshDatiRAM();
 
 		return notifica;
 	}
@@ -208,68 +206,103 @@ public class DataBase
 		return rs.getInt(1);
 	}
 	
+
+	
 	public void segnalaFallimentoEvento(Evento evento) throws SQLException
 	{
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
-		String titolo = String.format("Evento %s fallito", titolo_evento);
-		String contenuto = String.format(NOTIFICA_FALLIMENTO_EVENTO,titolo_evento);		
-		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = new LinkedList<>();
-		
+
 		switch(evento.getClass().getSimpleName())
 		{
 			case "PartitaCalcio" : 
 				{
-					list_utenti = selectUtentiDiPartita((PartitaCalcio)evento);
+					segnalaFallimentoPartitaCalcio(evento.getId(), titolo_evento);
 					break;
 				}
 			default : break;
 		}
-		for(Utente utente : list_utenti)
-			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
 	}
+	
+	
+	public void segnalaFallimentoPartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	{
+		String titolo = String.format("Evento %s fallito", titolo_evento);
+		String contenuto = String.format(NOTIFICA_FALLIMENTO_EVENTO,titolo_evento);	
+		Notifica notifica = new Notifica(titolo, contenuto);
+		notifica = insertNotifica(notifica);
+		LinkedList<Utente>list_utenti = selectUtentiDiPartita(id_partita);
+		
+		for(Utente utente : list_utenti)
+		{
+			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+		}
+		this.deletePartita(id_partita);
+	}
+
 	
 	public void segnalaConclusioneEvento(Evento evento) throws SQLException
 	{
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
-		String titolo = String.format("Evento %s concluso", titolo_evento);
-		String contenuto = String.format(NOTIFICA_CONCLUSIONE_EVENTO,titolo_evento);		
-		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = new LinkedList<>();
-		
+
 		switch(evento.getClass().getSimpleName())
 		{
 			case "PartitaCalcio" : 
 				{
-					list_utenti = selectUtentiDiPartita((PartitaCalcio)evento);
+					segnalaConclusionePartitaCalcio(evento.getId(), titolo_evento);
 					break;
 				}
 			default : break;
 		}
+	
+	}
+	
+	
+	public void segnalaConclusionePartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	{
+		String titolo = String.format("Evento %s concluso", titolo_evento);
+		String contenuto = String.format(NOTIFICA_CONCLUSIONE_EVENTO,titolo_evento);		
+		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
+		LinkedList<Utente> list_utenti = selectUtentiDiPartita(id_partita);
+		
 		for(Utente utente : list_utenti)
+		{
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+		}
+		this.deletePartita(id_partita);
 	}
 	
 	
 	public void segnalaChiusuraEvento(Evento evento) throws SQLException
 	{
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
-		String titolo = String.format("Iscrizioni dell'evento %s concluse", titolo_evento);
-		String contenuto = String.format(NOTIFICA_CHIUSURA_EVENTO, titolo_evento);		
-		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = new LinkedList<>();
-		
+
 		switch(evento.getClass().getSimpleName())
 		{
 			case "PartitaCalcio" : 
 				{
-					list_utenti = selectUtentiDiPartita((PartitaCalcio)evento);
+					segnalaConclusionePartitaCalcio(evento.getId(), titolo_evento);
 					break;
 				}
 			default : break;
 		}
+	
+	}
+	
+	
+	public void segnalaChiusuraPartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	{
+		String titolo = String.format("Iscrizioni dell'evento %s concluse", titolo_evento);
+		String contenuto = String.format(NOTIFICA_CHIUSURA_EVENTO, titolo_evento);		
+		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
+		LinkedList<Utente> list_utenti = selectUtentiDiPartita(id_partita);
+		
 		for(Utente utente : list_utenti)
+		{
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+		}
 	}
 	
 	
@@ -306,31 +339,41 @@ public class DataBase
 		
 		while(rs.next())
 		{
+			int id_partita = rs.getInt(1);
+			String titolo_evento = rs.getString(8);
 			Calendar data_termine = Calendar.getInstance(); data_termine.setTimeInMillis(rs.getTimestamp(4).getTime());
 			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
 			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(11).getTime());
-			Utente creatore = selectUtente(rs.getInt(2));
-			String string_stato = rs.getString(12);
-			
-			PartitaCalcio partita = new PartitaCalcio(
-					rs.getInt(1),
-					creatore,
-					rs.getString(3),
-					data_termine,
-					data_inizio,
-					(Integer)rs.getInt(6),
-					(Integer)rs.getInt(7), 
-					rs.getString(8),
-					rs.getString(9),
-					rs.getString(10),
-					data_fine,
-					convertiStringInStato(string_stato),
-					(Integer)rs.getInt(13),
-					(Integer)rs.getInt(14),
-					(String)rs.getString(15));
-			
-			partita.setFruitori(selectUtentiDiPartita(partita));
-			eventi.add(partita);
+			if(Calendar.getInstance().compareTo(data_termine) > 0)
+			{
+				segnalaFallimentoPartitaCalcio(id_partita, titolo_evento);
+				deletePartita(rs.getInt(1));
+			}
+			else 
+			{
+				Utente creatore = selectUtente(rs.getInt(2));
+				String string_stato = rs.getString(12);
+
+				PartitaCalcio partita = new PartitaCalcio(
+						id_partita,
+						creatore,
+						rs.getString(3),
+						data_termine,
+						data_inizio,
+						(Integer)rs.getInt(6),
+						(Integer)rs.getInt(7), 
+						titolo_evento,
+						rs.getString(9),
+						rs.getString(10),
+						data_fine,
+						convertiStringInStato(string_stato),
+						(Integer)rs.getInt(13),
+						(Integer)rs.getInt(14),
+						(String)rs.getString(15));
+
+				partita.setFruitori(selectUtentiDiPartita(partita.getId()));
+				eventi.add(partita);
+			}
 		}
 		
 		return eventi;
@@ -397,7 +440,7 @@ public class DataBase
 		else
 			return null;
 		
-		partita.setFruitori(selectUtentiDiPartita(partita));
+		partita.setFruitori(selectUtentiDiPartita(partita.getId()));
 		
 		return partita;
 
@@ -516,14 +559,14 @@ public class DataBase
 		return partite;
 	}
 	
-	public LinkedList<Utente> selectUtentiDiPartita(PartitaCalcio partita) throws SQLException
+	public LinkedList<Utente> selectUtentiDiPartita(int id_partita) throws SQLException
 	{
 		LinkedList<Utente> utenti = new LinkedList<>();
 		
 		String sql = "SELECT id_utente FROM relazione_utente_partita WHERE id_partita=?";
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setInt(1, partita.getId());
+		ps.setInt(1, id_partita);
 		
 		ResultSet rs = ps.executeQuery();
 		
@@ -592,21 +635,13 @@ public class DataBase
  * DELETE : OPERAZIONI DI DELETE	
  */
 		
-	public void deleteEvento(Evento evento) throws SQLException
+	public void deletePartita(int id_partita) throws SQLException
 	{
-		switch(evento.getClass().getSimpleName())
-		{
-		case "PartitaCalcio" : 
-			{
-				String sql = "DELETE FROM partita_calcio WHERE id = ?" ;
-				PreparedStatement ps = getConnection().prepareStatement(sql);
-				ps.setInt(1, evento.getId());
-				ps.executeUpdate();
-				refreshDatiRAM();
-				break;
-			}
-		default : return;
-		}
+		String sql = "DELETE FROM partita_calcio WHERE id = ?" ;
+		PreparedStatement ps = getConnection().prepareStatement(sql);
+		ps.setInt(1, id_partita);
+		ps.executeUpdate();
+		refreshDatiRAM();
 	}
 	
 	
@@ -656,14 +691,14 @@ public class DataBase
 	}
 	
 	
-	public void deleteCollegamentoPartitaCalcioUtente(Utente utente, PartitaCalcio partita_calcio) throws SQLException
+	public void deleteCollegamentoPartitaCalcioUtente(int id_utente, int id_partita) throws SQLException
 	{
 //		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
 		String sql = "DELETE FROM relazione_utente_partita WHERE id_utente=? AND id_partita=?" ;
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setInt(1, utente.getId_utente());
-		ps.setInt(2, partita_calcio.getId());
+		ps.setInt(1, id_utente);
+		ps.setInt(2, id_partita);
 		ps.executeUpdate();
 	}
 	

@@ -73,7 +73,7 @@ public class CreazioneEvento extends JPanel {
 	/**crea i vari componenti dei campi comuni a tutte le attivita
 	 * 
 	 * @param frameWidth Larghezza della finestra
-	 * @param fontHeight Parametro che indica l'altezza di una stringa disegnata con il font prestabilito sullo schermo in uso (dpiende dai DPI)
+	 * @param fontHeight Parametro che indica l'altezza di una stringa disegnata con il font prestabilito sullo schermo in uso (dipende dai DPI)
 	 */
 	void formCampiComuni(int frameWidth, int fontHeight) {
 		for(int i = 0; i < nomeCampiComuni.length; i++) {
@@ -207,23 +207,63 @@ public class CreazioneEvento extends JPanel {
 		return Y;
 	}
 
-	private void conferma() {
+	private void conferma() 
+	{
 		//Tutti i campi numerici devono essere controllati che contengano un numero
 		//I campi che contengono date devono essere compressi in oggetti Calendar
-		try { Evento e;
+		try 
+		{ 
+			Evento e;
 			if (comboBox.getSelectedItem()==null) return;
-			if (comboBox.getSelectedItem().equals(categoriaPartita)) {
+			
+			if (comboBox.getSelectedItem().equals(categoriaPartita)) 
+			{
 				Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null;
+//				Acquisizione data e ora, l'aggiunta del "+ 1" è posta in corrispondenza del mese, in quanto Java associa lo 0 a Gennaio				
 				termineIscrizione = Calendar.getInstance();
-				termineIscrizione.set(Integer.parseInt(testoCampiComuniData[0][2].getText()), Integer.parseInt(testoCampiComuniData[0][1].getText()), Integer.parseInt(testoCampiComuniData[0][0].getText()), 0, 0);
+				termineIscrizione.set(
+						Integer.parseInt(testoCampiComuniData[0][2].getText()),
+						Integer.parseInt(testoCampiComuniData[0][1].getText() + 1),
+						Integer.parseInt(testoCampiComuniData[0][0].getText()),
+						0,
+						0);
+				
 				dataInizioEvento = Calendar.getInstance();
-				dataInizioEvento.set(Integer.parseInt(testoCampiComuniData[1][2].getText()), Integer.parseInt(testoCampiComuniData[1][1].getText()), Integer.parseInt(testoCampiComuniData[1][0].getText()), Integer.parseInt(testoCampiComuniOra[0][0].getText()), Integer.parseInt(testoCampiComuniOra[0][1].getText()));
+				dataInizioEvento.set(
+						Integer.parseInt(testoCampiComuniData[1][2].getText()),
+						Integer.parseInt(testoCampiComuniData[1][1].getText() + 1),
+						Integer.parseInt(testoCampiComuniData[1][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[0][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[0][1].getText()));
+				
 				//Questo parametro è opzionale percui si compila solo se è presente
-				if (testoCampiComuniData[2][2].getText() != "" || testoCampiComuniData[2][1].getText() != "" || testoCampiComuniData[2][0].getText() != "" || testoCampiComuniOra[1][1].getText() !="" || testoCampiComuniOra[1][0].getText() !="") {
+				if (testoCampiComuniData[2][2].getText() != "" || testoCampiComuniData[2][1].getText() != "" ||
+						testoCampiComuniData[2][0].getText() != "" || testoCampiComuniOra[1][1].getText() !="" ||
+						testoCampiComuniOra[1][0].getText() !="") 
+				{
 					dataFineEvento = Calendar.getInstance();
-					dataFineEvento.set(Integer.parseInt(testoCampiComuniData[2][2].getText()), Integer.parseInt(testoCampiComuniData[2][1].getText()), Integer.parseInt(testoCampiComuniData[2][0].getText()), Integer.parseInt(testoCampiComuniOra[1][0].getText()), Integer.parseInt(testoCampiComuniOra[1][1].getText()));
+					dataFineEvento.set(
+							Integer.parseInt(testoCampiComuniData[2][2].getText()),
+							Integer.parseInt(testoCampiComuniData[2][1].getText() + 1),
+							Integer.parseInt(testoCampiComuniData[2][0].getText()),
+							Integer.parseInt(testoCampiComuniOra[1][0].getText()),
+							Integer.parseInt(testoCampiComuniOra[1][1].getText()));
 				}
-				e = new PartitaCalcio(Sessione.getUtente_corrente(), testoCampiComuni[2].getText(), termineIscrizione, dataInizioEvento, Integer.parseInt(testoCampiComuni[1].getText()), Integer.parseInt(testoCampiComuni[4].getText()), testoCampiComuni[0].getText(), testoCampiComuni[6].getText(), testoCampiComuni[5].getText(), dataFineEvento, Integer.parseInt(testoCampiPartitaCalcio[0].getText()), Integer.parseInt(testoCampiPartitaCalcio[1].getText()), (String)sesso.getSelectedItem());
+				e = new PartitaCalcio(
+						Sessione.getUtente_corrente(),
+						testoCampiComuni[2].getText(),
+						termineIscrizione,
+						dataInizioEvento,
+						Integer.parseInt(testoCampiComuni[1].getText()),
+						Integer.parseInt(testoCampiComuni[4].getText()),
+						testoCampiComuni[0].getText(),
+						testoCampiComuni[6].getText(),
+						testoCampiComuni[5].getText(),
+						dataFineEvento,
+						Integer.parseInt(testoCampiPartitaCalcio[0].getText()),
+						Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
+						(String)sesso.getSelectedItem());
+				
 				Grafica.getIstance().aggiungiEvento(e);
 			}
 		} catch(NumberFormatException e) {JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}
