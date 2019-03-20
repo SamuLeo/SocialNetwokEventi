@@ -214,20 +214,17 @@ public class CreazioneEvento extends JPanel {
 		try 
 		{ 
 			Evento e;
-			if (comboBox.getSelectedItem()==null) return;
+			if (comboBox.getSelectedItem()==null) return;	//Nessuna categoria selezionata
 			
-			if (comboBox.getSelectedItem().equals(categoriaPartita)) 
-			{
+			if (comboBox.getSelectedItem().equals(categoriaPartita)){
 				Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null;
-//				Acquisizione data e ora, l'aggiunta del "+ 1" è posta in corrispondenza del mese, in quanto Java associa lo 0 a Gennaio				
+				//Acquisizione data e ora, l'aggiunta del "+ 1" è posta in corrispondenza del mese, in quanto Java associa lo 0 a Gennaio				
 				termineIscrizione = Calendar.getInstance();
 				termineIscrizione.set(
 						Integer.parseInt(testoCampiComuniData[0][2].getText()),
 						Integer.parseInt(testoCampiComuniData[0][1].getText() + 1),
 						Integer.parseInt(testoCampiComuniData[0][0].getText()),
-						0,
-						0);
-				
+						0,0);
 				dataInizioEvento = Calendar.getInstance();
 				dataInizioEvento.set(
 						Integer.parseInt(testoCampiComuniData[1][2].getText()),
@@ -237,10 +234,7 @@ public class CreazioneEvento extends JPanel {
 						Integer.parseInt(testoCampiComuniOra[0][1].getText()));
 				
 				//Questo parametro è opzionale percui si compila solo se è presente
-				if (testoCampiComuniData[2][2].getText() != "" || testoCampiComuniData[2][1].getText() != "" ||
-						testoCampiComuniData[2][0].getText() != "" || testoCampiComuniOra[1][1].getText() !="" ||
-						testoCampiComuniOra[1][0].getText() !="") 
-				{
+				if (!testoCampiComuniData[2][2].getText().equals("") || !testoCampiComuniData[2][1].getText().equals("") || !testoCampiComuniData[2][0].getText().equals("") || !testoCampiComuniOra[1][1].getText().equals("") || !testoCampiComuniOra[1][0].getText().equals("")) {
 					dataFineEvento = Calendar.getInstance();
 					dataFineEvento.set(
 							Integer.parseInt(testoCampiComuniData[2][2].getText()),
@@ -251,22 +245,22 @@ public class CreazioneEvento extends JPanel {
 				}
 				e = new PartitaCalcio(
 						Sessione.getUtente_corrente(),
-						testoCampiComuni[2].getText(),
-						termineIscrizione,
-						dataInizioEvento,
-						Integer.parseInt(testoCampiComuni[1].getText()),
-						Integer.parseInt(testoCampiComuni[4].getText()),
-						testoCampiComuni[0].getText(),
-						testoCampiComuni[6].getText(),
-						testoCampiComuni[5].getText(),
-						dataFineEvento,
-						Integer.parseInt(testoCampiPartitaCalcio[0].getText()),
-						Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
-						(String)sesso.getSelectedItem());
+/*Ob.	LUOGO*/			testoCampiComuni[2].getText(),
+/*Ob.	Data FINE ISCR*/termineIscrizione,
+/*Ob.	Data-ora iniz*/	dataInizioEvento,
+/*Ob.	Partecip.*/		Integer.parseInt(testoCampiComuni[1].getText()),
+/*Ob.	COSTO*/			Integer.parseInt(testoCampiComuni[4].getText()),
+/*Opz.	TITOLO*/		(testoCampiComuni[0].getText().equals("")? "Evento anonimo" : testoCampiComuni[0].getText()),
+/*Opz.	NOTE*/			testoCampiComuni[6].getText(),
+/*Opz.	COMPRESO*/		testoCampiComuni[5].getText(),
+/*Opz.	Data-ora FINE*/	dataFineEvento,
+/*Ob.	ETA MIN*/		Integer.parseInt(testoCampiPartitaCalcio[0].getText()),
+/*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
+/*Ob.	GENERE*/		(String)sesso.getSelectedItem());
 				
 				Grafica.getIstance().aggiungiEvento(e);
 			}
-		} catch(NumberFormatException e) {JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}
+		} catch(NumberFormatException e) {e.printStackTrace(); JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}
 		catch (Exception e) {JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}
 	}
 }

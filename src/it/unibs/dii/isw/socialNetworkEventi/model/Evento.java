@@ -1,15 +1,10 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
-import java.io.Serializable;
-
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
-
 import java.util.*;
 
-public abstract class Evento implements Serializable
-{
-	private static final long serialVersionUID = 1L;
+public abstract class Evento {
 	
 	private int id_evento;
 	private Utente utente_creatore;

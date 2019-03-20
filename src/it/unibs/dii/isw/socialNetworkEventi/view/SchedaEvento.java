@@ -34,14 +34,22 @@ public class SchedaEvento extends JPanel {
 		Y=20+altezzaRighe/5*6;
 		add(titolo);
 		
-		iscriviti = new JButton("Iscriviti");
+		if (e.getUtenteCreatore().equals(Sessione.getUtente_corrente())) {
+			iscriviti = new JButton("Elimina evento");
+			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
+		} else {
+			if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
+				iscriviti = new JButton("Iscriviti");
+				iscriviti.addActionListener(click -> Grafica.getIstance().iscriviEvento(e));
+			} else {iscriviti = new JButton("Annulla iscrizione");
+				iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
+			}
+		}
 		iscriviti.setFont(testoBottoni);
 		iscriviti.setBounds(20, Y+10, larghezza-40,altezzaRighe/5*6);
 		iscriviti.setBackground(Grafica.getIstance().coloreBottoni);
 		add(iscriviti);
-		iscriviti.addActionListener(event -> 
-		{if(e.getClass().getSimpleName() == "PartitaCalcio") 
-			Sessione.iscrizioneUtenteInEvento((PartitaCalcio) e);});
+		
 		
 		Y+=20+altezzaRighe/5*6;
 		LinkedList<Campo> llist = new LinkedList<>();

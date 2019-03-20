@@ -319,27 +319,18 @@ public class Sessione
 	}
 	
 	
-	public static void disiscrizioneUtenteInPartita(PartitaCalcio partita)
-	{
-		if(utente_corrente == null)
-		{
-			System.out.println("L'utente corrente è null");
-			return;
-		}
+	public static void disiscrizioneUtenteEvento(Evento evento) throws RuntimeException{
+		if(utente_corrente == null) throw new RuntimeException("L'utente corrente è null");
 		
-		try
-		{
-			if(!utenteIscrittoAllaPartita(partita))
-			{
-				System.out.println("Utente non iscritto alla partita");
-				return;
-			}	
-			db.deleteCollegamentoPartitaCalcioUtente(utente_corrente.getId_utente(), partita.getId());
-		} 
-		catch (SQLException e) 
-		{
-			System.out.println("Errore durante l'eliminazione dell'utente corrente dalla partita selezionata");
-			e.printStackTrace();
+		switch(evento.getClass().getSimpleName()) {
+			case "PartitaCalcio" : try {
+				PartitaCalcio partita = (PartitaCalcio)evento;
+				if(!utenteIscrittoAllaPartita(partita)) throw new RuntimeException ("Utente non iscritto alla partita");	
+				db.deleteCollegamentoPartitaCalcioUtente(utente_corrente.getId_utente(), partita.getId());
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new RuntimeException ("Errore durante l'eliminazione dell'utente corrente dalla partita selezionata");
+			} break;
 		}
 	}
 	

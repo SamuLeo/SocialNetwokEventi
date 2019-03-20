@@ -245,6 +245,18 @@ public class Grafica {
 		Sessione.aggiungiEvento(e);
 		visualizzaBacheca();
 	}
+	void eliminaEvento (Evento e) {
+		if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);
+	}
+	void iscriviEvento(Evento e) {
+		Sessione.iscrizioneUtenteInEvento(e);
+		visualizzaBacheca();
+	}
+	void rimuoviIscrizioneEvento(Evento e) {
+		try {Sessione.disiscrizioneUtenteEvento(e);
+			visualizzaBacheca();
+		} catch (RuntimeException exc) {JOptionPane.showMessageDialog(null, exc.getMessage(), "Impossibile disiscriversi", JOptionPane.INFORMATION_MESSAGE); return;}
+	}
 	void eliminaNotifica(Notifica n) {
 		frame.getContentPane().remove(pannelloCentrale);
 		pannelloNotifiche =new PannelloNotifiche(Sessione.eliminaNotificaUtente(n), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);

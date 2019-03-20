@@ -1,14 +1,11 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.util.Calendar;
-
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class PartitaCalcio extends Evento 
 {
-	private String titolo="Partita di Calcio";
-	private String descrizione="";
 	public PartitaCalcio(
 			Utente creatore,
 			String luogo,
