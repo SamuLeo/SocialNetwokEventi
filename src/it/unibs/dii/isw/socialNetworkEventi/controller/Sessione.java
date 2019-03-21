@@ -1,6 +1,5 @@
 package it.unibs.dii.isw.socialNetworkEventi.controller;
 
-import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -22,21 +21,20 @@ public class Sessione
 	private static Utente utente_corrente;
 	private static DataBase db;
 	
-	public static void main(String[] args) 
-	{
-		Calendar c = Calendar.getInstance();
+	public static void main(String[] args) {
+		/*Calendar c = Calendar.getInstance();
 		c.set(2019, 2, 31, 1, 1);
 		System.out.println(c.getTime());
 		System.out.println(Calendar.getInstance().getTime());
 		Timestamp t = new Timestamp (Calendar.getInstance().getTimeInMillis());
 		c.setTimeInMillis(t.getTime());
-		System.out.println(c.getTime());
+		System.out.println(c.getTime());*/
 		connettiDB();
 		
 		Grafica.getIstance().crea();
 		Grafica.getIstance().mostraLogin();		
 		
-		eventsStatusChecker();
+		new Timer().schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 15000);
 	}
 	
 	
@@ -57,13 +55,6 @@ public class Sessione
 //			gestire caso in cui all'apertura eventi sono scaduti
 			
 		}
-	}
-	
-	
-	public static void eventsStatusChecker()
-	{
-		Timer ascolto = new Timer();
-		ascolto.schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 15000);
 	}
 	
 	public static Runnable aggiornatore = new Runnable() {
