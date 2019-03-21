@@ -27,7 +27,7 @@ public class Grafica {
 	}
 	
 	JFrame frame;
-	JButton btnNuovoEvento = new JButton("Aggiungi Evento"), btnBacheca = new JButton ("Bacheca"), btnConfermaCreazioneEvento = new JButton("Conferma"), btnAnnullaCreazioneEvento = new JButton("Annulla"), btnNotifiche = new JButton("Notifiche");
+	JButton btnNuovoEvento = new JButton(" ➕ Aggiungi Evento"), btnBacheca = new JButton ("Bacheca 🏠"), btnConfermaCreazioneEvento = new JButton(" ✔ Conferma"), btnAnnullaCreazioneEvento = new JButton(" ✖ Annulla"), btnNotifiche = new JButton(" 💬  Notifiche");
 	JPanel toolbarBacheca = new JPanel(), barraFunzioni = new JPanel(), barraForm = new JPanel();
 	Login loginPane;
 	JScrollPane pannelloCentrale = new JScrollPane();
@@ -43,10 +43,10 @@ public class Grafica {
 	int screenW = (int)(screenSize.getWidth());
 	int screenH = (int)(screenSize.getHeight());
 	private int larghezzaStrPassword, altezzaStringhe, larghezzaCampiUtentePswd;
-	static final Font fontTestoBottoni=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/5);
-	static final Font fontTesto=new Font("Segoe UI", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+	static final Font fontTestoBottoni=new Font("DOBBIAMO TROVARE UN FONT CARINO", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/5);
+	static final Font fontTesto=new Font("DOBBIAMO TROVARE UN FONT CARINO", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
 	static final Color coloreBottoni = new Color(255,255,255);
-	static final Color coloreSfondo = new Color(240,240,240);
+	static final Color coloreSfondo = new Color(244,244,244);
 	static final Color coloreBarra = new Color(200,200,200);
 	
 	public void crea() {
@@ -67,7 +67,7 @@ public class Grafica {
 			btnNuovoEvento.setBackground(coloreBottoni);
 			btnNuovoEvento.addActionListener(e -> iniziaCreazioneEvento());
 			selettoreCategoria.setFont(fontTesto);
-			selettoreCategoria.insertItemAt("Calcio", 0);
+			selettoreCategoria.insertItemAt(" ⚽ Calcio", 0);
 			selettoreCategoria.setSelectedIndex(0);
 			selettoreCategoria.setBackground(coloreBottoni);
 			selettoreCategoria.setFocusable(false);
@@ -120,11 +120,14 @@ public class Grafica {
 	}
 	
 	public void visualizzaBacheca() {
+		//Se la Bacheca è già in mostra, va solo aggiornata
+		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
 		//Riconfigurazione del Frame
-		frame.setTitle("Bacheca");
+		frame.setTitle("Bacheca @" + Sessione.getUtente_corrente().getNome());
 		svuotaFrame();
 		frame.getContentPane().add(toolbarBacheca, BorderLayout.NORTH);
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		btnBacheca.setText("\u21BA Aggiorna contenuti");
 		if (form != null) form.setVisible(false);
 		if (schedaEvento != null) schedaEvento.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
@@ -166,6 +169,7 @@ public class Grafica {
 		frame.setTitle("Notifche");
 		svuotaFrame();
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		btnBacheca.setText("Bacheca 🏠");
 		if (form != null) form.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(false);
 		if (schedaEvento != null) schedaEvento.setVisible(false);
@@ -186,6 +190,7 @@ public class Grafica {
 		frame.setTitle((String)e.getCampi().get(NomeCampi.TITOLO).getContenuto());
 		svuotaFrame();
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		btnBacheca.setText("Bacheca 🏠");
 		if (form != null) form.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(true);
@@ -242,8 +247,7 @@ public class Grafica {
 		else loginPane.ripulisci();
 	}
 	void aggiungiEvento(Evento e) {
-		Sessione.aggiungiEvento(e);
-		visualizzaBacheca();
+		if (Sessione.aggiungiEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
 	}
 	void eliminaEvento (Evento e) {
 		if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);

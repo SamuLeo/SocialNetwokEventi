@@ -222,13 +222,13 @@ public class CreazioneEvento extends JPanel {
 				termineIscrizione = Calendar.getInstance();
 				termineIscrizione.set(
 						Integer.parseInt(testoCampiComuniData[0][2].getText()),
-						Integer.parseInt(testoCampiComuniData[0][1].getText() + 1),
+						Integer.parseInt(testoCampiComuniData[0][1].getText())-1,
 						Integer.parseInt(testoCampiComuniData[0][0].getText()),
 						0,0);
 				dataInizioEvento = Calendar.getInstance();
 				dataInizioEvento.set(
 						Integer.parseInt(testoCampiComuniData[1][2].getText()),
-						Integer.parseInt(testoCampiComuniData[1][1].getText() + 1),
+						Integer.parseInt(testoCampiComuniData[1][1].getText())-1,
 						Integer.parseInt(testoCampiComuniData[1][0].getText()),
 						Integer.parseInt(testoCampiComuniOra[0][0].getText()),
 						Integer.parseInt(testoCampiComuniOra[0][1].getText()));
@@ -238,11 +238,12 @@ public class CreazioneEvento extends JPanel {
 					dataFineEvento = Calendar.getInstance();
 					dataFineEvento.set(
 							Integer.parseInt(testoCampiComuniData[2][2].getText()),
-							Integer.parseInt(testoCampiComuniData[2][1].getText() + 1),
+							Integer.parseInt(testoCampiComuniData[2][1].getText())-1,
 							Integer.parseInt(testoCampiComuniData[2][0].getText()),
 							Integer.parseInt(testoCampiComuniOra[1][0].getText()),
 							Integer.parseInt(testoCampiComuniOra[1][1].getText()));
 				}
+				System.out.println("Termine iscrizioni: " + termineIscrizione.getTime() + "\nInizio: " + dataInizioEvento.getTime());
 				e = new PartitaCalcio(
 						Sessione.getUtente_corrente(),
 /*Ob.	LUOGO*/			testoCampiComuni[2].getText(),
@@ -258,6 +259,7 @@ public class CreazioneEvento extends JPanel {
 /*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
 /*Ob.	GENERE*/		(String)sesso.getSelectedItem());
 				
+				System.out.println("Creata una partita di calcio con successo: ora salvo");
 				Grafica.getIstance().aggiungiEvento(e);
 			}
 		} catch(NumberFormatException e) {e.printStackTrace(); JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}

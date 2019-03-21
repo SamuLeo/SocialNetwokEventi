@@ -1,8 +1,9 @@
 package it.unibs.dii.isw.socialNetworkEventi.controller;
 
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
@@ -24,6 +24,13 @@ public class Sessione
 	
 	public static void main(String[] args) 
 	{
+		Calendar c = Calendar.getInstance();
+		c.set(2019, 2, 31, 1, 1);
+		System.out.println(c.getTime());
+		System.out.println(Calendar.getInstance().getTime());
+		Timestamp t = new Timestamp (Calendar.getInstance().getTimeInMillis());
+		c.setTimeInMillis(t.getTime());
+		System.out.println(c.getTime());
 		connettiDB();
 		
 		Grafica.getIstance().crea();
@@ -56,41 +63,36 @@ public class Sessione
 	public static void eventsStatusChecker()
 	{
 		Timer ascolto = new Timer();
-		ascolto.schedule(
-				new TimerTask()
-				{
-					public void run()
-					{	
-						try 
-						{
-							db.refreshDatiRAM();
-							ArrayList<Evento> eventi = new ArrayList<>();
-							eventi = db.getEventi();
-							
-							for(Evento evento : eventi)
-							{
-								if(controllaStatoEvento(evento) == true)
-								{
-									db.updateStatoPartitaCalcio(evento);
-									switch(evento.getStato())
-									{
-										case FALLITA : db.segnalaFallimentoEvento(evento);
-										break;
-										case CONCLUSA : db.segnalaConclusioneEvento(evento);
-										break;
-										default : return;
-									}
-								}
-							}
-						} 
-						catch (SQLException e) 
-						{
-							e.printStackTrace();
-						}
-					
-					}
-				}, 0, 15000);
+		ascolto.schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 15000);
 	}
+	
+	public static Runnable aggiornatore = new Runnable() {
+		public void run(){	
+		try 
+		{
+			db.refreshDatiRAM();
+			ArrayList<Evento> eventi = new ArrayList<>();
+			eventi = db.getEventi();
+			
+			for(Evento evento : eventi)
+			{
+				if(controllaStatoEvento(evento) == true)
+				{
+					db.updateStatoPartitaCalcio(evento);
+					switch(evento.getStato())
+					{
+						case FALLITA : db.segnalaFallimentoEvento(evento);
+						break;
+						case CONCLUSA : db.segnalaConclusioneEvento(evento);
+						break;
+						default : return;
+					}
+				}
+			}
+		} 
+		catch (SQLException e)  {e.printStackTrace();}
+	}
+};
 	
 	
 	/**
@@ -98,10 +100,11 @@ public class Sessione
 	 * @return true se lo stato cambia
 	 * @throws SQLException 
 	 */
-	public static boolean controllaStatoEvento(Evento evento) throws SQLException
-	{
+	public static boolean controllaStatoEvento(Evento evento) throws SQLException {
 		boolean DataChiusuraIscrizioniNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()) < 0;
-		boolean DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		boolean DataFineEventoNelFuturo;
+		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
+		else DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
 		StatoEvento statoEvento = evento.getStato();
 		
 		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")))
@@ -123,15 +126,12 @@ public class Sessione
 		try
 		{
 			db.insertEvento(evento); 
-			
 			iscrizioneUtenteInEvento(evento);
 			return true;
 		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
+		catch(SQLException e) {e.printStackTrace();}
+		catch(Exception e) {System.out.println("ECCEZIONE");e.printStackTrace();}
+		return false;
 	}
 	
 	public static boolean insertNotificaUtenteCorrente(Notifica notifica)
@@ -175,27 +175,13 @@ public class Sessione
 	}
 	
 	
-	public static ArrayList<Evento> getEventi()
-	{
-		try 
-		{
-			db.refreshDatiRAM();
-		} 
-		catch (SQLException e) 
-		{
-			System.out.println("Errore durante il caricamento dati della bacheca");
-		}
-		
+	public static ArrayList<Evento> getEventi() {
 		return db.getEventi();
 	}
 	
 	
-	public static PartitaCalcio selectPartita(int id_partita)
-	{
-		try
-		{return db.selectPartitaCalcio(id_partita);}
-		catch(SQLException e)
-		{return null;}
+	public static PartitaCalcio selectPartita(int id_partita) {
+		return db.selectPartitaCalcio(id_partita);
 	}
 	
 	
@@ -219,7 +205,6 @@ public class Sessione
 	
 	public static boolean accedi(Utente utente)
 	{
-
 		 try 
 		 {
 			 Integer id_utente = db.existUtente(utente);
@@ -232,10 +217,7 @@ public class Sessione
 			 else
 				 return false;
 		} 
-		 catch (SQLException e) 
-		 {
-			e.printStackTrace();
-		}
+		 catch (SQLException e) {e.printStackTrace();}
 		 return true;
 	}
 	
@@ -296,13 +278,13 @@ public class Sessione
 						System.out.println("Utente già iscritto alla partita");
 						return;
 					}	
-					//			se il giocatoer occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-					if(partita.getNumeroFruitori() == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
+					//se il giocatore occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
+					if(partita.getNumeroPartecipanti() == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
 					{
 						db.collegaUtentePartita(utente_corrente, partita);
 						db.segnalaChiusuraEvento(partita);
 					}
-					else if (partita.getNumeroFruitori() < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
+					else if (partita.getNumeroPartecipanti() < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
 						db.collegaUtentePartita(utente_corrente, partita);
 					else
 						return;

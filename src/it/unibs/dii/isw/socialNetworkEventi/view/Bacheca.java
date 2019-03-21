@@ -37,7 +37,7 @@ public class Bacheca extends JPanel {
 			this.add(cards[i]);
 		}
 		
-		X=larghezza; Y= 20*6+(80+altezzaStringhe/5*21)*5;
+		X=larghezza; Y= 20*(cards.length+1)+(80+altezzaStringhe/5*21)*cards.length;
 		this.setPreferredSize(new Dimension(larghezza,Y));
 	}
 	
@@ -55,17 +55,16 @@ public class Bacheca extends JPanel {
 		this.setPreferredSize(new Dimension(larghezza,Y));
 	}
 	
-	class cardEvento extends JPanel 
-	{
+	class cardEvento extends JPanel {
 		private static final long serialVersionUID = 1L;
 		Evento e;
 		int w, altezzaStringhe;
 		Font testo, testoBottoni;
 		JLabel data, ora, sesso, capienza;
 		JButton titolo;
+		AnelloNumerico anello;
 		
-		cardEvento (Evento e, int w, Font testoBottoni, Font testo, int altezzaStringhe) 
-		{
+		cardEvento (Evento e, int w, Font testoBottoni, Font testo, int altezzaStringhe) {
 			this.e=e;
 			this.w=w;
 			this.testoBottoni=testoBottoni;
@@ -74,8 +73,7 @@ public class Bacheca extends JPanel {
 		}
 		
 		@SuppressWarnings("deprecation")
-		protected void paintComponent(Graphics g) 
-		{
+		protected void paintComponent(Graphics g) {
 			//Creazione sfondo della card
 			g.setColor(sfondo);
 			g.fillRect(0, 0, w, 80+altezzaStringhe/5*21);
@@ -92,10 +90,10 @@ public class Bacheca extends JPanel {
 			titolo.setBounds(w/10, 15, (int)(w*0.8), altezzaStringhe/5*6);
 			//Data ed ora dell'evento
 			Calendar dataOra = (Calendar)(e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto());
-			if (data==null) {data = new JLabel("Data: " + dataOra.getTime().getDay() + '/'+ dataOra.getTime().getMonth() + '/' + (dataOra.getTime().getYear()+1900)); this.add(data);}
+			if (data==null) {data = new JLabel("Data: " + dataOra.getTime().getDate() + '/'+ (dataOra.getTime().getMonth()+1) + '/' + (dataOra.getTime().getYear()+1900)); this.add(data);}
 			data.setFont(testo);
 			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.6), altezzaStringhe);
-			if (ora==null) {ora = new JLabel("Orario: " + '\t' + dataOra.getTime().getHours() + '.'+ dataOra.getTime().getMinutes()); this.add(ora);}
+			if (ora==null) {ora = new JLabel("Orario: " + '\t' + (dataOra.getTime().getHours()) + '.'+ dataOra.getTime().getMinutes()); this.add(ora);}
 			ora.setFont(testo);
 			ora.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
 			//Sesso dei partecipanti alla partita
@@ -103,9 +101,14 @@ public class Bacheca extends JPanel {
 			sesso.setFont(testo);
 			sesso.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
 			//Anello di visualizzazione degli iscritti
-			int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();
-			int iscritti=(int)(e.getNumeroPartecipanti());
-			g.setColor(sfondoAnello);
+			if (anello==null) {
+				int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();
+				int iscritti=(int)(e.getNumeroPartecipanti());
+				anello=new AnelloNumerico(40+altezzaStringhe*3,partecipanti,iscritti,testo,altezzaStringhe, sfondoCard);
+				add(anello);
+			}
+			anello.setBounds(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3);
+			/*g.setColor(sfondoAnello);
 			g.fillOval(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3);
 			g.setColor(new Color((int)(255*Math.pow((double)iscritti/(double)partecipanti,0.5)),(int)(255-255*Math.pow((double)iscritti/(double)partecipanti, 2)),30));
 			g.fillArc(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3, 90, -360/partecipanti*iscritti);
@@ -115,13 +118,47 @@ public class Bacheca extends JPanel {
 			if (capienza==null) {capienza = new JLabel(""+iscritti +'/'+partecipanti); this.add(capienza);}
 			capienza.setFont(testo);
 			capienza.setBounds(w/3*2+30, altezzaStringhe/5*11+35, altezzaStringhe*3-20, altezzaStringhe);
-			capienza.setHorizontalAlignment(SwingConstants.CENTER);
+			capienza.setHorizontalAlignment(SwingConstants.CENTER);*/
 			this.setPreferredSize(new Dimension(w,80+altezzaStringhe/5*21));
 		}
 		
-		void ridimensiona (int larghezza) 
-		{
-			w=larghezza;
-		}
+		void ridimensiona (int larghezza) {w=larghezza;}
 	}
+}
+
+class AnelloNumerico extends JPanel {
+	private static final long serialVersionUID = 1L;
+	private static final Color sfondoAnello = new Color(200,200,200);
+	Color sfondo;
+	int totale, n, lato, altezzaStringhe;
+	JLabel capienza;
+	Font testo;
+	
+	AnelloNumerico (int w, int totale, int n, Font testo, int altezzaStringhe, Color sfondo) {
+		lato=w;
+		this.totale=totale;
+		this.n=n;
+		this.testo=testo;
+		this.altezzaStringhe = altezzaStringhe;
+		this.sfondo=sfondo;
+	}
+	
+	protected void paintComponent(Graphics g) {
+		g.setColor(sfondo);
+		g.fillRect(0, 0, lato, lato);
+		g.setColor(sfondoAnello);
+		g.fillOval(0, 0, lato, lato);
+		g.setColor(new Color((int)(255*Math.pow((double)n/(double)totale,0.5)),(int)(255-255*Math.pow((double)n/(double)totale, 2)),30));
+		g.fillArc(0, 0, lato, lato, 90, -360/totale*n);
+		g.setColor(sfondo);
+		g.fillOval(lato/12, lato/12, lato-lato/6, lato-lato/6);
+		g.setColor(Color.darkGray);
+		if (capienza==null) {capienza = new JLabel(""+n +'/'+totale); this.add(capienza);}
+		capienza.setFont(testo);
+		capienza.setBounds(lato/10, lato/2-altezzaStringhe/2, lato/5*4, altezzaStringhe);
+		capienza.setHorizontalAlignment(SwingConstants.CENTER);
+		this.setPreferredSize(new Dimension(lato,lato));
+	}
+	
+	void ridimensiona (int lato) {this.lato=lato;}
 }

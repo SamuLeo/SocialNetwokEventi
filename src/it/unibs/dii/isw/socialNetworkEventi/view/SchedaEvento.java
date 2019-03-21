@@ -3,6 +3,7 @@ package it.unibs.dii.isw.socialNetworkEventi.view;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
 import javax.swing.JButton;
@@ -22,18 +23,20 @@ public class SchedaEvento extends JPanel {
 	private JLabel[] desc, val;
 	JLabel titolo;
 	JButton iscriviti;
+	AnelloNumerico anello;
 
-	@SuppressWarnings({ "deprecation", "rawtypes", "static-access" })
+	@SuppressWarnings({ "rawtypes", "static-access" })
 	public SchedaEvento(Evento e, Font testo, Font testoBottoni, int altezzaRighe, int larghezza) {
 		super();
 		setLayout(null);
+		setBackground(Grafica.coloreSfondo);
 		titolo = new JLabel((String)e.getCampi().get(NomeCampi.TITOLO).getContenuto());
-		titolo.setFont(testoBottoni);
+		titolo.setFont(testoBottoni.deriveFont(testoBottoni.getSize()*2F));
 		titolo.setHorizontalAlignment(SwingConstants.CENTER);
-		titolo.setBounds(20, 20, larghezza-40,altezzaRighe/5*6);
-		Y=20+altezzaRighe/5*6;
+		titolo.setBounds(20, 20, larghezza-40,altezzaRighe/5*12);
+		Y=20+altezzaRighe/5*12;
 		add(titolo);
-		
+		System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
 		if (e.getUtenteCreatore().equals(Sessione.getUtente_corrente())) {
 			iscriviti = new JButton("Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
@@ -59,12 +62,13 @@ public class SchedaEvento extends JPanel {
 		desc=new JLabel[s.length];
 		val=new JLabel[s.length];
 		Object temp;
+		DateFormat formattaDate = DateFormat.getInstance();
 		for (int i=0; i<s.length;i++) {
 			desc[i]= new JLabel(s[i].getDescrizione_campo());
 			temp=s[i].getContenuto();
 			if (temp instanceof Calendar) {
 				Calendar t = (Calendar)temp;
-				val[i]= new JLabel(""+t.getTime().getDay() + '/'+ t.getTime().getMonth() + '/' + (t.getTime().getYear()+1900)+ ' ' + t.getTime().getHours() + '.'+ t.getTime().getMinutes());
+				val[i]= new JLabel(formattaDate.format(t.getTime())); //+t.get(Calendar.HOUR_OF_DAY) +  '/'+ (t.get(Calendar.MONTH)+1) + '/' + t.get(Calendar.YEAR)+ ' ' + t.getTime().getHours() + '.'+ t.getTime().getMinutes());
 			}
 			else val[i] = new JLabel(temp.toString());
 			desc[i].setFont(testo); val[i].setFont(testo);
@@ -73,12 +77,20 @@ public class SchedaEvento extends JPanel {
 			Y+= altezzaRighe+20;
 			add(desc[i]); add(val[i]);
 		}
+		anello=new AnelloNumerico(larghezza/3, (int)(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto()), e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
+		anello.setBounds(larghezza/3, Y+25, larghezza/3, larghezza/3);
+		Y+=larghezza/3+50;
+		add(anello);
 		setPreferredSize(new Dimension(larghezza, Y));
 	}
 	
 	void ridimensiona(int larghezza) {
 		titolo.setSize(larghezza-40,titolo.getHeight());
 		iscriviti.setSize(larghezza-40,iscriviti.getHeight());
+		int altezzaVecchia = anello.getWidth();
+		anello.ridimensiona(larghezza/3);
+		anello.setBounds(larghezza/3, Y-25-altezzaVecchia, larghezza/3, larghezza/3);
+		Y-=altezzaVecchia-larghezza/3;
 		for (JLabel d: desc)
 			d.setSize((larghezza-60)/2, d.getHeight());
 		for (JLabel v: val)

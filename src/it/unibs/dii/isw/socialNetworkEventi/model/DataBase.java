@@ -6,8 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.LinkedList;
 
@@ -26,6 +24,8 @@ public class DataBase
 	private Connection con;
 	private ArrayList<Evento> eventi;
 	private ArrayList<Utente> utenti;
+	public ArrayList<Evento> getEventi() {return eventi;}
+	public ArrayList<Utente> getUtenti() {return utenti;}
 	
 //	Connessione a mysql creata tramite pattern Singleton
 	public Connection getConnection() throws SQLException
@@ -75,7 +75,7 @@ public class DataBase
 		case "PartitaCalcio" : 
 			{
 //				Estrazione campi dall'oggetto evento
-				int id_creatore									= evento.getUtenteCreatore().getId_utente();					
+				int id_creatore									= evento.getUtenteCreatore().getId_utente();
 				String luogo 									= (String) evento.getCampo(NomeCampi.LUOGO).getContenuto();
 				Calendar data_ora_termine_ultimo_iscrizione		= (Calendar) evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto();
 				Calendar data_ora_inizio_evento 				= (Calendar) evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto();
@@ -91,6 +91,7 @@ public class DataBase
 				int eta_minima									= (Integer) evento.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
 			    int eta_massima									= (Integer) evento.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
 			    String genere									= (String) evento.getCampo(NomeCampi.GENERE).getContenuto();
+			    
 			    
 //				Stringa contenente uno script sql per inserire la partita di calcio
 				String sql = "INSERT INTO partita_calcio "
@@ -122,7 +123,7 @@ public class DataBase
 				rs.next();
 				evento.setId(rs.getInt(1));
 				
-				refreshDatiRAM();
+				eventi = selectEventiAll(); //refreshDatiRAM();
 
 				return evento;
 			}
@@ -203,6 +204,7 @@ public class DataBase
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
 		rs.next();
+		refreshDatiRAM();
 		return rs.getInt(1);
 	}
 	
@@ -343,14 +345,14 @@ public class DataBase
 			String titolo_evento = rs.getString(8);
 			Calendar data_termine = Calendar.getInstance(); data_termine.setTimeInMillis(rs.getTimestamp(4).getTime());
 			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
-			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(11).getTime());
-			if(Calendar.getInstance().compareTo(data_termine) > 0)
-			{
+			Calendar data_fine = Calendar.getInstance(); 
+			System.out.println("Termine di " + titolo_evento + " " + data_termine.getTime());
+			if (rs.getTimestamp(11) != null) data_fine.setTimeInMillis(rs.getTimestamp(11).getTime()); else data_fine=null;
+			
+			if(Calendar.getInstance().compareTo(data_termine) > 0) {
 				segnalaFallimentoPartitaCalcio(id_partita, titolo_evento);
 				deletePartita(rs.getInt(1));
-			}
-			else 
-			{
+			} else {
 				Utente creatore = selectUtente(rs.getInt(2));
 				String string_stato = rs.getString(12);
 
@@ -379,7 +381,16 @@ public class DataBase
 		return eventi;
 	}
 	
-	public PartitaCalcio selectPartitaCalcio(int  id_partita_calcio) throws SQLException
+	public PartitaCalcio selectPartitaCalcio(int id) {
+		for (Evento e : eventi) {
+			if (e instanceof PartitaCalcio && ((PartitaCalcio)e).getId() == id) return (PartitaCalcio)e;
+		}
+		return null;
+	}
+	//Credo sia il caso di limitare le operazioni sul DB solo agli eventi di scrittura. Altrimenti mi sfugge il senso di tenere una copia in RAM
+	//Perlomeno fintanto che questa architettura DB è così fragile
+	
+	/*public PartitaCalcio selectPartitaCalcio(int  id_partita_calcio) throws SQLException
 	{
 
 		PartitaCalcio partita;
@@ -413,7 +424,8 @@ public class DataBase
 		{
 			Calendar data_termine = Calendar.getInstance(); data_termine.setTimeInMillis(rs.getTimestamp(4).getTime());
 			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
-			Calendar data_fine = Calendar.getInstance(); data_fine.setTimeInMillis(rs.getTimestamp(11).getTime());
+			Calendar data_fine = Calendar.getInstance(); 
+			if (rs.getTimestamp(11) != null) data_fine.setTimeInMillis(rs.getTimestamp(11).getTime()); else data_fine=null;
 			Utente creatore = selectUtente(rs.getInt(2));
 			String string_stato = rs.getString(12);
 
@@ -435,7 +447,7 @@ public class DataBase
 					(Integer)rs.getInt(14),
 					(String)rs.getString(15));
 
-			eventi.add(partita);
+			eventi.add(partita);	// <----- eh?
 		}
 		else
 			return null;
@@ -444,7 +456,7 @@ public class DataBase
 		
 		return partita;
 
-	}
+	}*/
 
 	
 	public ArrayList<Utente> selectUtentiAll() throws SQLException
@@ -461,19 +473,23 @@ public class DataBase
 		
 		while(rs.next())
 		{		
-			Utente utente = new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));			
+			Utente utente = new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));	
 			utenti.add(utente);
 		}
 		
 		return utenti;
 	}
 	
-	
-	public Utente selectUtente(int id_utente) throws SQLException
+	public Utente selectUtente(int id) {
+		for (Utente u : utenti) {
+			if (u.getId_utente() == id) return u;
+		}
+		return null;
+	}
+	//Stesso motivo di sopra
+	/*public Utente selectUtente(int id_utente) throws SQLException
 	{
-		Utente utente = null;
-		
-		String sql = "SELECT id, nome, password FROM utente";
+		String sql = "SELECT id, nome, password FROM utente WHERE id=" + id_utente;
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		
@@ -481,16 +497,9 @@ public class DataBase
 		
 		rs.beforeFirst();
 		
-		if(rs.next())
-		{		
-			utente = new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));
-			
-			utenti.add(utente);
-			return utente;
-		}
-		else
-			return null;
-	}	
+		if(rs.next()) return new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));
+		else return null;
+	}*/
 	
 	
 	public Notifica selectNotifica(int id_notifica) throws SQLException
@@ -537,7 +546,7 @@ public class DataBase
 		return notifiche;
 	}
 	
-	
+	//Meh
 	public LinkedList<PartitaCalcio> selectPartiteDiUtente(Utente utente) throws SQLException
 	{
 		LinkedList<PartitaCalcio> partite = new LinkedList<>();
@@ -594,10 +603,7 @@ public class DataBase
 		
 		rs.beforeFirst();
 		
-		while(rs.next())
-		{		
-			counter++;
-		}
+		while(rs.next()) counter++;
 		
 		return counter;
 	}
@@ -700,6 +706,7 @@ public class DataBase
 		ps.setInt(1, id_utente);
 		ps.setInt(2, id_partita);
 		ps.executeUpdate();
+		refreshDatiRAM();
 	}
 	
 	
@@ -712,14 +719,14 @@ public class DataBase
 	
 	public Integer existUtente(Utente utente) throws SQLException
 	{
-		refreshDatiRAM();
+		utenti = selectUtentiAll();
 		if(utenti.isEmpty())
 			return null;
 		
-		for(Utente utente1 : utenti)
+		for(Utente u : utenti)
 		{
-			if(utente1.equals(utente))
-				return utente1.getId_utente();
+			if(u.equals(utente))
+				return u.getId_utente();
 		}
 		return null;
 	}
@@ -741,10 +748,11 @@ public class DataBase
 	}
 	
 	
-	public Timestamp creaTimestamp(Calendar cal)
-	{	
-	      LocalDateTime ldt = LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
-	      return Timestamp.valueOf(ldt);
+	public Timestamp creaTimestamp(Calendar c) {	
+	     //LocalDateTime ldt = LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
+		if (c==null) return null; else return new Timestamp (c.getTimeInMillis());
+	    //LocalDateTime ldt = LocalDateTime.of(c.get(Calendar.YEAR), c.get(Calendar.MONTH)+1, c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
+	    //return Timestamp.valueOf(ldt);
 	}
 
 
@@ -772,12 +780,5 @@ public class DataBase
 		default : return null;
 		}
 	}
-	
-
-	public ArrayList<Evento> getEventi() {return eventi;}
-
-	
-	public ArrayList<Utente> getUtenti() {return utenti;}	
-
 }
 

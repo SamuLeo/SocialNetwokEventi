@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
 import javax.swing.JButton;
@@ -84,8 +85,7 @@ public class PannelloNotifiche extends JPanel {
 			if (titolo==null) {titolo = new JLabel(n.getTitolo()); this.add(titolo);}
 			titolo.setFont(testoBottoni);
 			titolo.setBounds(w/10, 15, (int)(w*0.7), altezzaStringhe/5*6);
-			Calendar dataOra= n.getData();
-			if (data==null) {data = new JLabel(""+dataOra.getTime().getDay() + '/'+ dataOra.getTime().getMonth() + '/' + (dataOra.getTime().getYear()+1900)+ ' ' + dataOra.getTime().getHours() + '.'+ dataOra.getTime().getMinutes()); this.add(data);}
+			if (data==null) {data = new JLabel(DateFormat.getInstance().format(n.getData().getTime())); this.add(data);}
 			data.setFont(testo);
 			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.8), altezzaStringhe);
 			if (contenuto==null) {contenuto=new JLabel("<HTML>" + n.getContenuto() + "</HTML>"); this.add(contenuto);}
@@ -95,7 +95,7 @@ public class PannelloNotifiche extends JPanel {
 			elimina.setFont(testoBottoni);
 			elimina.setBackground(sfondo);
 			elimina.setBorderPainted(false);
-			elimina.setBounds(w/5*4, 15, altezzaStringhe/5*7, altezzaStringhe/5*7);
+			elimina.setBounds(w/5*4, 15, altezzaStringhe/5*8, altezzaStringhe/5*8);
 		}
 		
 		private int calcolaY() {
