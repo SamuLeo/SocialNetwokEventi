@@ -29,7 +29,7 @@ public class Login extends JPanel {
 		setLayout(null);
 		this.setBackground(coloreSfondo);
 		JLabel img;
-		try {img = new JLabel(new ImageIcon(ImageIO.read(new File("IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
+		try {img = new JLabel(new ImageIcon(ImageIO.read(new File("Dati\\IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
 		} catch (IOException e) {e.printStackTrace();img =new JLabel();}
 		JButton accedi = new JButton("Accedi"), nuovoUt = new JButton("Registrati");
 		utente = new JTextField(); password = new JPasswordField();

@@ -1,47 +1,42 @@
 package it.unibs.dii.isw.socialNetworkEventi.view;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.Calendar;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import java.awt.event.ItemListener;
-import java.util.Calendar;
-import java.awt.event.ItemEvent;
-
 public class CreazioneEvento extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final String categoriaPartita = "Partita di calcio";
-	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti", "Luogo", "Durata", "Quota individuale", "Compreso nella quota", "Note"};
+	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti", "Luogo", "Quota individuale", "Compreso nella quota", "Note"};
 	private static final String[] nomeCampiPartitaDiCalcio = {"Eta minima", "Eta massima", "Sesso"};
 	private static final String[] nomeCampiComuniData = {"Termine ultimo di iscrizione", "Data inizio", "Data conclusiva",};
-	private static final String[] nomeCampiComuniOra = {"Ora inizio", "Ora conclusiva"};
+	private static final String[] nomeCampiComuniOra = {"Ora termine iscrizioni", "Ora inizio", "Ora conclusiva"};
 	private static final String[] GMA = {"G", "M", "A"};
 	private static final String[] MO = {"h", "m"};
-	JComboBox<String> comboBox = new JComboBox<>(), sesso;
-	JLabel lblCategorie = new JLabel("Categoria");
-	JLabel[] campiComuni = new JLabel[nomeCampiComuni.length];
-	JTextField[] testoCampiComuni = new JTextField[nomeCampiComuni.length];
-	JLabel[] campiComuniData = new JLabel[nomeCampiComuniData.length];
-	JTextField[][] testoCampiComuniData = new JTextField[3][3];
-	JLabel[][] giornoMeseAnno = new JLabel[3][3];
-	JLabel[] campiComuniOra = new JLabel[nomeCampiComuniOra.length];
-	JLabel[][] oreMinuti = new JLabel[2][2];
-	JTextField[][] testoCampiComuniOra = new JTextField[2][2];
-	JLabel[] campiPartitaCalcio;
-	JTextField[] testoCampiPartitaCalcio;
-	int [][] data_ora_campi = new int[3][5];
 	public static final int cordinataX = 35;
 	private Font testo;
 	private int X=0, Y=0;
+	JComboBox<String> comboBox = new JComboBox<>(), sesso;
+	JLabel lblCategorie = new JLabel("Categoria");
+	
+	JLabel[] campiComuni = new JLabel[nomeCampiComuni.length];
+	JTextField[] testoCampiComuni = new JTextField[nomeCampiComuni.length];
+	
+	JLabel[] campiComuniData = new JLabel[nomeCampiComuniData.length];
+	JTextField[][] testoCampiComuniData = new JTextField[nomeCampiComuniData.length][3];
+	JLabel[][] giornoMeseAnno = new JLabel[nomeCampiComuniData.length][3];
+	
+	JLabel[] campiComuniOra = new JLabel[nomeCampiComuniOra.length];
+	JLabel[][] oreMinuti = new JLabel[nomeCampiComuniOra.length][2];
+	JTextField[][] testoCampiComuniOra = new JTextField[nomeCampiComuniOra.length][2];
+	
+	JLabel[] campiPartitaCalcio;
+	JTextField[] testoCampiPartitaCalcio;
 	
 	/**
 	 * @param testo Font usato per il testo
@@ -224,24 +219,25 @@ public class CreazioneEvento extends JPanel {
 						Integer.parseInt(testoCampiComuniData[0][2].getText()),
 						Integer.parseInt(testoCampiComuniData[0][1].getText())-1,
 						Integer.parseInt(testoCampiComuniData[0][0].getText()),
-						0,0);
+						Integer.parseInt(testoCampiComuniOra[0][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[0][1].getText()));
 				dataInizioEvento = Calendar.getInstance();
 				dataInizioEvento.set(
 						Integer.parseInt(testoCampiComuniData[1][2].getText()),
 						Integer.parseInt(testoCampiComuniData[1][1].getText())-1,
 						Integer.parseInt(testoCampiComuniData[1][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[0][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[0][1].getText()));
+						Integer.parseInt(testoCampiComuniOra[1][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[1][1].getText()));
 				
 				//Questo parametro è opzionale percui si compila solo se è presente
-				if (!testoCampiComuniData[2][2].getText().equals("") || !testoCampiComuniData[2][1].getText().equals("") || !testoCampiComuniData[2][0].getText().equals("") || !testoCampiComuniOra[1][1].getText().equals("") || !testoCampiComuniOra[1][0].getText().equals("")) {
+				if (!testoCampiComuniData[2][2].getText().equals("") || !testoCampiComuniData[2][1].getText().equals("") || !testoCampiComuniData[2][0].getText().equals("") || !testoCampiComuniOra[2][1].getText().equals("") || !testoCampiComuniOra[2][0].getText().equals("")) {
 					dataFineEvento = Calendar.getInstance();
 					dataFineEvento.set(
 							Integer.parseInt(testoCampiComuniData[2][2].getText()),
 							Integer.parseInt(testoCampiComuniData[2][1].getText())-1,
 							Integer.parseInt(testoCampiComuniData[2][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[1][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[1][1].getText()));
+							Integer.parseInt(testoCampiComuniOra[2][0].getText()),
+							Integer.parseInt(testoCampiComuniOra[2][1].getText()));
 				}
 				System.out.println("Termine iscrizioni: " + termineIscrizione.getTime() + "\nInizio: " + dataInizioEvento.getTime());
 				e = new PartitaCalcio(
@@ -250,10 +246,10 @@ public class CreazioneEvento extends JPanel {
 /*Ob.	Data FINE ISCR*/termineIscrizione,
 /*Ob.	Data-ora iniz*/	dataInizioEvento,
 /*Ob.	Partecip.*/		Integer.parseInt(testoCampiComuni[1].getText()),
-/*Ob.	COSTO*/			Integer.parseInt(testoCampiComuni[4].getText()),
+/*Ob.	COSTO*/			Integer.parseInt(testoCampiComuni[3].getText()),
 /*Opz.	TITOLO*/		(testoCampiComuni[0].getText().equals("")? "Evento anonimo" : testoCampiComuni[0].getText()),
-/*Opz.	NOTE*/			testoCampiComuni[6].getText(),
-/*Opz.	COMPRESO*/		testoCampiComuni[5].getText(),
+/*Opz.	NOTE*/			testoCampiComuni[5].getText(),
+/*Opz.	COMPRESO*/		testoCampiComuni[4].getText(),
 /*Opz.	Data-ora FINE*/	dataFineEvento,
 /*Ob.	ETA MIN*/		Integer.parseInt(testoCampiPartitaCalcio[0].getText()),
 /*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),

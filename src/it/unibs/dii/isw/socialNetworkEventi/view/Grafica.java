@@ -2,12 +2,9 @@ package it.unibs.dii.isw.socialNetworkEventi.view;
 
 
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
-import java.util.LinkedList;
 
 import javax.swing.*;
 
@@ -16,7 +13,6 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.Notifica;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
-import it.unibs.dii.isw.socialNetworkEventi.view.PannelloNotifiche.CardNotifica;
 
 public class Grafica {
 	private static Grafica me;
@@ -123,7 +119,7 @@ public class Grafica {
 		//Se la Bacheca è già in mostra, va solo aggiornata
 		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
 		//Riconfigurazione del Frame
-		frame.setTitle("Bacheca @" + Sessione.getUtente_corrente().getNome());
+		frame.setTitle("Bacheca di @" + Sessione.getUtente_corrente().getNome());
 		svuotaFrame();
 		frame.getContentPane().add(toolbarBacheca, BorderLayout.NORTH);
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
