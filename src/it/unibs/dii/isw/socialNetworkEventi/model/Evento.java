@@ -8,7 +8,7 @@ public abstract class Evento {
 	
 	private int id_evento;
 	private Utente utente_creatore;
-	private StatoEvento stato; 
+	private StatoEvento stato = StatoEvento.VALIDA;
 	
 	private HashMap<NomeCampi, Campo> campi;
 	private LinkedList<Utente> fruitori;
@@ -43,9 +43,7 @@ public abstract class Evento {
 		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
 		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
 		this.setUtenteCreatore(creatore);
-		fruitori.add(creatore);
-		
-		stato = StatoEvento.VALIDA;
+		fruitori.add(creatore);		
 	}
 	
 	/*

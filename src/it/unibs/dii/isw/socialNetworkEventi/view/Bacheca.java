@@ -61,7 +61,7 @@ public class Bacheca extends JPanel {
 		int w, altezzaStringhe;
 		Font testo, testoBottoni;
 		JLabel data, ora, sesso, capienza;
-		JButton titolo;
+		JButton bottone_titolo = null;
 		AnelloNumerico anello;
 		
 		cardEvento (Evento e, int w, Font testoBottoni, Font testo, int altezzaStringhe) {
@@ -81,25 +81,30 @@ public class Bacheca extends JPanel {
 			g.fillRoundRect(0, 0, w, 80+altezzaStringhe/5*21, Math.min(Math.max(w/10, 20),80), Math.min(Math.max(w/10, 20),80));
 			g.setColor(Color.black);
 			//Titolo dell'evento
-			if (titolo==null) {titolo = new JButton((String)(e.getCampo(NomeCampi.TITOLO).getContenuto())); this.add(titolo);}
-			titolo.setBorderPainted(false);
-			titolo.addActionListener(event -> Grafica.getIstance().visualizzaEvento(e));
-			titolo.setBackground(sfondoCard);
-			titolo.setHorizontalAlignment(SwingConstants.LEFT);
-			titolo.setFont(testoBottoni);
-			titolo.setBounds(w/10, 15, (int)(w*0.8), altezzaStringhe/5*6);
+			if (bottone_titolo == null) 
+			{
+				String titolo = (e.getCampo(NomeCampi.TITOLO)) != null ? (String)(e.getCampo(NomeCampi.TITOLO).getContenuto()) : "Evento senza nome";
+				bottone_titolo = new JButton(titolo);
+				this.add(bottone_titolo);
+			}
+			bottone_titolo.setBorderPainted(false);
+			bottone_titolo.addActionListener(event -> Grafica.getIstance().visualizzaEvento(e));
+			bottone_titolo.setBackground(sfondoCard);
+			bottone_titolo.setHorizontalAlignment(SwingConstants.LEFT);
+			bottone_titolo.setFont(testoBottoni);
+			bottone_titolo.setBounds(w/10, 15, (int)(w*0.8), altezzaStringhe/5*6);
 			//Data ed ora dell'evento
 			Calendar dataOra = (Calendar)(e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto());
 			if (data==null) {data = new JLabel("Data: " + dataOra.getTime().getDate() + '/'+ (dataOra.getTime().getMonth()+1) + '/' + (dataOra.getTime().getYear()+1900)); this.add(data);}
 			data.setFont(testo);
-			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.6), altezzaStringhe);
+			data.setBounds(w/9, 30+bottone_titolo.getHeight(), (int)(w*0.6), altezzaStringhe);
 			if (ora==null) {ora = new JLabel("Orario: " + '\t' + (dataOra.getTime().getHours()) + '.'+ dataOra.getTime().getMinutes()); this.add(ora);}
 			ora.setFont(testo);
-			ora.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
+			ora.setBounds(w/9, 40+bottone_titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
 			//Sesso dei partecipanti alla partita
 			if (sesso==null) {sesso = new JLabel("Sesso: " + e.getCampi().get(NomeCampi.GENERE).getContenuto()); this.add(sesso);}
 			sesso.setFont(testo);
-			sesso.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
+			sesso.setBounds(w/9, 50+bottone_titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
 			//Anello di visualizzazione degli iscritti
 			if (anello==null) {
 				int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();

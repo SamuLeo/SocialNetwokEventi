@@ -48,13 +48,14 @@ public class DataBase
 		return con;
 	}
 	
-	
+
 	public void refreshDatiRAM() throws SQLException
 	{
 		utenti = selectUtentiAll();
 		eventi = selectEventiAll();
 	}
 
+	
 /*
  * 
  * OPERAZIONI C.R.U.D. SU DB MYSQL
@@ -62,12 +63,12 @@ public class DataBase
  */
 	
 
-	
-	
+		
 /*
  * CREATE : OPERAZIONI DI INSERT	
  */
 		
+	
 	public Evento insertEvento(Evento evento) throws SQLException
 	{
 		switch(evento.getClass().getSimpleName())
@@ -86,8 +87,7 @@ public class DataBase
 				String note										= (String)( evento.getCampo(NomeCampi.NOTE) != null ? evento.getCampo(NomeCampi.NOTE).getContenuto() : null);
 				String benefici_quota							= (String)( evento.getCampo(NomeCampi.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto() : null);
 				Calendar data_ora_termine_evento				= evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto() : null;
-				String stato									= evento.getStato().getCodNomeCampi();
-			   
+				
 				int eta_minima									= (Integer) evento.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
 			    int eta_massima									= (Integer) evento.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
 			    String genere									= (String) evento.getCampo(NomeCampi.GENERE).getContenuto();
@@ -111,7 +111,7 @@ public class DataBase
 				ps.setString(8, note);
 				ps.setString(9, benefici_quota);
 				ps.setTimestamp(10, this.creaTimestamp(data_ora_termine_evento));
-				ps.setString(11, stato);				
+				ps.setString(11, StatoEvento.APERTA.getCodNomeCampi());				
 				ps.setInt(12, eta_minima);
 				ps.setInt(13, eta_massima);
 				ps.setString(14, (String)genere);
@@ -239,7 +239,6 @@ public class DataBase
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
 			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
 		}
-		this.deletePartita(id_partita);
 	}
 
 	
@@ -272,7 +271,6 @@ public class DataBase
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
 			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
 		}
-		this.deletePartita(id_partita);
 	}
 	
 	
@@ -289,7 +287,6 @@ public class DataBase
 				}
 			default : break;
 		}
-	
 	}
 	
 	
@@ -308,9 +305,13 @@ public class DataBase
 	}
 	
 	
+	
+	
 /*
  * READ : OPERAZIONI DI SELECT
  */
+	
+	
 	
 	public ArrayList<Evento> selectEventiAll() throws SQLException
 	{
@@ -380,6 +381,7 @@ public class DataBase
 		
 		return eventi;
 	}
+
 	
 	public PartitaCalcio selectPartitaCalcio(int id) {
 		for (Evento e : eventi) {
@@ -387,78 +389,8 @@ public class DataBase
 		}
 		return null;
 	}
-	//Credo sia il caso di limitare le operazioni sul DB solo agli eventi di scrittura. Altrimenti mi sfugge il senso di tenere una copia in RAM
-	//Perlomeno fintanto che questa architettura DB è così fragile
-	
-	/*public PartitaCalcio selectPartitaCalcio(int  id_partita_calcio) throws SQLException
-	{
-
-		PartitaCalcio partita;
-		
-		String sql = "SELECT id, "
-				+ " id_creatore,"
-				+ " luogo, "
-				+ " data_ora_termine_ultimo_iscrizione, "
-				+ " data_ora_inizio_evento, "
-				+ " partecipanti,"
-				+ " costo,"
-				+ " titolo,"
-				+ " note,"
-				+ " benefici_quota,"
-				+ " data_ora_termine_evento,"
-				+ " stato,"
-				+ " eta_minima,"
-				+ " eta_massima,"
-				+ " genere"
-				+ " FROM partita_calcio WHERE id LIKE ?";
 
 
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setInt(1, id_partita_calcio);
-		
-		ResultSet rs = ps.executeQuery();
-		
-		rs.beforeFirst();
-		
-		if(rs.next())
-		{
-			Calendar data_termine = Calendar.getInstance(); data_termine.setTimeInMillis(rs.getTimestamp(4).getTime());
-			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
-			Calendar data_fine = Calendar.getInstance(); 
-			if (rs.getTimestamp(11) != null) data_fine.setTimeInMillis(rs.getTimestamp(11).getTime()); else data_fine=null;
-			Utente creatore = selectUtente(rs.getInt(2));
-			String string_stato = rs.getString(12);
-
-			
-			 partita = new PartitaCalcio(
-					rs.getInt(1),
-					creatore,
-					rs.getString(3),
-					data_termine,
-					data_inizio,
-					(Integer)rs.getInt(6),
-					(Integer)rs.getInt(7), 
-					rs.getString(8),
-					rs.getString(9),
-					rs.getString(10),
-					data_fine,
-					convertiStringInStato(string_stato),
-					(Integer)rs.getInt(13),
-					(Integer)rs.getInt(14),
-					(String)rs.getString(15));
-
-			eventi.add(partita);	// <----- eh?
-		}
-		else
-			return null;
-		
-		partita.setFruitori(selectUtentiDiPartita(partita.getId()));
-		
-		return partita;
-
-	}*/
-
-	
 	public ArrayList<Utente> selectUtentiAll() throws SQLException
 	{
 		ArrayList<Utente> utenti = new ArrayList<>();
@@ -479,6 +411,7 @@ public class DataBase
 		
 		return utenti;
 	}
+
 	
 	public Utente selectUtente(int id) {
 		for (Utente u : utenti) {
@@ -486,22 +419,8 @@ public class DataBase
 		}
 		return null;
 	}
-	//Stesso motivo di sopra
-	/*public Utente selectUtente(int id_utente) throws SQLException
-	{
-		String sql = "SELECT id, nome, password FROM utente WHERE id=" + id_utente;
+
 		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		
-		ResultSet rs = ps.executeQuery();
-		
-		rs.beforeFirst();
-		
-		if(rs.next()) return new Utente(rs.getInt(1), rs.getString(2), rs.getString(3));
-		else return null;
-	}*/
-	
-	
 	public Notifica selectNotifica(int id_notifica) throws SQLException
 	{		
 		String sql = "SELECT titolo, contenuto, data FROM notifica WHERE id=?";
@@ -546,7 +465,7 @@ public class DataBase
 		return notifiche;
 	}
 	
-	//Meh
+	
 	public LinkedList<PartitaCalcio> selectPartiteDiUtente(Utente utente) throws SQLException
 	{
 		LinkedList<PartitaCalcio> partite = new LinkedList<>();
@@ -567,6 +486,7 @@ public class DataBase
 		
 		return partite;
 	}
+	
 	
 	public LinkedList<Utente> selectUtentiDiPartita(int id_partita) throws SQLException
 	{
@@ -610,11 +530,11 @@ public class DataBase
 	
 
 	
-	
-	
 /*
  * UPDATE : OPERAZIONI DI AGGIORNAMENTO	
  */
+	
+	
 	
 	public void updateStatoPartitaCalcio(Evento evento) throws SQLException
 	{
@@ -640,7 +560,9 @@ public class DataBase
 /*
  * DELETE : OPERAZIONI DI DELETE	
  */
-		
+	
+	
+	
 	public void deletePartita(int id_partita) throws SQLException
 	{
 		String sql = "DELETE FROM partita_calcio WHERE id = ?" ;
@@ -717,6 +639,7 @@ public class DataBase
  */
 	
 	
+	
 	public Integer existUtente(Utente utente) throws SQLException
 	{
 		utenti = selectUtentiAll();
@@ -748,11 +671,9 @@ public class DataBase
 	}
 	
 	
-	public Timestamp creaTimestamp(Calendar c) {	
-	     //LocalDateTime ldt = LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
+	public Timestamp creaTimestamp(Calendar c) 
+	{	
 		if (c==null) return null; else return new Timestamp (c.getTimeInMillis());
-	    //LocalDateTime ldt = LocalDateTime.of(c.get(Calendar.YEAR), c.get(Calendar.MONTH)+1, c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
-	    //return Timestamp.valueOf(ldt);
 	}
 
 

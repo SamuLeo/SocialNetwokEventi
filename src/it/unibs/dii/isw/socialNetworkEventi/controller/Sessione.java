@@ -21,14 +21,8 @@ public class Sessione
 	private static Utente utente_corrente;
 	private static DataBase db;
 	
-	public static void main(String[] args) {
-		/*Calendar c = Calendar.getInstance();
-		c.set(2019, 2, 31, 1, 1);
-		System.out.println(c.getTime());
-		System.out.println(Calendar.getInstance().getTime());
-		Timestamp t = new Timestamp (Calendar.getInstance().getTimeInMillis());
-		c.setTimeInMillis(t.getTime());
-		System.out.println(c.getTime());*/
+	public static void main(String[] args) 
+	{
 		connettiDB();
 		
 		Grafica.getIstance().crea();
@@ -50,12 +44,8 @@ public class Sessione
 		{
 			e.printStackTrace();
 		}
-		catch(IllegalArgumentException e)
-		{
-//			gestire caso in cui all'apertura eventi sono scaduti
-			
-		}
 	}
+
 	
 	public static Runnable aggiornatore = new Runnable() {
 		public void run(){	
@@ -91,11 +81,16 @@ public class Sessione
 	 * @return true se lo stato cambia
 	 * @throws SQLException 
 	 */
-	public static boolean controllaStatoEvento(Evento evento) throws SQLException {
+	public static boolean controllaStatoEvento(Evento evento) throws SQLException 
+	{
 		boolean DataChiusuraIscrizioniNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()) < 0;
 		boolean DataFineEventoNelFuturo;
-		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
-		else DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		
+		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) 
+			DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
+		else 
+			DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		
 		StatoEvento statoEvento = evento.getStato();
 		
 		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")))

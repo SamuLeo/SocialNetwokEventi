@@ -14,7 +14,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
-public class Login extends JPanel {
+public class Login extends JPanel 
+{
+	private static String operatingSystem = System.getProperty("os.name").toLowerCase();
+
 	static final Color coloreBottoni = new Color(255,255,255);
 	static final Color coloreSfondo = new Color(250,250,250);
 	private static final long serialVersionUID = 1L;
@@ -25,12 +28,30 @@ public class Login extends JPanel {
 	private final ActionListener accediLambda = e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword()));
 	private final ActionListener creaUtLambda = e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword()));
 	
-	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) {
+	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
+	{
 		setLayout(null);
 		this.setBackground(coloreSfondo);
 		JLabel img;
-		try {img = new JLabel(new ImageIcon(ImageIO.read(new File("Dati\\IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
-		} catch (IOException e) {e.printStackTrace();img =new JLabel();}
+		
+		try {
+			if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0)
+			img = new JLabel(
+					new ImageIcon(ImageIO.read(
+							new File("Dati//IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
+			else if(operatingSystem.indexOf("win") >= 0)
+				img = new JLabel(
+						new ImageIcon(ImageIO.read(
+								new File("Dati\\IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
+			else
+				img = new JLabel();
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+			img =new JLabel();
+		}
+		
 		JButton accedi = new JButton("Accedi"), nuovoUt = new JButton("Registrati");
 		utente = new JTextField(); password = new JPasswordField();
 		JLabel utlabel = new JLabel("Utente: "), pswdlabel = new JLabel("Password: ");
