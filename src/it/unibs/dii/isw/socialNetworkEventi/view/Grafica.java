@@ -116,8 +116,6 @@ public class Grafica {
 	}
 	
 	public void visualizzaBacheca() {
-		//Se la Bacheca è già in mostra, va solo aggiornata
-		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
 		//Riconfigurazione del Frame
 		frame.setTitle("Bacheca di @" + Sessione.getUtente_corrente().getNome());
 		svuotaFrame();
@@ -129,6 +127,8 @@ public class Grafica {
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(true);
 		//Creazione pannello principale
+		//Se la Bacheca è già in mostra, va solo aggiornata
+		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
 		//JOptionPane.showMessageDialog(null, "Frame: " + frame.getWidth() + " C.P.: " + frame.getContentPane().getWidth() + " Pannello: " +pannelloCentrale.getWidth(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
 		bacheca = new Bacheca(Sessione.getEventi(), frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
@@ -243,7 +243,15 @@ public class Grafica {
 		else loginPane.ripulisci();
 	}
 	void aggiungiEvento(Evento e) {
-		if (Sessione.aggiungiEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
+		if (Sessione.aggiungiEvento(e)) {
+			visualizzaBacheca();
+			try {barraForm.remove(btnConfermaCreazioneEvento);} catch (Exception ekkhh) {}
+			btnConfermaCreazioneEvento = new JButton(" ✔ Conferma");
+			btnConfermaCreazioneEvento.setFont(fontTestoBottoni);
+			btnConfermaCreazioneEvento.setBackground(coloreBottoni);
+			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
+		}	
+		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
 	}
 	void eliminaEvento (Evento e) {
 		if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);

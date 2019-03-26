@@ -204,7 +204,7 @@ public class DataBase
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
 		rs.next();
-		refreshDatiRAM();
+
 		return rs.getInt(1);
 	}
 	
@@ -282,7 +282,7 @@ public class DataBase
 		{
 			case "PartitaCalcio" : 
 				{
-					segnalaConclusionePartitaCalcio(evento.getId(), titolo_evento);
+					segnalaChiusuraPartitaCalcio(evento.getId(), titolo_evento);
 					break;
 				}
 			default : break;

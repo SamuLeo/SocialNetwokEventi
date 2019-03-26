@@ -258,7 +258,13 @@ public class CreazioneEvento extends JPanel {
 				System.out.println("Creata una partita di calcio con successo: ora salvo");
 				Grafica.getIstance().aggiungiEvento(e);
 			}
-		} catch(NumberFormatException e) {e.printStackTrace(); JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}
-		catch (Exception e) {JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); return;}
+		} 
+		catch(NumberFormatException e) 
+		{e.printStackTrace(); 
+		JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
+		return;}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
+			return;}
 	}
 }

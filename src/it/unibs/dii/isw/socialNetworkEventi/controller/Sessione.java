@@ -265,12 +265,12 @@ public class Sessione
 						return;
 					}	
 					//se il giocatore occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-					if(partita.getNumeroPartecipanti() == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
+					if(db.getNumeroUtentiDiEvento(partita) == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
 					{
 						db.collegaUtentePartita(utente_corrente, partita);
 						db.segnalaChiusuraEvento(partita);
 					}
-					else if (partita.getNumeroPartecipanti() < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
+					else if (db.getNumeroUtentiDiEvento(partita) < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
 						db.collegaUtentePartita(utente_corrente, partita);
 					else
 						return;
