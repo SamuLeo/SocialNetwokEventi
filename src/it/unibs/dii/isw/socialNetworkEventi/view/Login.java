@@ -14,10 +14,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
-public class Login extends JPanel 
-{
-	private static String operatingSystem = System.getProperty("os.name").toLowerCase();
-
+public class Login extends JPanel {
 	static final Color coloreBottoni = new Color(255,255,255);
 	static final Color coloreSfondo = new Color(250,250,250);
 	private static final long serialVersionUID = 1L;
@@ -33,25 +30,14 @@ public class Login extends JPanel
 		setLayout(null);
 		this.setBackground(coloreSfondo);
 		JLabel img;
-		
-		try {
-			if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0)
-			img = new JLabel(
-					new ImageIcon(ImageIO.read(
-							new File("Dati//IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
-			else if(operatingSystem.indexOf("win") >= 0)
-				img = new JLabel(
-						new ImageIcon(ImageIO.read(
-								new File("Dati\\IconaPiccola.png")).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
-			else
-				img = new JLabel();
-		}
-		catch (IOException e) 
-		{
+		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//IconaPiccola.png";
+		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\IconaPiccola.png";
+		try { img = new JLabel(new ImageIcon(ImageIO.read(new File(percorso)).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
+		} catch (IOException e) {
 			e.printStackTrace();
 			img =new JLabel();
 		}
-		
 		JButton accedi = new JButton("Accedi"), nuovoUt = new JButton("Registrati");
 		utente = new JTextField(); password = new JPasswordField();
 		JLabel utlabel = new JLabel("Utente: "), pswdlabel = new JLabel("Password: ");

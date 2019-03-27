@@ -6,35 +6,40 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
-import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 
 public class Bacheca extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private static final Color sfondoCard = new Color(220,220,220), sfondoAnello = new Color(200,200,200), sfondo = new Color(240,240,240);
+	private static final Color sfondoCard = new Color(220,220,220), sfondo = new Color(240,240,240);
 	private cardEvento[] cards;
+	@SuppressWarnings("unused")
 	private int X=0, Y=0;
 	
 	Bacheca(ArrayList<Evento> eventi, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
 	{
 		super();
 		setLayout(null);
+		eventi=new ArrayList<> (eventi.stream().filter(evento -> evento.getStato().compareTo(StatoEvento.APERTA)==0).collect(Collectors.toList()));
 		cards = new cardEvento[eventi.size()];
 		
 		for (int i=0; i<eventi.size(); i++) 
 		{
-			cards[i]=new cardEvento(eventi.get(i), larghezza-60, testoBottoni, testo, altezzaStringhe);
-			cards[i].setBounds(20, 20*(i+1)+(80+altezzaStringhe/5*21)*i, larghezza-60, 80+altezzaStringhe/5*21);
-			this.add(cards[i]);
+			if (eventi.get(i).getStato().compareTo(StatoEvento.APERTA)==0) {
+				cards[i]=new cardEvento(eventi.get(i), larghezza-60, testoBottoni, testo, altezzaStringhe);
+				cards[i].setBounds(20, 20*(i+1)+(80+altezzaStringhe/5*21)*i, larghezza-60, 80+altezzaStringhe/5*21);
+				this.add(cards[i]);
+				continue;
+			}
 		}
 		
 		X=larghezza; Y= 20*(cards.length+1)+(80+altezzaStringhe/5*21)*cards.length;

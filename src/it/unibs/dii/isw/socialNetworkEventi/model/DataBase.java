@@ -300,7 +300,6 @@ public class DataBase
 		for(Utente utente : list_utenti)
 		{
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
-			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
 		}
 	}
 	
@@ -350,35 +349,32 @@ public class DataBase
 			System.out.println("Termine di " + titolo_evento + " " + data_termine.getTime());
 			if (rs.getTimestamp(11) != null) data_fine.setTimeInMillis(rs.getTimestamp(11).getTime()); else data_fine=null;
 			
-			if(Calendar.getInstance().compareTo(data_termine) > 0) {
+			if(Calendar.getInstance().compareTo(data_termine) > 0)
 				segnalaFallimentoPartitaCalcio(id_partita, titolo_evento);
-				deletePartita(rs.getInt(1));
-			} else {
-				Utente creatore = selectUtente(rs.getInt(2));
-				String string_stato = rs.getString(12);
+				//deletePartita(rs.getInt(1));
+			Utente creatore = selectUtente(rs.getInt(2));
+			String string_stato = rs.getString(12);
 
-				PartitaCalcio partita = new PartitaCalcio(
-						id_partita,
-						creatore,
-						rs.getString(3),
-						data_termine,
-						data_inizio,
-						(Integer)rs.getInt(6),
-						(Integer)rs.getInt(7), 
-						titolo_evento,
-						rs.getString(9),
-						rs.getString(10),
-						data_fine,
-						convertiStringInStato(string_stato),
-						(Integer)rs.getInt(13),
-						(Integer)rs.getInt(14),
-						(String)rs.getString(15));
+			PartitaCalcio partita = new PartitaCalcio(
+					id_partita,
+					creatore,
+					rs.getString(3),
+					data_termine,
+					data_inizio,
+					(Integer)rs.getInt(6),
+					(Integer)rs.getInt(7), 
+					titolo_evento,
+					rs.getString(9),
+					rs.getString(10),
+					data_fine,
+					convertiStringInStato(string_stato),
+					(Integer)rs.getInt(13),
+					(Integer)rs.getInt(14),
+					(String)rs.getString(15));
 
 				partita.setFruitori(selectUtentiDiPartita(partita.getId()));
 				eventi.add(partita);
-			}
 		}
-		
 		return eventi;
 	}
 
@@ -546,6 +542,7 @@ public class DataBase
 				PreparedStatement ps = getConnection().prepareStatement(sql);
 				ps.setString(1, evento.getStato().getCodNomeCampi());
 				ps.setInt(2, evento.getId());
+				ps.executeUpdate();
 				refreshDatiRAM();
 				break;
 			}

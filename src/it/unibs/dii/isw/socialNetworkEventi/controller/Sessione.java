@@ -1,7 +1,6 @@
 package it.unibs.dii.isw.socialNetworkEventi.controller;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Timer;
@@ -44,6 +43,20 @@ public class Sessione
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public static boolean accedi(Utente utente) {
+		 try {
+			 Integer id_utente = db.existUtente(utente);
+			 if(id_utente != null) {
+				 utente.setId_utente(id_utente);
+				 utente_corrente = utente;
+				 return true;
+			 }
+			 else return false;
+		} 
+		catch (SQLException e) {e.printStackTrace();}
+		return false;
 	}
 
 	
@@ -95,7 +108,7 @@ public class Sessione
 		
 		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")))
 		{
-			evento.setStato(StatoEvento.FALLITA);			
+			evento.setStato(StatoEvento.FALLITA);
 			return true;
 		}
 		else if(DataFineEventoNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Chiusa")))
@@ -189,25 +202,6 @@ public class Sessione
 	}
 	
 	
-	public static boolean accedi(Utente utente)
-	{
-		 try 
-		 {
-			 Integer id_utente = db.existUtente(utente);
-			if(id_utente != null)
-			 {
-				utente.setId_utente(id_utente);
-				utente_corrente = utente;
-				 return true;
-			 }
-			 else
-				 return false;
-		} 
-		 catch (SQLException e) {e.printStackTrace();}
-		 return true;
-	}
-	
-	
 	public static LinkedList<Notifica> getNotificheUtente() 
 	{
 		
@@ -269,6 +263,8 @@ public class Sessione
 					{
 						db.collegaUtentePartita(utente_corrente, partita);
 						db.segnalaChiusuraEvento(partita);
+						partita.setStato(StatoEvento.CHIUSA);
+						db.updateStatoPartitaCalcio(partita);
 					}
 					else if (db.getNumeroUtentiDiEvento(partita) < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
 						db.collegaUtentePartita(utente_corrente, partita);

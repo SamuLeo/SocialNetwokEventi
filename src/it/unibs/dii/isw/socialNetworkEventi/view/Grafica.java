@@ -46,10 +46,14 @@ public class Grafica {
 	static final Color coloreBarra = new Color(200,200,200);
 	
 	public void crea() {
+		//Ottenimento icona della finestra
+		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//IconaPiccola.png";
+		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\IconaPiccola.png";
 		//Operazioni iniziali sul Frame e sulle variabili di classe
 			frame = new JFrame();
 			frame.setMinimumSize(new Dimension(screenH/3, (int) (screenH/2.25)));
-			frame.setIconImage(new ImageIcon("IconaPiccola.png").getImage());
+			frame.setIconImage(new ImageIcon(percorso).getImage());
 			frame.setBounds(screenW/2-(int)(screenH/4.4), screenH/2-(int)(screenH/4.4), (int)(screenH/2.2), (int)(screenH/1.8));
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setVisible(true);
@@ -89,7 +93,7 @@ public class Grafica {
 			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
 			barraForm.add(btnAnnullaCreazioneEvento, BorderLayout.EAST);
 			pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+			pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 	}
 	
 	public void svuotaFrame() {
@@ -110,6 +114,7 @@ public class Grafica {
 		frame.setLayout(null);
 		loginPane=new Login(fontTestoBottoni, fontTesto, larghezzaStrPassword , altezzaStringhe, larghezzaCampiUtentePswd);
 		loginPane.setBounds((int)((frame.getContentPane().getWidth()-loginPane.getWidth())/2), (int)((frame.getContentPane().getHeight()-loginPane.getHeight())/2), loginPane.getWidth(), loginPane.getHeight());
+		frame.setMinimumSize(new Dimension(Math.max(screenH/3,loginPane.getWidth()), Math.max((int) (screenH/2.25),loginPane.getHeight())));
 		frame.getContentPane().add(loginPane);
 		loginPane.focus();
 		frame.repaint();
@@ -132,7 +137,7 @@ public class Grafica {
 		//JOptionPane.showMessageDialog(null, "Frame: " + frame.getWidth() + " C.P.: " + frame.getContentPane().getWidth() + " Pannello: " +pannelloCentrale.getWidth(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
 		bacheca = new Bacheca(Sessione.getEventi(), frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
-		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -153,7 +158,7 @@ public class Grafica {
 		//Creazione pannello principale
 		form = new CreazioneEvento(fontTesto, frame.getContentPane().getWidth(), altezzaStringhe);
 		pannelloCentrale = new JScrollPane(form);
-		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -173,7 +178,7 @@ public class Grafica {
 		//Creazione pannello principale
 		pannelloNotifiche=new PannelloNotifiche(Sessione.getNotificheUtente(), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
-		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -194,7 +199,7 @@ public class Grafica {
 		//Creazione pannello principale
 		schedaEvento=new SchedaEvento(e, fontTesto, fontTestoBottoni, altezzaStringhe, frame.getContentPane().getWidth());
 		pannelloCentrale = new JScrollPane(schedaEvento);
-		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -233,10 +238,10 @@ public class Grafica {
 	}
 	
 	void accedi(String utente, String password) {
-		if (Sessione.accedi(new Utente(utente, password))) 
+		if (Sessione.accedi(new Utente(utente, password))) {
+			frame.setMinimumSize(new Dimension(screenH/3, (int) (screenH/2.25)));
 			visualizzaBacheca();
-		else 
-			loginPane.ripulisci();
+		} else loginPane.ripulisci();
 	}
 	void creaUtente(String utente, String password) {
 		if (Sessione.insertUtente(new Utente(utente, password))) visualizzaBacheca();
@@ -269,7 +274,7 @@ public class Grafica {
 		frame.getContentPane().remove(pannelloCentrale);
 		pannelloNotifiche =new PannelloNotifiche(Sessione.eliminaNotificaUtente(n), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
-		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/400);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);

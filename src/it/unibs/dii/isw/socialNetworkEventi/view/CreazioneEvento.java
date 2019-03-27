@@ -52,6 +52,7 @@ public class CreazioneEvento extends JPanel {
 		comboBox.addItem(categoriaPartita);
 		comboBox.setSelectedItem(null);
 		comboBox.setFont(testo);
+		comboBox.addFocusListener(tabList);
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				formCategoria((String)comboBox.getSelectedItem(), X, fontHeight);
@@ -77,6 +78,7 @@ public class CreazioneEvento extends JPanel {
 			campiComuni[i].setBounds(cordinataX, Y+10, frameWidth-100, (int)(fontHeight*1.1));
 			campiComuni[i].setFont(testo);
 			testoCampiComuni[i]= new JTextField();
+			testoCampiComuni[i].addFocusListener(tabList);
 			this.add(testoCampiComuni[i]);
 			testoCampiComuni[i].setBounds(cordinataX, Y+20+(int)(fontHeight*1.1), frameWidth-100, (int)(fontHeight*1.1));
 			testoCampiComuni[i].setFont(testo);
@@ -91,6 +93,7 @@ public class CreazioneEvento extends JPanel {
 			Y+=20+(int)(fontHeight*1.1)*2;
 			for(int j = 0; j < 3; j++) {
 				testoCampiComuniData[i][j]= new JTextField();
+				testoCampiComuniData[i][j].addFocusListener(tabList);
 				this.add(testoCampiComuniData[i][j]);
 				testoCampiComuniData[i][j].setBounds(cordinataX+(j*((frameWidth-100)/3))+(frameWidth-100)/6, Y+10, (frameWidth-100)/6, (int)(fontHeight*1.1));
 				testoCampiComuniData[i][j].setFont(testo);
@@ -109,6 +112,7 @@ public class CreazioneEvento extends JPanel {
 			Y+=20+(int)(fontHeight*1.1)*2;
 			for(int j = 0; j < 2; j++) {
 				testoCampiComuniOra[i][j]= new JTextField();
+				testoCampiComuniOra[i][j].addFocusListener(tabList);
 				this.add(testoCampiComuniOra[i][j]);
 				testoCampiComuniOra[i][j].setBounds(cordinataX+j*((frameWidth-100)/2)+(frameWidth-100)/6, Y+10, (frameWidth-100)/3, (int)(fontHeight*1.1));
 				testoCampiComuniOra[i][j].setFont(testo);
@@ -139,6 +143,7 @@ public class CreazioneEvento extends JPanel {
 				Y+=10+(int)(fontHeight*1.1);
 				if (i<testoCampiPartitaCalcio.length) {
 					testoCampiPartitaCalcio[i]=new JTextField();
+					testoCampiPartitaCalcio[i].addFocusListener(tabList);
 					this.add(testoCampiPartitaCalcio[i]);
 					testoCampiPartitaCalcio[i].setBounds(cordinataX, Y, frameWidth-100, (int)(fontHeight*1.1));
 					testoCampiPartitaCalcio[i].setFont(testo);
@@ -146,6 +151,7 @@ public class CreazioneEvento extends JPanel {
 				}
 			}
 			sesso=new JComboBox<>();
+			sesso.addFocusListener(tabList);
 			sesso.addItem("Maschi"); sesso.addItem("Femmine"); sesso.addItem("Qualsiasi");
 			sesso.setSelectedIndex(2);
 			sesso.setFont(testo);
@@ -201,9 +207,28 @@ public class CreazioneEvento extends JPanel {
 	public int getHeight() {
 		return Y;
 	}
+	
+	FocusListener tabList = new FocusListener() {
+		public void focusGained(FocusEvent ev) {
+			try {
+				int ah = ((JComponent)(ev.getSource())).getY();
+				JScrollBar jscb = Grafica.getIstance().pannelloCentrale.getVerticalScrollBar();
+				if (ah>(jscb.getValue()+jscb.getVisibleAmount())*0.9) {
+					for (int val = jscb.getValue(); val <= ah - jscb.getVisibleAmount()/2; val++)
+						jscb.setValue(val); //Thread.currentThread().sleep(10);
+				}
+				else if (ah < jscb.getValue()*1.1) {
+					for (int val = jscb.getValue(); val >= ah - jscb.getVisibleAmount()/2; val--)
+						jscb.setValue(val);
+				}
+				//System.out.println("min: " + jscb.getMinimum() + " max: " + jscb.getMaximum() + " attuale: " + jscb.getValue() + " visibile: " + jscb.getVisibleAmount());
+			}
+			catch (ClassCastException /*| InterruptedException*/ e) {}
+		}
+		public void focusLost(FocusEvent arg0) {}
+	};
 
-	private void conferma() 
-	{
+	private void conferma() {
 		//Tutti i campi numerici devono essere controllati che contengano un numero
 		//I campi che contengono date devono essere compressi in oggetti Calendar
 		try 

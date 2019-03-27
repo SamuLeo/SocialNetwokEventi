@@ -4,6 +4,7 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import java.util.*;
 
+@SuppressWarnings("rawtypes")
 public abstract class Evento {
 	
 	private int id_evento;
@@ -97,7 +98,21 @@ public abstract class Evento {
 		    StatoEvento stato
 			)
 	{
-		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento);
+		//this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento);
+		campi = new HashMap<>();
+		fruitori = new LinkedList<>();
+		//inserimento dei campi obbligatori nella HashMap dei campi	
+		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
+		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
+		aggiungiCampo(data_ora_inizio_evento, true, NomeCampi.D_O_INIZIO_EVENTO, "Inizio evento");
+		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
+		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
+		setUtenteCreatore(creatore);
+		fruitori.add(creatore);
+		if(titolo != null) aggiungiCampo(titolo, false, NomeCampi.TITOLO, "Titolo evento");
+		if(note != null) aggiungiCampo(note, false, NomeCampi.NOTE, "Note aggiuntive ");			
+		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampi.BENEFICI_QUOTA, "Servizi compresi");						
+		if(data_ora_termine_evento != null)	aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Fine evento");						
 		id_evento= id;
 		this.stato = stato;
 	}
