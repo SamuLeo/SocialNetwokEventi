@@ -3,13 +3,16 @@ package it.unibs.dii.isw.socialNetworkEventi.controller;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.LogManager;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
+import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
@@ -20,9 +23,14 @@ public class Sessione
 	private static Utente utente_corrente;
 	private static DataBase db;
 	
+	private static  String nome_file_log_sessione ;
+	private static Logger logger;
+	
 	public static void main(String[] args) 
 	{
 		connettiDB();
+		
+		creaLogger();
 		
 		Grafica.getIstance().crea();
 		Grafica.getIstance().mostraLogin();		
@@ -43,6 +51,18 @@ public class Sessione
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private static void creaLogger()
+	{
+		String operatingSystem = System.getProperty("os.name").toLowerCase();
+		
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) 
+			nome_file_log_sessione = "Dati//file_log//log_sessione";
+		else if(operatingSystem.indexOf("win") >= 0) 
+			nome_file_log_sessione = "Dati\\file_log\\log_sessione";
+		
+		logger = new Logger(nome_file_log_sessione);
 	}
 	
 	public static boolean accedi(Utente utente) {
@@ -90,7 +110,8 @@ public class Sessione
 	
 	
 	/**
-	 * 
+	 * Questo metodo controlla e in caso aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
+	 * oppure se l'evento ha raggiunto la sua conclusione 
 	 * @return true se lo stato cambia
 	 * @throws SQLException 
 	 */
@@ -109,11 +130,14 @@ public class Sessione
 		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")))
 		{
 			evento.setStato(StatoEvento.FALLITA);
+			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a FALLITO", evento.getId()));
 			return true;
 		}
 		else if(DataFineEventoNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Chiusa")))
 		{
 			evento.setStato(StatoEvento.CONCLUSA);
+			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da CHIUSO a CONCLUSO", evento.getId()));
+
 			return true;
 		}
 		return false;
@@ -126,6 +150,7 @@ public class Sessione
 		{
 			db.insertEvento(evento); 
 			iscrizioneUtenteInEvento(evento);
+			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da VALIDO a APERTO", evento.getId()));
 			return true;
 		}
 		catch(SQLException e) {e.printStackTrace();}
@@ -265,6 +290,7 @@ public class Sessione
 						db.segnalaChiusuraEvento(partita);
 						partita.setStato(StatoEvento.CHIUSA);
 						db.updateStatoPartitaCalcio(partita);
+						logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a CHIUSO", evento.getId()));
 					}
 					else if (db.getNumeroUtentiDiEvento(partita) < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
 						db.collegaUtentePartita(utente_corrente, partita);

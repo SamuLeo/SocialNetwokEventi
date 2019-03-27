@@ -258,13 +258,16 @@ public class Grafica {
 		}	
 		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
 	}
-	void eliminaEvento (Evento e) {
-		if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);
-	}
+	
+//	void eliminaEvento (Evento e) {
+//	if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);
+//}
+
 	void iscriviEvento(Evento e) {
 		Sessione.iscrizioneUtenteInEvento(e);
 		visualizzaBacheca();
 	}
+	
 	void rimuoviIscrizioneEvento(Evento e) {
 		try {Sessione.disiscrizioneUtenteEvento(e);
 			visualizzaBacheca();
