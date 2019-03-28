@@ -156,7 +156,7 @@ public class Grafica {
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(false);
 		//Creazione pannello principale
-		form = new CreazioneEvento(fontTesto, frame.getContentPane().getWidth(), altezzaStringhe);
+		form = new CreazioneEvento(fontTesto, frame.getContentPane().getWidth(), altezzaStringhe, coloreSfondo);
 		pannelloCentrale = new JScrollPane(form);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -258,16 +258,13 @@ public class Grafica {
 		}	
 		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
 	}
-	
-//	void eliminaEvento (Evento e) {
-//	if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);
-//}
-
+	void eliminaEvento (Evento e) {
+		if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);
+	}
 	void iscriviEvento(Evento e) {
 		Sessione.iscrizioneUtenteInEvento(e);
 		visualizzaBacheca();
 	}
-	
 	void rimuoviIscrizioneEvento(Evento e) {
 		try {Sessione.disiscrizioneUtenteEvento(e);
 			visualizzaBacheca();

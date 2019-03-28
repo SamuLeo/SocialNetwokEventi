@@ -2,8 +2,10 @@ package it.unibs.dii.isw.socialNetworkEventi.view;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 import java.util.Calendar;
+import java.util.function.Consumer;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
@@ -28,6 +30,7 @@ public class CreazioneEvento extends JPanel {
 	JTextField[] testoCampiComuni = new JTextField[nomeCampiComuni.length];
 	
 	JLabel[] campiComuniData = new JLabel[nomeCampiComuniData.length];
+	JButton[] campiComuniCALENDARIO = new JButton[nomeCampiComuniData.length];
 	JTextField[][] testoCampiComuniData = new JTextField[nomeCampiComuniData.length][3];
 	JLabel[][] giornoMeseAnno = new JLabel[nomeCampiComuniData.length][3];
 	
@@ -43,10 +46,11 @@ public class CreazioneEvento extends JPanel {
 	 * @param frameWidth Larghezza della finestra (di conseguenza anche del pannello)
 	 * @param fontHeight Parametro che indica l'altezza di una stringa disegnata con il font prestabilito sullo schermo in uso (dpiende dai DPI)
 	 */
-	CreazioneEvento (Font testo, int frameWidth, int fontHeight) {
+	CreazioneEvento (Font testo, int frameWidth, int fontHeight, Color sfondo) {
 		this.testo=testo;
 		X=frameWidth;
 		this.setLayout(null);
+		setBackground(sfondo);
 		comboBox.setBounds(cordinataX, 20+(int)(fontHeight*1.1), frameWidth-100, (int)(fontHeight*1.1));
 		this.add(comboBox);
 		comboBox.addItem(categoriaPartita);
@@ -64,7 +68,8 @@ public class CreazioneEvento extends JPanel {
 		Y=20+(int)(fontHeight*1.1)+(int)(fontHeight*1.1);
 		this.setPreferredSize(new Dimension(frameWidth,Y));
 		Grafica.getIstance().btnConfermaCreazioneEvento.addActionListener(e -> conferma());
-	}	
+		comboBox.setSelectedIndex(0);
+	}
 
 	/**crea i vari componenti dei campi comuni a tutte le attivita
 	 * 
@@ -88,8 +93,17 @@ public class CreazioneEvento extends JPanel {
 		for(int i = 0; i < nomeCampiComuniData.length; i++) {
 			campiComuniData[i]= new JLabel(nomeCampiComuniData[i]);
 			this.add(campiComuniData[i]);
-			campiComuniData[i].setBounds(cordinataX, Y+20+(int)(fontHeight*1.1), frameWidth-100, (int)(fontHeight*1.1));
+			campiComuniData[i].setBounds(cordinataX + (int)(fontHeight*1.1) + 30, Y+20+(int)(fontHeight*1.1), frameWidth-130-(int)(fontHeight*1.1), (int)(fontHeight*1.1));
 			campiComuniData[i].setFont(testo);
+			
+			campiComuniCALENDARIO[i] = new JButton("📅");
+			campiComuniCALENDARIO[i].setFont(testo.deriveFont(testo.getSize()*0.8F));
+			campiComuniCALENDARIO[i].setForeground(new Color(255,50,50));
+			campiComuniCALENDARIO[i].setBorderPainted(false);
+			campiComuniCALENDARIO[i].setBackground(new Color(230,230,230));
+			campiComuniCALENDARIO[i].setBounds(cordinataX, Y+20+(int)(fontHeight*1.1), (int)(fontHeight*1.5), (int)(fontHeight*1.1));
+			this.add(campiComuniCALENDARIO[i]);
+			campiComuniCALENDARIO[i].addActionListener(new RunnableCalendario(i, testo, frameWidth/3*2));
 			Y+=20+(int)(fontHeight*1.1)*2;
 			for(int j = 0; j < 3; j++) {
 				testoCampiComuniData[i][j]= new JTextField();
@@ -292,4 +306,36 @@ public class CreazioneEvento extends JPanel {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
 			return;}
 	}
+}
+
+class RunnableCalendario implements Runnable, ActionListener {
+	int i, lato;
+	Font testo;
+	
+	public RunnableCalendario(int i, Font testo, int lato) {
+		this.i=i;
+		this.testo=testo;
+		this.lato=lato;
+	}
+	
+	public void run() {
+		new Calendario(testo, lato, new ConsumerCalendario(i));
+	}
+	public void actionPerformed(ActionEvent click) {
+		new Calendario(testo, lato, new ConsumerCalendario(i));
+	}
+}
+class ConsumerCalendario implements Consumer<Calendar> {
+	int i;
+	
+	public ConsumerCalendario (int i) {
+		this.i=i;
+	}
+	
+	public void accept(Calendar data) {
+		//System.out.println("Box " + i + ": " + data.get(Calendar.DATE));
+		Grafica.getIstance().form.testoCampiComuniData[i][0].setText("" + data.get(Calendar.DATE));
+		Grafica.getIstance().form.testoCampiComuniData[i][1].setText("" + (data.get(Calendar.MONTH) +1));
+		Grafica.getIstance().form.testoCampiComuniData[i][2].setText("" + data.get(Calendar.YEAR));
+	}	
 }

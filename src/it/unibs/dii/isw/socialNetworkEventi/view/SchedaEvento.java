@@ -39,7 +39,7 @@ public class SchedaEvento extends JPanel {
 		System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
 		if (e.getUtenteCreatore().equals(Sessione.getUtente_corrente())) {
 			iscriviti = new JButton("Elimina evento");
-//			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
+			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
 		} else {
 			if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
 				iscriviti = new JButton("Iscriviti");

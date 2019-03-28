@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -73,7 +72,7 @@ public class PannelloNotifiche extends JPanel {
 			this.n=n;
 			this.w=w;
 		}
-		@SuppressWarnings("deprecation")
+
 		protected void paintComponent(Graphics g) {
 			g.setColor(sfondo);
 			calcolaY();

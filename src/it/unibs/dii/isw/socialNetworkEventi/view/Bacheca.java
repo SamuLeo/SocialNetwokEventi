@@ -111,13 +111,14 @@ public class Bacheca extends JPanel {
 			sesso.setFont(testo);
 			sesso.setBounds(w/9, 50+bottone_titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
 			//Anello di visualizzazione degli iscritti
+			int latoAnello = 40+altezzaStringhe*3;
 			if (anello==null) {
 				int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();
 				int iscritti=(int)(e.getNumeroPartecipanti());
-				anello=new AnelloNumerico(40+altezzaStringhe*3,partecipanti,iscritti,testo,altezzaStringhe, sfondoCard);
+				anello=new AnelloNumerico(latoAnello,partecipanti,iscritti,testo,altezzaStringhe, sfondoCard);
 				add(anello);
 			}
-			anello.setBounds(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3);
+			anello.setBounds(Math.min(w/5*4, w-w/10-latoAnello), altezzaStringhe/5*6 +15, latoAnello, latoAnello);
 			/*g.setColor(sfondoAnello);
 			g.fillOval(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3);
 			g.setColor(new Color((int)(255*Math.pow((double)iscritti/(double)partecipanti,0.5)),(int)(255-255*Math.pow((double)iscritti/(double)partecipanti, 2)),30));
@@ -134,41 +135,4 @@ public class Bacheca extends JPanel {
 		
 		void ridimensiona (int larghezza) {w=larghezza;}
 	}
-}
-
-class AnelloNumerico extends JPanel {
-	private static final long serialVersionUID = 1L;
-	private static final Color sfondoAnello = new Color(200,200,200);
-	Color sfondo;
-	int totale, n, lato, altezzaStringhe;
-	JLabel capienza;
-	Font testo;
-	
-	AnelloNumerico (int w, int totale, int n, Font testo, int altezzaStringhe, Color sfondo) {
-		lato=w;
-		this.totale=totale;
-		this.n=n;
-		this.testo=testo;
-		this.altezzaStringhe = altezzaStringhe;
-		this.sfondo=sfondo;
-	}
-	
-	protected void paintComponent(Graphics g) {
-		g.setColor(sfondo);
-		g.fillRect(0, 0, lato, lato);
-		g.setColor(sfondoAnello);
-		g.fillOval(0, 0, lato, lato);
-		g.setColor(new Color((int)(255*Math.pow((double)n/(double)totale,0.5)),(int)(255-255*Math.pow((double)n/(double)totale, 2)),30));
-		g.fillArc(0, 0, lato, lato, 90, -360/totale*n);
-		g.setColor(sfondo);
-		g.fillOval(lato/12, lato/12, lato-lato/6, lato-lato/6);
-		g.setColor(Color.darkGray);
-		if (capienza==null) {capienza = new JLabel(""+n +'/'+totale); this.add(capienza);}
-		capienza.setFont(testo);
-		capienza.setBounds(lato/10, lato/2-altezzaStringhe/2, lato/5*4, altezzaStringhe);
-		capienza.setHorizontalAlignment(SwingConstants.CENTER);
-		this.setPreferredSize(new Dimension(lato,lato));
-	}
-	
-	void ridimensiona (int lato) {this.lato=lato;}
 }
