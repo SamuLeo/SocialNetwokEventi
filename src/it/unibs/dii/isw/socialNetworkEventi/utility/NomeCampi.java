@@ -12,10 +12,12 @@ public enum NomeCampi
 	NOTE(6), 
 	BENEFICI_QUOTA(7),
 	D_O_TERMINE_EVENTO(8),
+	D_O_TERMINE_RITIRO_ISCRIZIONE(9),
+	TOLLERANZA_MAX(10),
 //	Campi dell'evento partita di calcio
-	ETA_MINIMA(9),
-	ETA_MASSIMA(10),
-	GENERE(11);
+	ETA_MINIMA(11),
+	ETA_MASSIMA(12),
+	GENERE(13);
 
 	
 	private int codCampo;

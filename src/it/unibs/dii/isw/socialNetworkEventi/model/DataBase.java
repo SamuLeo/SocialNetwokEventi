@@ -19,6 +19,8 @@ public class DataBase
 	private static final String NOTIFICA_FALLIMENTO_EVENTO = "Caro utente,\n l'evento %s a cui si era iscritto è fallito a causa della scarsa richiesta di partecipazione";
 	private static final String NOTIFICA_CONCLUSIONE_EVENTO = "Caro utente,\n l'evento %s a cui si era iscritto è concluso";
 	private static final String NOTIFICA_CHIUSURA_EVENTO = "Caro utente,\n l'evento %s a cui si era iscritto ha raggiunto il numero massimo si iscrizioni, per tanto si svolgerà";
+	private static final String NOTIFICA_RITIRO_EVENTO = "Caro utente,\n siamo spiacenti: l'evento %s a cui era iscritto è stato ritirato";
+
 
 	
 	private Connection con;
@@ -87,6 +89,8 @@ public class DataBase
 				String note										= (String)( evento.getCampo(NomeCampi.NOTE) != null ? evento.getCampo(NomeCampi.NOTE).getContenuto() : null);
 				String benefici_quota							= (String)( evento.getCampo(NomeCampi.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto() : null);
 				Calendar data_ora_termine_evento				= evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto() : null;
+				Calendar data_ora_termine_ritiro_iscrizione		= evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto() : null;
+				int tolleranza_max								= (Integer) evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
 				
 				int eta_minima									= (Integer) evento.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
 			    int eta_massima									= (Integer) evento.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
@@ -97,26 +101,29 @@ public class DataBase
 				String sql = "INSERT INTO partita_calcio "
 						+ "(id_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note,"
 						+ "benefici_quota, data_ora_termine_evento, stato, eta_minima, eta_massima, genere)"
-						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				
 //				script contenente la stringa sql precedentemente specificata inviato al DB, con prevenzione SQL Injection	
 				PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-				ps.setInt(1, id_creatore);				
-				ps.setString(2, luogo);
-				ps.setTimestamp(3, this.creaTimestamp(data_ora_termine_ultimo_iscrizione));	
-				ps.setTimestamp(4, this.creaTimestamp(data_ora_inizio_evento));	
-				ps.setInt(5, partecipanti);
-				ps.setInt(6, costo);
-				ps.setString(7, titolo);
-				ps.setString(8, note);
-				ps.setString(9, benefici_quota);
-				ps.setTimestamp(10, this.creaTimestamp(data_ora_termine_evento));
-				ps.setString(11, StatoEvento.APERTA.getCodNomeCampi());				
-				ps.setInt(12, eta_minima);
-				ps.setInt(13, eta_massima);
-				ps.setString(14, (String)genere);
-
+				ps.setInt		(1, id_creatore);				
+				ps.setString	(2, luogo);
+				ps.setTimestamp	(3, this.creaTimestamp(data_ora_termine_ultimo_iscrizione));	
+				ps.setTimestamp	(4, this.creaTimestamp(data_ora_inizio_evento));	
+				ps.setInt		(5, partecipanti);
+				ps.setInt		(6, costo);
 				
+				ps.setString	(7, titolo);
+				ps.setString	(8, note);
+				ps.setString	(9, benefici_quota);
+				ps.setTimestamp	(10, this.creaTimestamp(data_ora_termine_evento));
+				ps.setTimestamp	(11, this.creaTimestamp(data_ora_termine_ritiro_iscrizione));
+				ps.setInt		(12, tolleranza_max);				
+				ps.setString	(13, StatoEvento.APERTA.getCodNomeCampi());
+				
+				ps.setInt		(14, eta_minima);
+				ps.setInt		(15, eta_massima);
+				ps.setString	(16, (String)genere);
+
 				ps.executeUpdate();
 				ResultSet rs = ps.getGeneratedKeys();
 	
@@ -304,6 +311,37 @@ public class DataBase
 	}
 	
 	
+	public void segnalaRitiroEvento(Evento evento) throws SQLException
+	{
+		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
+
+		switch(evento.getClass().getSimpleName())
+		{
+			case "PartitaCalcio" : 
+				{
+					segnalaRitiroPartitaCalcio(evento.getId(), titolo_evento);
+					break;
+				}
+			default : break;
+		}
+	}
+	
+	
+	public void segnalaRitiroPartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	{
+		String titolo = String.format("Partita %s ritirata", titolo_evento);
+		String contenuto = String.format(NOTIFICA_RITIRO_EVENTO, titolo_evento);		
+		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
+		LinkedList<Utente> list_utenti = selectUtentiDiPartita(id_partita);
+		
+		for(Utente utente : list_utenti)
+		{
+			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+		}
+	}
+	
+	
 	
 	
 /*
@@ -327,6 +365,8 @@ public class DataBase
 				+ " note,"
 				+ " benefici_quota,"
 				+ " data_ora_termine_evento,"
+				+ " data_ora_termine_ritiro_iscrizione,"
+				+ " tolleranza_max,"
 				+ " stato,"
 				+ " eta_minima,"
 				+ " eta_massima,"
@@ -343,34 +383,42 @@ public class DataBase
 		{
 			int id_partita = rs.getInt(1);
 			String titolo_evento = rs.getString(8);
-			Calendar data_termine = Calendar.getInstance(); data_termine.setTimeInMillis(rs.getTimestamp(4).getTime());
-			Calendar data_inizio = Calendar.getInstance(); data_inizio.setTimeInMillis(rs.getTimestamp(5).getTime());		
-			Calendar data_fine = Calendar.getInstance(); 
-			System.out.println("Termine di " + titolo_evento + " " + data_termine.getTime());
-			if (rs.getTimestamp(11) != null) data_fine.setTimeInMillis(rs.getTimestamp(11).getTime()); else data_fine=null;
 			
-			if(Calendar.getInstance().compareTo(data_termine) > 0)
+			Calendar data_ora_termine_ultimo_iscrizione = Calendar.getInstance(); data_ora_termine_ultimo_iscrizione.setTimeInMillis(rs.getTimestamp(4).getTime());
+			Calendar data_ora_inizio_evento = Calendar.getInstance(); data_ora_inizio_evento.setTimeInMillis(rs.getTimestamp(5).getTime());
+			
+			Calendar data_ora_termine_evento = Calendar.getInstance(); 
+			if (rs.getTimestamp(11) != null) data_ora_termine_evento.setTimeInMillis(rs.getTimestamp(11).getTime()); 
+			else data_ora_termine_evento=null;
+			
+			Calendar data_ora_termine_ritiro_iscrizione = Calendar.getInstance(); 
+			if (rs.getTimestamp(12) != null) data_ora_termine_ritiro_iscrizione.setTimeInMillis(rs.getTimestamp(12).getTime()); 
+			else data_ora_termine_ritiro_iscrizione=null;
+			
+			if(Calendar.getInstance().compareTo(data_ora_termine_ultimo_iscrizione) > 0) 
 				segnalaFallimentoPartitaCalcio(id_partita, titolo_evento);
-				//deletePartita(rs.getInt(1));
+			
 			Utente creatore = selectUtente(rs.getInt(2));
-			String string_stato = rs.getString(12);
+			String string_stato = rs.getString(14);
 
 			PartitaCalcio partita = new PartitaCalcio(
 					id_partita,
 					creatore,
 					rs.getString(3),
-					data_termine,
-					data_inizio,
+					data_ora_termine_ultimo_iscrizione,
+					data_ora_inizio_evento,
 					(Integer)rs.getInt(6),
 					(Integer)rs.getInt(7), 
 					titolo_evento,
 					rs.getString(9),
 					rs.getString(10),
-					data_fine,
-					convertiStringInStato(string_stato),
+					data_ora_termine_evento,
+					data_ora_termine_ritiro_iscrizione,
 					(Integer)rs.getInt(13),
-					(Integer)rs.getInt(14),
-					(String)rs.getString(15));
+					convertiStringInStato(string_stato),
+					(Integer)rs.getInt(15),
+					(Integer)rs.getInt(16),
+					(String)rs.getString(17));
 
 				partita.setFruitori(selectUtentiDiPartita(partita.getId()));
 				eventi.add(partita);
@@ -625,7 +673,6 @@ public class DataBase
 		ps.setInt(1, id_utente);
 		ps.setInt(2, id_partita);
 		ps.executeUpdate();
-		refreshDatiRAM();
 	}
 	
 	

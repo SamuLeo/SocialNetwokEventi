@@ -7,7 +7,8 @@ public enum StatoEvento
 	APERTA("Aperta"),	//Evento non scaduto che può accettare iscritti
 	CHIUSA("Chiusa"),	//Evento ha raggiunto il numero massimo di iscritti ma non è ancora passato temporalmente
 	CONCLUSA("Conclusa"),//Evento andato a buon fine e passato
-	FALLITA("Fallita");	//Evento non andato a buon fine
+	FALLITA("Fallita"),	//Evento non andato a buon fine
+	RITIRATA("Ritirata");
 	
 	private String codStatoEvento;
 	

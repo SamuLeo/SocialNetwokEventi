@@ -118,19 +118,27 @@ public class Sessione
 	public static boolean controllaStatoEvento(Evento evento) throws SQLException 
 	{
 		boolean DataChiusuraIscrizioniNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()) < 0;
-		boolean DataFineEventoNelFuturo;
-		
-		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) 
-			DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
-		else 
-			DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
+		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
+		boolean DataFineEventoNelFuturo;		
+		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
+		else DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		int numero_iscritti_attuali = db.getNumeroUtentiDiEvento(evento);
+		int numero_minimo_iscritti = (Integer)evento.getCampo(NomeCampi.PARTECIPANTI).getContenuto();
+		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
 		
 		StatoEvento statoEvento = evento.getStato();
 		
-		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")))
+		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")) && (numero_iscritti_attuali < numero_minimo_iscritti))
 		{
 			evento.setStato(StatoEvento.FALLITA);
 			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a FALLITO", evento.getId()));
+			return true;
+		}
+		else if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")) && (numero_iscritti_attuali > numero_minimo_iscritti))
+		{
+			evento.setStato(StatoEvento.CHIUSA);
+			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a CHIUSO", evento.getId()));
 			return true;
 		}
 		else if(DataFineEventoNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Chiusa")))
@@ -193,7 +201,20 @@ public class Sessione
 	public static boolean deleteEvento(Evento evento)
 	{
 		try
-		{db.deletePartita(evento.getId()); return true;}
+		{
+			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
+			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
+			if(termine_ritiro_scaduto)
+				throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");
+			else
+			{
+				evento.setStato(StatoEvento.RITIRATA);
+				db.updateStatoPartitaCalcio(evento); 
+				db.segnalaRitiroEvento(evento);
+				logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a RITIRATO", evento.getId()));
+			}
+			return true;
+		}
 		catch(SQLException e)
 		{return false;}
 	}
@@ -283,8 +304,12 @@ public class Sessione
 						System.out.println("Utente già iscritto alla partita");
 						return;
 					}	
-					//se il giocatore occupa l'ultimo posto disponibile allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-					if(db.getNumeroUtentiDiEvento(partita) == ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()-1))
+					int numero_iscritti_attuali = db.getNumeroUtentiDiEvento(partita);
+					int numero_massimo_iscritti_possibili = ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto() + (Integer)partita.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
+					Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();
+					boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
+					//se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
+					if((numero_iscritti_attuali == (numero_massimo_iscritti_possibili-1)) && termine_ritiro_scaduto)
 					{
 						db.collegaUtentePartita(utente_corrente, partita);
 						db.segnalaChiusuraEvento(partita);
@@ -292,7 +317,7 @@ public class Sessione
 						db.updateStatoPartitaCalcio(partita);
 						logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a CHIUSO", evento.getId()));
 					}
-					else if (db.getNumeroUtentiDiEvento(partita) < ((Integer)partita.getCampo(NomeCampi.PARTECIPANTI).getContenuto()))
+					else if (numero_iscritti_attuali < numero_massimo_iscritti_possibili)
 						db.collegaUtentePartita(utente_corrente, partita);
 					else
 						return;
@@ -312,15 +337,20 @@ public class Sessione
 	public static void disiscrizioneUtenteEvento(Evento evento) throws RuntimeException{
 		if(utente_corrente == null) throw new RuntimeException("L'utente corrente è null");
 		
+		Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
+		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
+		if(termine_ritiro_scaduto)
+			throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
+		
 		switch(evento.getClass().getSimpleName()) {
-			case "PartitaCalcio" : try {
-				PartitaCalcio partita = (PartitaCalcio)evento;
-				if(!utenteIscrittoAllaPartita(partita)) throw new RuntimeException ("Utente non iscritto alla partita");	
-				db.deleteCollegamentoPartitaCalcioUtente(utente_corrente.getId_utente(), partita.getId());
-			} catch (SQLException e) {
-				e.printStackTrace();
-				throw new RuntimeException ("Errore durante l'eliminazione dell'utente corrente dalla partita selezionata");
-			} break;
+		case "PartitaCalcio" : try {
+			PartitaCalcio partita = (PartitaCalcio)evento;
+			if(!utenteIscrittoAllaPartita(partita)) throw new RuntimeException ("Utente non iscritto alla partita");	
+			db.deleteCollegamentoPartitaCalcioUtente(utente_corrente.getId_utente(), partita.getId());
+		} catch (SQLException e) 
+		{
+			e.printStackTrace();
+		} break;
 		}
 	}
 	
