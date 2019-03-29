@@ -314,10 +314,10 @@ public class CreazioneEvento extends JPanel {
 			}
 		} 
 		catch(NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
+			JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.WARNING_MESSAGE); 
 			return;
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.WARNING_MESSAGE); 
 			return;
 		}
 	}

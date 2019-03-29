@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
-
+import java.util.LinkedList;
 import javax.swing.*;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
@@ -23,14 +23,22 @@ public class Grafica {
 	}
 	
 	JFrame frame;
-	JButton btnNuovoEvento = new JButton(" ➕ Aggiungi Evento"), btnBacheca = new JButton ("Bacheca 🏠"), btnConfermaCreazioneEvento = new JButton(" ✔ Conferma"), btnAnnullaCreazioneEvento = new JButton(" ✖ Annulla"), btnNotifiche = new JButton(" 💬  Notifiche");
-	JPanel toolbarBacheca = new JPanel(), barraFunzioni = new JPanel(), barraForm = new JPanel();
+	JButton btnNuovoEvento = new JButton(" ➕ Aggiungi Evento"), 
+			btnBacheca = new JButton ("Bacheca 🏠"),
+			btnConfermaCreazioneEvento = new JButton(" ✔ Conferma"), 
+			btnAnnullaCreazioneEvento = new JButton(" ✖ Annulla"), 
+			btnNotifiche = new JButton(" 💬  Notifiche"), 
+			btnProfilo = new JButton(" 👤  Visualizza Profilo");
+	JPanel toolbarBacheca = new JPanel(), 
+			barraFunzioni = new JPanel(), 
+			barraForm = new JPanel();
 	Login loginPane;
 	JScrollPane pannelloCentrale = new JScrollPane();
 	Bacheca bacheca;
 	CreazioneEvento form;
 	PannelloNotifiche pannelloNotifiche;
 	SchedaEvento schedaEvento;
+	PannelloUtente schedaUtente;
 	JComboBox<String> selettoreCategoria = new JComboBox<>();
 	
 	private ComponentListener listenerRidimensionamento = new listenerRidimensionamento();
@@ -82,6 +90,9 @@ public class Grafica {
 			btnAnnullaCreazioneEvento.setFont(fontTestoBottoni);
 			btnAnnullaCreazioneEvento.setBackground(coloreBottoni);
 			btnAnnullaCreazioneEvento.addActionListener(e -> visualizzaBacheca());
+			btnProfilo.setBackground(coloreBottoni);
+			btnProfilo.setFont(fontTestoBottoni);
+			btnProfilo.addActionListener(click -> visualizzaProfilo());
 			toolbarBacheca.setLayout(new BorderLayout(0, 0));
 			toolbarBacheca.setBackground(coloreSfondo);
 			toolbarBacheca.add(btnNuovoEvento, BorderLayout.EAST);
@@ -105,7 +116,9 @@ public class Grafica {
 		try {frame.getContentPane().remove(toolbarBacheca);} catch (Exception e) {}
 		try {frame.getContentPane().remove(barraFunzioni);} catch (Exception e) {}
 		try {frame.getContentPane().remove(barraForm);} catch (Exception e) {}
+		try {frame.getContentPane().remove(btnProfilo);} catch (Exception e) {}
 		try {frame.getContentPane().remove(pannelloCentrale);} catch (Exception e) {}
+		try {frame.getContentPane().remove(schedaUtente);} catch (Exception e) {}
 		frame.getContentPane().revalidate();
 	}
 	
@@ -122,7 +135,7 @@ public class Grafica {
 	
 	public void visualizzaBacheca() {
 		//Riconfigurazione del Frame
-		frame.setTitle("Bacheca di @" + Sessione.getUtente_corrente().getNome());
+		frame.setTitle("Bacheca di @" + chiediUtenteCorrente().getNome());
 		svuotaFrame();
 		frame.getContentPane().add(toolbarBacheca, BorderLayout.NORTH);
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
@@ -131,6 +144,7 @@ public class Grafica {
 		if (schedaEvento != null) schedaEvento.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(true);
+		if (schedaUtente != null) schedaUtente.setVisible(false);
 		//Creazione pannello principale
 		//Se la Bacheca è già in mostra, va solo aggiornata
 		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
@@ -155,6 +169,7 @@ public class Grafica {
 		if (schedaEvento != null) schedaEvento.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(false);
+		if (schedaUtente != null) schedaUtente.setVisible(false);
 		//Creazione pannello principale
 		form = new CreazioneEvento(fontTesto, frame.getContentPane().getWidth(), altezzaStringhe, coloreSfondo);
 		pannelloCentrale = new JScrollPane(form);
@@ -170,20 +185,23 @@ public class Grafica {
 		frame.setTitle("Notifche");
 		svuotaFrame();
 		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		frame.getContentPane().add(btnProfilo, BorderLayout.NORTH);
 		btnBacheca.setText("Bacheca 🏠");
 		if (form != null) form.setVisible(false);
 		if (bacheca != null) bacheca.setVisible(false);
 		if (schedaEvento != null) schedaEvento.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
+		if (schedaUtente != null) schedaUtente.setVisible(false);
 		//Creazione pannello principale
 		pannelloNotifiche=new PannelloNotifiche(Sessione.getNotificheUtente(), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()-btnProfilo.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
-		frame.getContentPane().revalidate();
 		barraFunzioni.repaint(200);
+		frame.getContentPane().revalidate();
+		btnProfilo.repaint(200);
 	}
 	
 	public void visualizzaEvento(Evento e) {
@@ -196,6 +214,7 @@ public class Grafica {
 		if (bacheca != null) bacheca.setVisible(false);
 		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(true);
 		if (schedaEvento != null) schedaEvento.setVisible(true);
+		if (schedaUtente != null) schedaUtente.setVisible(false);
 		//Creazione pannello principale
 		schedaEvento=new SchedaEvento(e, fontTesto, fontTestoBottoni, altezzaStringhe, frame.getContentPane().getWidth());
 		pannelloCentrale = new JScrollPane(schedaEvento);
@@ -205,6 +224,29 @@ public class Grafica {
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
 		frame.getContentPane().revalidate();
 		barraFunzioni.repaint(200);
+	}
+	
+	public void visualizzaProfilo() {
+		//Riconfigurazione del Frame
+		frame.setTitle("Profilo di @" + chiediUtenteCorrente().getNome());
+		svuotaFrame();
+		frame.getContentPane().add(barraFunzioni, BorderLayout.SOUTH);
+		btnBacheca.setText("Bacheca 🏠");
+		if (form != null) form.setVisible(false);
+		if (schedaEvento != null) schedaEvento.setVisible(false);
+		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
+		if (bacheca != null) bacheca.setVisible(false);
+		if (schedaUtente != null) schedaUtente.setVisible(true);
+		//Creazione pannello principale
+		schedaUtente = new PannelloUtente(chiediUtenteCorrente(), fontTesto, fontTestoBottoni, altezzaStringhe, frame.getContentPane().getWidth());
+		pannelloCentrale = new JScrollPane(schedaUtente);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		frame.getContentPane().revalidate();
+		barraFunzioni.repaint(200);
+		schedaUtente.ridimensiona(frame.getContentPane().getWidth());
 	}
 	
 	private void calcolaDimensioniStringhe() {
@@ -228,12 +270,15 @@ public class Grafica {
 				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
 				form.ridimensiona(frame.getContentPane().getWidth());
 			} else if (pannelloNotifiche != null && pannelloCentrale.isVisible() && pannelloNotifiche.isVisible()) {
-				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()-btnProfilo.getHeight()));
 				pannelloNotifiche.ridimensiona(frame.getContentPane().getWidth());
 			} else if (schedaEvento != null && pannelloCentrale.isVisible() && schedaEvento.isVisible()) {
-			pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
-			schedaEvento.ridimensiona(frame.getContentPane().getWidth());
-		}
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+				schedaEvento.ridimensiona(frame.getContentPane().getWidth());
+			} else if (schedaUtente != null && pannelloCentrale.isVisible() && schedaUtente.isVisible()) {
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
+				schedaUtente.ridimensiona(frame.getContentPane().getWidth());
+			}
 		}
 	}
 	
@@ -252,6 +297,11 @@ public class Grafica {
 		if (Sessione.insertUtente(new Utente(utente, password))) visualizzaBacheca();
 		else loginPane.ripulisci();
 	}
+	
+	void aggiornaDatiUtente(Integer etm, Integer etM, LinkedList<String> categorie) {
+		//Sessione.aggiornaDatiUtente(etm, etM, categorie);
+	}
+	
 	void aggiungiEvento(Evento e) {
 		if (Sessione.aggiungiEvento(e)) {
 			visualizzaBacheca();
@@ -261,14 +311,14 @@ public class Grafica {
 			btnConfermaCreazioneEvento.setBackground(coloreBottoni);
 			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
 		}	
-		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
+		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.ERROR_MESSAGE);
 	}
 	void eliminaEvento (Evento e) {
 		try {
 			Sessione.deleteEvento(e);
 			visualizzaBacheca(); 
 		} catch (RuntimeException r) {
-			JOptionPane.showMessageDialog(null, r.getMessage(), "Errore", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, r.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	void iscriviEvento(Evento e) {
@@ -278,7 +328,7 @@ public class Grafica {
 	void rimuoviIscrizioneEvento(Evento e) {
 		try {Sessione.disiscrizioneUtenteEvento(e);
 			visualizzaBacheca();
-		} catch (RuntimeException exc) {JOptionPane.showMessageDialog(null, exc.getMessage(), "Impossibile disiscriversi", JOptionPane.INFORMATION_MESSAGE); return;}
+		} catch (RuntimeException exc) {JOptionPane.showMessageDialog(null, exc.getMessage(), "Impossibile disiscriversi", JOptionPane.ERROR_MESSAGE); return;}
 	}
 	void eliminaNotifica(Notifica n) {
 		frame.getContentPane().remove(pannelloCentrale);

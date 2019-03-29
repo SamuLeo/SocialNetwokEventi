@@ -90,7 +90,7 @@ public class DataBase
 				String benefici_quota							= (String)( evento.getCampo(NomeCampi.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto() : null);
 				Calendar data_ora_termine_evento				= evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto() : null;
 				Calendar data_ora_termine_ritiro_iscrizione		= evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto() : null;
-				int tolleranza_max								= (Integer) evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
+				int tolleranza_max								= (Integer)( evento.getCampo(NomeCampi.TOLLERANZA_MAX) != null ? evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto() : null);
 				
 				int eta_minima									= (Integer) evento.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
 			    int eta_massima									= (Integer) evento.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
