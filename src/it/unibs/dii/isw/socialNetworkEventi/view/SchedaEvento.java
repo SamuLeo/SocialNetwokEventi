@@ -38,7 +38,7 @@ public class SchedaEvento extends JPanel {
 		add(titolo);
 		//System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
 		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto())>0;
-		if (e.getUtenteCreatore().equals(Sessione.getUtente_corrente()) && !termine_ritiro_scaduto) {
+		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto) {
 			iscriviti = new JButton("Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
 		} else if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {

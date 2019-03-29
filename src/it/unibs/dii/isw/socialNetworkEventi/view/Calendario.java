@@ -12,6 +12,9 @@ import javax.swing.table.*;
 public class Calendario extends JFrame {
 	private static final long serialVersionUID = 1L;
 	static final Font font=new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+	Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
+	int screenW = (int)(screenSize.getWidth());
+	int screenH = (int)(screenSize.getHeight());
 	DefaultTableModel model;
 	Calendar cal = new GregorianCalendar();
 	JLabel nomeMese;
@@ -28,7 +31,7 @@ public class Calendario extends JFrame {
 		
 	    setTitle("Scegli una data");
 	    setSize(lato, lato);
-	    setBounds(Grafica.getIstance().screenW/2-lato/2, Grafica.getIstance().screenH/2-lato/2, lato, lato);
+	    setBounds(screenW/2-lato/2, screenH/2-lato/2, lato, lato);
 	    setLayout(new BorderLayout());
 	    setVisible(true);
 	    nomeMese = new JLabel();

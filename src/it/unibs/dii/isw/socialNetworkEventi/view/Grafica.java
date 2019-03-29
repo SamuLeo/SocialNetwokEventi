@@ -243,6 +243,11 @@ public class Grafica {
 			visualizzaBacheca();
 		} else loginPane.ripulisci();
 	}
+	
+	Utente chiediUtenteCorrente() {
+		return Sessione.getUtente_corrente();
+	}
+	
 	void creaUtente(String utente, String password) {
 		if (Sessione.insertUtente(new Utente(utente, password))) visualizzaBacheca();
 		else loginPane.ripulisci();

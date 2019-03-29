@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.util.Calendar;
 import java.util.function.Consumer;
 
-import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 
@@ -294,7 +293,7 @@ public class CreazioneEvento extends JPanel {
 					throw new IllegalArgumentException("Necessario inserire date nel futuro");
 				
 				e = new PartitaCalcio(
-						Sessione.getUtente_corrente(),
+						Grafica.getIstance().chiediUtenteCorrente(),
 /*Ob.	LUOGO*/			testoCampiComuni[3].getText(),
 /*Ob.	Data FINE ISCR*/termineIscrizione,
 /*Ob.	Data-ora iniz*/	dataInizioEvento,
