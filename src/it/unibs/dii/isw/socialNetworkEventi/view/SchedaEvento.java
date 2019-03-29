@@ -36,22 +36,24 @@ public class SchedaEvento extends JPanel {
 		titolo.setBounds(20, 20, larghezza-40,altezzaRighe/5*12);
 		Y=20+altezzaRighe/5*12;
 		add(titolo);
-		System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
-		if (e.getUtenteCreatore().equals(Sessione.getUtente_corrente())) {
+		//System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
+		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto())>0;
+		if (e.getUtenteCreatore().equals(Sessione.getUtente_corrente()) && !termine_ritiro_scaduto) {
 			iscriviti = new JButton("Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
-		} else {
-			if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
-				iscriviti = new JButton("Iscriviti");
-				iscriviti.addActionListener(click -> Grafica.getIstance().iscriviEvento(e));
-			} else {iscriviti = new JButton("Annulla iscrizione");
-				iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
-			}
+		} else if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
+			iscriviti = new JButton("Iscriviti");
+			iscriviti.addActionListener(click -> Grafica.getIstance().iscriviEvento(e));
+		} else if (!termine_ritiro_scaduto) {
+			iscriviti = new JButton("Annulla iscrizione");
+			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
 		}
-		iscriviti.setFont(testoBottoni);
-		iscriviti.setBounds(20, Y+10, larghezza-40,altezzaRighe/5*6);
-		iscriviti.setBackground(Grafica.getIstance().coloreBottoni);
-		add(iscriviti);
+		if (iscriviti != null) {
+			iscriviti.setFont(testoBottoni);
+			iscriviti.setBounds(20, Y+10, larghezza-40,altezzaRighe/5*6);
+			iscriviti.setBackground(Grafica.getIstance().coloreBottoni);
+			add(iscriviti);
+		}
 		
 		
 		Y+=20+altezzaRighe/5*6;
@@ -77,7 +79,9 @@ public class SchedaEvento extends JPanel {
 			Y+= altezzaRighe+20;
 			add(desc[i]); add(val[i]);
 		}
-		anello=new AnelloNumerico(larghezza/3, (int)(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto()), e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
+		int partecipanti = (int)(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto());
+		if (e.getCampo(NomeCampi.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
+		anello=new AnelloNumerico(larghezza/3, partecipanti, e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
 		anello.setBounds(larghezza/3, Y+25, larghezza/3, larghezza/3);
 		Y+=larghezza/3+50;
 		add(anello);
@@ -86,7 +90,7 @@ public class SchedaEvento extends JPanel {
 	
 	void ridimensiona(int larghezza) {
 		titolo.setSize(larghezza-40,titolo.getHeight());
-		iscriviti.setSize(larghezza-40,iscriviti.getHeight());
+		if (iscriviti != null) iscriviti.setSize(larghezza-40,iscriviti.getHeight());
 		int altezzaVecchia = anello.getWidth();
 		anello.ridimensiona(larghezza/3);
 		anello.setBounds(larghezza/3, Y-25-altezzaVecchia, larghezza/3, larghezza/3);

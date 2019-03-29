@@ -114,6 +114,7 @@ public class Bacheca extends JPanel {
 			int latoAnello = 40+altezzaStringhe*3;
 			if (anello==null) {
 				int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();
+				if (e.getCampo(NomeCampi.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
 				int iscritti=(int)(e.getNumeroPartecipanti());
 				anello=new AnelloNumerico(latoAnello,partecipanti,iscritti,testo,altezzaStringhe, sfondoCard);
 				add(anello);

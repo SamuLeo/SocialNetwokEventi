@@ -3,10 +3,8 @@ package it.unibs.dii.isw.socialNetworkEventi.controller;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.LogManager;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -118,14 +116,14 @@ public class Sessione
 	public static boolean controllaStatoEvento(Evento evento) throws SQLException 
 	{
 		boolean DataChiusuraIscrizioniNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()) < 0;
-		Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
-		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
+		//Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
+		//boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
 		boolean DataFineEventoNelFuturo;		
 		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
 		else DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
 		int numero_iscritti_attuali = db.getNumeroUtentiDiEvento(evento);
 		int numero_minimo_iscritti = (Integer)evento.getCampo(NomeCampi.PARTECIPANTI).getContenuto();
-		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
+		//int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
 		
 		StatoEvento statoEvento = evento.getStato();
 		
@@ -198,7 +196,7 @@ public class Sessione
 	}
 	
 	
-	public static boolean deleteEvento(Evento evento)
+	public static void deleteEvento(Evento evento) throws RuntimeException
 	{
 		try
 		{
@@ -213,10 +211,9 @@ public class Sessione
 				db.segnalaRitiroEvento(evento);
 				logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a RITIRATO", evento.getId()));
 			}
-			return true;
 		}
 		catch(SQLException e)
-		{return false;}
+		{throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");}
 	}
 	
 	
@@ -273,6 +270,7 @@ public class Sessione
 		try 
 		{
 			db.deleteCollegamentoNotificaUtente(utente_corrente, notifica);
+			utente_corrente.rimuoviNotifica(notifica);
 		} 
 		catch (SQLException e) 
 		{

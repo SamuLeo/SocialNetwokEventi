@@ -100,7 +100,7 @@ public class DataBase
 //				Stringa contenente uno script sql per inserire la partita di calcio
 				String sql = "INSERT INTO partita_calcio "
 						+ "(id_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note,"
-						+ "benefici_quota, data_ora_termine_evento, stato, eta_minima, eta_massima, genere)"
+						+ "benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max, stato, eta_minima, eta_massima, genere)"
 						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				
 //				script contenente la stringa sql precedentemente specificata inviato al DB, con prevenzione SQL Injection	

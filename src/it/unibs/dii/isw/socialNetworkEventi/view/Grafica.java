@@ -48,8 +48,8 @@ public class Grafica {
 	public void crea() {
 		//Ottenimento icona della finestra
 		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
-		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//IconaPiccola.png";
-		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\IconaPiccola.png";
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//Icona.png";
+		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\Icona.png";
 		//Operazioni iniziali sul Frame e sulle variabili di classe
 			frame = new JFrame();
 			frame.setMinimumSize(new Dimension(screenH/3, (int) (screenH/2.25)));
@@ -259,7 +259,12 @@ public class Grafica {
 		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.INFORMATION_MESSAGE);
 	}
 	void eliminaEvento (Evento e) {
-		if (Sessione.deleteEvento(e)) visualizzaBacheca(); else JOptionPane.showMessageDialog(null, "Non è stato possibile eliminare l'evento", "Errore", JOptionPane.INFORMATION_MESSAGE);
+		try {
+			Sessione.deleteEvento(e);
+			visualizzaBacheca(); 
+		} catch (RuntimeException r) {
+			JOptionPane.showMessageDialog(null, r.getMessage(), "Errore", JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 	void iscriviEvento(Evento e) {
 		Sessione.iscrizioneUtenteInEvento(e);

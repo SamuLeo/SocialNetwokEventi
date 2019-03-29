@@ -14,10 +14,10 @@ import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 public class CreazioneEvento extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final String categoriaPartita = "Partita di calcio";
-	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti", "Luogo", "Quota individuale", "Compreso nella quota", "Note"};
+	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti", "Partecipanti in esubero ammessi", "Luogo", "Quota individuale", "Compreso nella quota", "Note"};
 	private static final String[] nomeCampiPartitaDiCalcio = {"Eta minima", "Eta massima", "Sesso"};
-	private static final String[] nomeCampiComuniData = {"Termine ultimo di iscrizione", "Data inizio", "Data conclusiva",};
-	private static final String[] nomeCampiComuniOra = {"Ora termine iscrizioni", "Ora inizio", "Ora conclusiva"};
+	private static final String[] nomeCampiComuniData = {"Termine ultimo di iscrizione", "Data inizio", "Data conclusiva","Termine ritiro iscrizione"};
+	private static final String[] nomeCampiComuniOra = {"Ora termine iscrizioni", "Ora inizio", "Ora conclusiva","Ora termine ritiro iscrizione"};
 	private static final String[] GMA = {"G", "M", "A"};
 	private static final String[] MO = {"h", "m"};
 	public static final int cordinataX = 35;
@@ -251,7 +251,7 @@ public class CreazioneEvento extends JPanel {
 			if (comboBox.getSelectedItem()==null) return;	//Nessuna categoria selezionata
 			
 			if (comboBox.getSelectedItem().equals(categoriaPartita)){
-				Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null;
+				Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null, termineRitiroIscrizione = null;
 				//Acquisizione data e ora, l'aggiunta del "+ 1" è posta in corrispondenza del mese, in quanto Java associa lo 0 a Gennaio				
 				termineIscrizione = Calendar.getInstance();
 				termineIscrizione.set(
@@ -278,18 +278,34 @@ public class CreazioneEvento extends JPanel {
 							Integer.parseInt(testoCampiComuniOra[2][0].getText()),
 							Integer.parseInt(testoCampiComuniOra[2][1].getText()));
 				}
-				System.out.println("Termine iscrizioni: " + termineIscrizione.getTime() + "\nInizio: " + dataInizioEvento.getTime());
+				//Questo parametro è opzionale percui si compila solo se è presente
+				if (!testoCampiComuniData[3][2].getText().equals("") || !testoCampiComuniData[3][1].getText().equals("") || !testoCampiComuniData[3][0].getText().equals("") || !testoCampiComuniOra[3][1].getText().equals("") || !testoCampiComuniOra[3][0].getText().equals("")) {
+					termineRitiroIscrizione = Calendar.getInstance();
+					termineRitiroIscrizione.set(
+							Integer.parseInt(testoCampiComuniData[3][2].getText()),
+							Integer.parseInt(testoCampiComuniData[3][1].getText())-1,
+							Integer.parseInt(testoCampiComuniData[3][0].getText()),
+							Integer.parseInt(testoCampiComuniOra[3][0].getText()),
+							Integer.parseInt(testoCampiComuniOra[3][1].getText()));
+				}
+				//Controllo se le date inserite sono tutte nl futuro
+				Calendar adesso = Calendar.getInstance();
+				if (termineIscrizione.before(adesso) || dataInizioEvento.before(adesso) || (dataFineEvento==null? false: dataFineEvento.before(adesso)) || (termineRitiroIscrizione==null? false: termineRitiroIscrizione.before(adesso)))
+					throw new IllegalArgumentException("Necessario inserire date nel futuro");
+				
 				e = new PartitaCalcio(
 						Sessione.getUtente_corrente(),
-/*Ob.	LUOGO*/			testoCampiComuni[2].getText(),
+/*Ob.	LUOGO*/			testoCampiComuni[3].getText(),
 /*Ob.	Data FINE ISCR*/termineIscrizione,
 /*Ob.	Data-ora iniz*/	dataInizioEvento,
 /*Ob.	Partecip.*/		Integer.parseInt(testoCampiComuni[1].getText()),
-/*Ob.	COSTO*/			Integer.parseInt(testoCampiComuni[3].getText()),
+/*Ob.	COSTO*/			Integer.parseInt(testoCampiComuni[4].getText()),
 /*Opz.	TITOLO*/		(testoCampiComuni[0].getText().equals("")? "Evento anonimo" : testoCampiComuni[0].getText()),
-/*Opz.	NOTE*/			testoCampiComuni[5].getText(),
-/*Opz.	COMPRESO*/		testoCampiComuni[4].getText(),
+/*Opz.	NOTE*/			testoCampiComuni[6].getText(),
+/*Opz.	COMPRESO*/		testoCampiComuni[5].getText(),
 /*Opz.	Data-ora FINE*/	dataFineEvento,
+/*Opz.	Termine ritiro*/termineRitiroIscrizione,
+/*Opz.	Tolleranza*/	(testoCampiComuni[2].getText().equals("") ? null : Integer.parseInt(testoCampiComuni[2].getText())),
 /*Ob.	ETA MIN*/		Integer.parseInt(testoCampiPartitaCalcio[0].getText()),
 /*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
 /*Ob.	GENERE*/		(String)sesso.getSelectedItem());
@@ -298,13 +314,13 @@ public class CreazioneEvento extends JPanel {
 				Grafica.getIstance().aggiungiEvento(e);
 			}
 		} 
-		catch(NumberFormatException e) 
-		{e.printStackTrace(); 
-		JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
-		return;}
-		catch (Exception e) {
+		catch(NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
+			return;
+		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE); 
-			return;}
+			return;
+		}
 	}
 }
 

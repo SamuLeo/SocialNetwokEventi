@@ -11,7 +11,7 @@ import javax.swing.table.*;
  
 public class Calendario extends JFrame {
 	private static final long serialVersionUID = 1L;
-	static final Font font=new Font("DOBBIAMO TROVARE UN FONT CARINO", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+	static final Font font=new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
 	DefaultTableModel model;
 	Calendar cal = new GregorianCalendar();
 	JLabel nomeMese;
@@ -22,8 +22,8 @@ public class Calendario extends JFrame {
 		this.lato=lato;
 		
 		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
-		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//IconaPiccola.png";
-		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\IconaPiccola.png";
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//Icona.png";
+		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\Icona.png";
 		setIconImage(new ImageIcon(percorso).getImage());
 		
 	    setTitle("Scegli una data");

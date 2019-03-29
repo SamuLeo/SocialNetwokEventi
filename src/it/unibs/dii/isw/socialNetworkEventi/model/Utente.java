@@ -2,8 +2,6 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
-
 public class Utente implements Serializable 
 {
 	private static final long serialVersionUID = 1L;
@@ -42,7 +40,7 @@ public class Utente implements Serializable
 	
 	 public void aggiungiNotifica(Notifica notifica) {notifiche.add(notifica);}
 	 
-	 public boolean rimuoviNotifica(Utente notifica)
+	 public boolean rimuoviNotifica(Notifica notifica)
 	 {
 		 if(notifiche.contains(notifica))
 		 	{notifiche.remove(notifica); return true;}

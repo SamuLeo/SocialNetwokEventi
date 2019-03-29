@@ -25,19 +25,20 @@ public class Login extends JPanel {
 	private final ActionListener accediLambda = e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword()));
 	private final ActionListener creaUtLambda = e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword()));
 	
-	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
-	{
-		setLayout(null);
-		this.setBackground(coloreSfondo);
+	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) {
 		JLabel img;
 		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
-		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//IconaPiccola.png";
-		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\IconaPiccola.png";
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//Icona.png";
+		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\Icona.png";
 		try { img = new JLabel(new ImageIcon(ImageIO.read(new File(percorso)).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
 		} catch (IOException e) {
 			e.printStackTrace();
 			img =new JLabel();
 		}
+		
+		setLayout(null);
+		setBackground(coloreSfondo);
+		
 		JButton accedi = new JButton("Accedi"), nuovoUt = new JButton("Registrati");
 		utente = new JTextField(); password = new JPasswordField();
 		JLabel utlabel = new JLabel("Utente: "), pswdlabel = new JLabel("Password: ");
@@ -51,6 +52,7 @@ public class Login extends JPanel {
 		int bottoneX = (labelX+utenteX+20)/2-10, bottoneY = (int)(utenteY*1.2);
 		X=20+labelX+20+utenteX+20;
 		Y=240+utenteY+20+labelY+20+bottoneY+40;
+		
 		img.setBounds(Math.max(10, X/2-Math.min(pswdWidth+fieldWidth,180)/2),10,Math.min(pswdWidth+fieldWidth,180),Math.min(pswdWidth+fieldWidth,180));
 		utlabel.setBounds(20, 240, labelX, labelY);
 		pswdlabel.setBounds(20, 240+labelY+20, labelX, labelY);
@@ -58,13 +60,15 @@ public class Login extends JPanel {
 		password.setBounds(20+labelX+20, 240+labelY+20, utenteX, utenteY);
 		accedi.setBounds(20, 240+labelY+20+labelY+20, bottoneX, bottoneY);
 		nuovoUt.setBounds(20+bottoneX+20, 240+labelY+20+labelY+20, bottoneX, bottoneY);
+		
 		accedi.addActionListener(accediLambda);
 		nuovoUt.addActionListener(creaUtLambda);
 		password.addActionListener(accediLambda);
-		this.add(img);
-		this.add(utlabel);this.add(pswdlabel);
-		this.add(utente);this.add(password);
-		this.add(nuovoUt);this.add(accedi);
+		
+		add(img);
+		add(utlabel); add(pswdlabel);
+		add(utente); add(password);
+		add(nuovoUt); add(accedi);
 	}
 	
 	public void focus() {
