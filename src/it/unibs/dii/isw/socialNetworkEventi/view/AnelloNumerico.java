@@ -10,8 +10,8 @@ import javax.swing.SwingConstants;
 
 public class AnelloNumerico extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private static final Color sfondoAnello = new Color(200,200,200);
-	Color sfondo;
+	private static final Color sfondoAnello = new Color(190,190,190);
+	Color sfondoCard;
 	int totale, n, lato, altezzaStringhe;
 	JLabel capienza;
 	Font testo;
@@ -22,17 +22,17 @@ public class AnelloNumerico extends JPanel {
 		this.n=n;
 		this.testo=testo;
 		this.altezzaStringhe = altezzaStringhe;
-		this.sfondo=sfondo;
+		this.sfondoCard=sfondo;
 	}
 	
 	protected void paintComponent(Graphics g) {
-		g.setColor(sfondo);
+		g.setColor(sfondoCard);
 		g.fillRect(0, 0, lato, lato);
 		g.setColor(sfondoAnello);
 		g.fillOval(0, 0, lato, lato);
 		g.setColor(new Color((int)(255*Math.pow((double)n/(double)totale,0.5)),(int)(255-255*Math.pow((double)n/(double)totale, 2)),30));
 		g.fillArc(0, 0, lato, lato, 90, -360/totale*n);
-		g.setColor(sfondo);
+		g.setColor(sfondoCard);
 		g.fillOval(lato/12, lato/12, lato-lato/6, lato-lato/6);
 		g.setColor(Color.darkGray);
 		if (capienza==null) {capienza = new JLabel(""+n +'/'+totale); this.add(capienza);}

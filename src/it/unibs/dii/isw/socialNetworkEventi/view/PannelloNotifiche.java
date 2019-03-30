@@ -17,7 +17,7 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Notifica;
 public class PannelloNotifiche extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private int X=0, Y=20, altezzaStringhe;
-	private static final Color sfondoCard = new Color(220,220,220), sfondo = new Color(240,240,240);
+	private static final Color sfondo = new Color(240,240,240);
 	Font testo, testoBottoni;
 	CardNotifica[] cards;
 	Graphics g;
@@ -62,6 +62,7 @@ public class PannelloNotifiche extends JPanel {
 	
 	class CardNotifica extends JPanel {
 		private static final long serialVersionUID = 1L;
+		Color sfondoCard = new Color(220,220,220);
 		Notifica n;
 		int w;
 		JLabel titolo, data, contenuto;
@@ -71,6 +72,7 @@ public class PannelloNotifiche extends JPanel {
 		CardNotifica (Notifica n, int w) {
 			this.n=n;
 			this.w=w;
+			addMouseListener(new lambdaJPanel(this, CardNotifica.class, null,null));
 		}
 
 		protected void paintComponent(Graphics g) {
