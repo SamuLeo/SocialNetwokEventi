@@ -21,6 +21,7 @@ public class Sessione
 {
 	
 	private static Utente utente_corrente;
+	public static Utente getUtente_corrente(){return utente_corrente;}
 	private static DataBase db;
 	
 	private static  String nome_file_log_sessione ;
@@ -69,10 +70,9 @@ public class Sessione
 	
 	public static boolean accedi(Utente utente) {
 		 try {
-			 Integer id_utente = db.existUtente(utente);
-			 if(id_utente != null) {
-				 utente.setId_utente(id_utente);
-				 utente_corrente = utente;
+			 Utente u = db.existUtente(utente);
+			 if(u != null) {
+				 utente_corrente = u;
 				 return true;
 			 }
 			 else return false;
@@ -209,14 +209,13 @@ public class Sessione
 		return true;
 	}
 	
-	public static boolean aggiungiInteresseUtenteCorrente(CategorieEvento nome_categoria)
-	{
-		try
-		{
-			if(utente_corrente.getCategorieInteressi().contains(nome_categoria))
-				return true;
-			else
+	public static boolean aggiungiInteresseUtenteCorrente(CategorieEvento nome_categoria) {
+		try {
+			if(utente_corrente.getCategorieInteressi().contains(nome_categoria)) return true;
+			else {
 				db.collegaUtenteCategoria(getUtente_corrente(), nome_categoria);
+				utente_corrente.aggiungiInteresse(nome_categoria);
+			}
 		}
 		catch(SQLException e)
 		{
@@ -226,13 +225,13 @@ public class Sessione
 		return true;
 	}
 	
-	public static boolean eliminaInteresseUtenteCorrente(String nome_categoria)
+	public static boolean eliminaInteresseUtenteCorrente(CategorieEvento nome_categoria)
 	{
-		try
-		{
-			if(utente_corrente.getCategorieInteressi().contains(nome_categoria))
+		try {
+			if(utente_corrente.getCategorieInteressi().contains(nome_categoria)) {
 				db.deleteCollegamentoCategoriaUtente(getUtente_corrente().getId_utente(), nome_categoria);
-			else
+				utente_corrente.rimuoviInteresse(nome_categoria);
+			} else
 				return true;
 		}
 		catch(SQLException e)
@@ -243,12 +242,14 @@ public class Sessione
 		return true;
 	}
 	
-	public static boolean updateFasciaEtaUtente(Utente utente)
+	public static boolean updateFasciaEta(int etm, int etM)
 	{
 		try
 		{
-			db.updateEtaMinUtente(utente.getId_utente(), utente.getEtaMin());
-			db.updateEtaMaxtente(utente.getId_utente(), utente.getEtaMax());
+			db.updateEtaMinUtente(utente_corrente.getId_utente(), etm);
+			db.updateEtaMaxtente(utente_corrente.getId_utente(), etM);
+			utente_corrente.setEtaMin(etm);
+			utente_corrente.setEtaMax(etM);
 		}
 		catch(SQLException e)
 		{
@@ -343,17 +344,8 @@ public class Sessione
 	}
 	
 	
-	
-	
-	public static PartitaCalcio selectPartita(int id_partita) 
-	{
-		return db.selectPartitaCalcio(id_partita);
-	}
-	
-	
-	public static ArrayList<Evento> getEventi() {
-		return db.getEventi();
-	}
+	public static PartitaCalcio selectPartita(int id_partita) {return db.selectPartitaCalcio(id_partita);}
+	public static ArrayList<Evento> getEventi() {return db.getEventi();}
 	
 	
 	public static LinkedList<Notifica> getNotificheUtente() 
@@ -391,8 +383,6 @@ public class Sessione
 		return null;
 	}
 
-	
-	
 	
 	
 	public static LinkedList<Notifica> eliminaNotificaUtente(Notifica notifica)
@@ -461,10 +451,5 @@ public class Sessione
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public static Utente getUtente_corrente() 
-	{
-		return utente_corrente;
 	}
 }

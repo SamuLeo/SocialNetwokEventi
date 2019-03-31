@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import javax.swing.*;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 
 class PannelloUtente extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -60,7 +61,7 @@ class PannelloUtente extends JPanel {
 		
 		JCheckBox temp;
 		categorie = new LinkedList<>();
-		for (String cl : new String[] {"PartitaCalcio"}) {
+		for (String cl : new String[] {"partita_calcio"}) {
 			temp = new JCheckBox(cl);
 			temp.setFont(testo);
 			temp.setBackground(Grafica.coloreSfondo);
@@ -70,6 +71,12 @@ class PannelloUtente extends JPanel {
 			categorie.add(temp);
 		}
 		
+		for (CategorieEvento c : u.getCategorieInteressi()) {
+			for (JCheckBox chk_cat : categorie)
+				if (chk_cat.getText().equalsIgnoreCase(c.toString()))
+					chk_cat.setSelected(true);
+		}
+			
 		salva = new JButton(" 💾  Salva");
 		salva.setFont(testoBottoni);
 		salva.setBackground(Grafica.coloreBottoni);
@@ -110,12 +117,16 @@ class PannelloUtente extends JPanel {
 	
 	void impostaPreferito(ActionEvent e) {
 		try {
-			Integer etm = (etamin.getText().equals("") ? -1 : Integer.parseInt(etamin.getText())), etM = (etamas.getText().equals("") ? -1 : Integer.parseInt(etamas.getText()));
+			Integer etm = (etamin.getText().equals("") ? -1 : Integer.parseInt(etamin.getText())),
+					etM = (etamas.getText().equals("") ? -1 : Integer.parseInt(etamas.getText()));
 			if (etm<0 || etM<0 || etm>etM) throw new NumberFormatException();
-			LinkedList<String> elenco = new LinkedList<>();
-			for (JCheckBox j : categorie)
-				if (j.isSelected()) elenco.add(j.getText());
-			Grafica.getIstance().aggiornaDatiUtente(etm, etM, elenco);
+			String[] elenco = new String[categorie.size()];
+			boolean[] selezionata = new boolean[elenco.length];
+			for (int i=0; i<elenco.length; i++) {
+				elenco[i] = categorie.get(i).getText();
+				selezionata[i] = categorie.get(i).isSelected();
+			}
+			Grafica.getIstance().aggiornaDatiUtente(etm, etM, elenco, selezionata);
 		} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null, "Sono stati inseriti dati scorretti nei campi riguardanti l'età", "Errore di compilazione", JOptionPane.WARNING_MESSAGE);}
 	}
 }

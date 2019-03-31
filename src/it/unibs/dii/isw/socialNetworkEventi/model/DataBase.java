@@ -25,7 +25,7 @@ public class DataBase
 	private static final String NOTIFICA_RITIRO_EVENTO 		= "Caro utente,\n siamo spiacenti: l'evento %s a cui era iscritto è stato ritirato";
 	private static final String NOTIFICA_NUOVO_EVENTO 		= "Caro utente, la informiamo che un nuovo evento della categoria %s dal nome %s è disponibile";
 
-	private static final String tabelle_db_eventi[][] = {{CategorieEvento.PARTITA_CALCIO.getString(),"relazione_utente_partita"}};
+	private static final String tabelle_db_eventi[][] = {{CategorieEvento.PARTITA_CALCIO.toString(),"relazione_utente_partita"}};
 
 	
 	private Connection con;
@@ -221,7 +221,7 @@ public class DataBase
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		ps.setInt(1, utente.getId_utente());
-		ps.setString(2, nome_categoria.getString());		
+		ps.setString(2, nome_categoria.toString().toLowerCase());		
 		
 		ps.executeUpdate();
 	}
@@ -370,7 +370,7 @@ public class DataBase
 	public void segnalaNuovaPartitaCalcio(int id_partita, String titolo_evento) throws SQLException
 	{
 		String titolo = String.format("Nuova partita di calcio disponbile!");
-		String contenuto = String.format(NOTIFICA_NUOVO_EVENTO, CategorieEvento.PARTITA_CALCIO.getString(), titolo_evento);		
+		String contenuto = String.format(NOTIFICA_NUOVO_EVENTO, CategorieEvento.PARTITA_CALCIO.toString(), titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
 		LinkedList<Utente> list_utenti = selectUtentiDiCategoria(CategorieEvento.PARTITA_CALCIO);
 		
@@ -599,7 +599,7 @@ public class DataBase
 		
 		String sql = "SELECT id_u FROM relazione_utente_categoria WHERE nome_categoria=?";	
 		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setString(1, nome_categoria.getString());
+		ps.setString(1, nome_categoria.toString());
 		
 		ResultSet rs = ps.executeQuery();
 		rs.beforeFirst();	
@@ -789,14 +789,14 @@ public class DataBase
 	}
 
 	
-	public void deleteCollegamentoCategoriaUtente(int id_utente, String nome_categoria) throws SQLException
+	public void deleteCollegamentoCategoriaUtente(int id_utente, CategorieEvento nome_categoria) throws SQLException
 	{
 //		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
 		String sql = "DELETE FROM relazione_utente_categoria WHERE id_u=? AND nome_categoria=?" ;
 		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
 		ps.setInt(1, id_utente);
-		ps.setString(2, nome_categoria);
+		ps.setString(2, nome_categoria.toString().toLowerCase());
 		ps.executeUpdate();
 	}
 	
@@ -808,17 +808,13 @@ public class DataBase
 	
 	
 	
-	public Integer existUtente(Utente utente) throws SQLException
+	public Utente existUtente(Utente utente) throws SQLException
 	{
 		utenti = selectUtentiAll();
-		if(utenti.isEmpty())
-			return null;
+		if(utenti.isEmpty()) return null;
 		
 		for(Utente u : utenti)
-		{
-			if(u.equals(utente))
-				return u.getId_utente();
-		}
+			if(u.equals(utente)) return u;
 		return null;
 	}
 

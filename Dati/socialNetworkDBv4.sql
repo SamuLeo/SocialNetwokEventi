@@ -73,7 +73,7 @@ DROP TABLE IF EXISTS `relazione_utente_categoria`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `relazione_utente_categoria` (
   `id_u` int(11) NOT NULL,
-  `nome_categoria` int(11) NOT NULL,
+  `nome_categoria` varchar(50) NOT NULL,
   PRIMARY KEY (`id_u`,`nome_categoria`),
   CONSTRAINT `id_u` FOREIGN KEY (`id_u`) REFERENCES `utente` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

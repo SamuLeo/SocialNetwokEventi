@@ -1,6 +1,5 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 import java.util.LinkedList;
-import java.util.stream.*;
 
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 
@@ -10,28 +9,29 @@ public class Utente  {
 	private String password;
 	private int eta_min;
 	private int eta_max;
-	private LinkedList<CategorieEvento> categorie_di_interesse;
+	private LinkedList<CategorieEvento> categorie_di_interesse = new LinkedList<>();
 	
 	private LinkedList<Evento> eventi;
 	private LinkedList<Notifica> notifiche;
 
-	public Utente(String nome)
-	{
+	public Utente(String nome) {
 		if (nome==null) throw new IllegalArgumentException("Necessario inserire un nome per questo account");
 		this.nome = nome;
 	}
 	
-	public Utente(String nome, String password, int eta_min, int eta_max)
-	{
+	public Utente(String nome, String password) {
 		this(nome);
 		this.password = password;
-		if (eta_min > eta_max) throw new IllegalArgumentException("La fascia di età minima non può superare la massima");
+	}
+	
+	public Utente(String nome, String password, int eta_min, int eta_max) {
+		this(nome, password);
+		//if (eta_min > eta_max) throw new IllegalArgumentException("La fascia di età minima non può superare la massima");
 		this.eta_min = eta_min;
 		this.eta_max = eta_max;
-	}	
+	}
 	
-	public Utente(int id, String nome, String password, int eta_min, int eta_max) 
-	{
+	public Utente(int id, String nome, String password, int eta_min, int eta_max)  {
 		this(nome, password, eta_min, eta_max);
 		id_utente = id;
 	}
@@ -51,12 +51,13 @@ public class Utente  {
 		 else return false;
 	 }
 	 
-	void aggiungiInteresse(CategorieEvento interesse) 
-	{
-		if (!categorie_di_interesse.contains(interesse)) categorie_di_interesse.add(interesse);
+	public void rimuoviInteresse(CategorieEvento interesse) {
+		categorie_di_interesse.remove(interesse);
 	}
 	
-
+	public void aggiungiInteresse(CategorieEvento interesse) {
+		if (!categorie_di_interesse.contains(interesse)) categorie_di_interesse.add(interesse);
+	}
 	 
 	public String getNome() {return nome;}
 	public void setNome(String nome) {this.nome = nome;}

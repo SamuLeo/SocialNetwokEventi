@@ -5,13 +5,13 @@ import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
-import java.util.LinkedList;
 import javax.swing.*;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.Notifica;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 
 public class Grafica {
@@ -294,12 +294,16 @@ public class Grafica {
 	}
 	
 	void creaUtente(String utente, String password) {
-		if (Sessione.insertUtente(new Utente(utente, password))) visualizzaBacheca();
+		if (Sessione.insertUtente(new Utente(utente, password))) visualizzaProfilo();//visualizzaBacheca();
 		else loginPane.ripulisci();
 	}
 	
-	void aggiornaDatiUtente(Integer etm, Integer etM, LinkedList<String> categorie) {
-		//Sessione.aggiornaDatiUtente(etm, etM, categorie);
+	void aggiornaDatiUtente(Integer etm, Integer etM, String[] elencoCategorie, boolean[] selezionata) {
+		if (elencoCategorie == null || selezionata == null || elencoCategorie.length != selezionata.length) return;
+		for (int i=0; i<elencoCategorie.length; i++)
+			if (selezionata[i]) Sessione.aggiungiInteresseUtenteCorrente(CategorieEvento.convertiStringInCategoria(elencoCategorie[i]));
+			else Sessione.eliminaInteresseUtenteCorrente(CategorieEvento.convertiStringInCategoria(elencoCategorie[i]));
+		Sessione.updateFasciaEta(etm, etM);
 	}
 	
 	void aggiungiEvento(Evento e) {
