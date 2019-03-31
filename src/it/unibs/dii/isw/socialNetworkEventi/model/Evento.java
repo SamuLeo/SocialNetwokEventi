@@ -1,11 +1,14 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import java.util.*;
 
 @SuppressWarnings("rawtypes")
-public abstract class Evento {
+public abstract class Evento 
+{
+	private static CategorieEvento nome_categoria = CategorieEvento.DEFAULT;
 	
 	private int id_evento;
 	private Utente utente_creatore;
@@ -135,7 +138,7 @@ public abstract class Evento {
 
 	private boolean data1PrecedenteData2(Calendar data1, Calendar data2)
 	 {
-	  //if(!dataNelFuturo(data1)) return false;
+//	  if(!dataNelFuturo(data1)) return false;
 	  return data1.compareTo(data2) < 0;
 	 }
 	 
@@ -164,19 +167,27 @@ public abstract class Evento {
 	} 
 	 
 	public HashMap<NomeCampi, Campo> getCampi()	{return campi;}
+	
 	public Campo getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
 
 	public LinkedList<Utente> getFruitori() { return fruitori; }
+	
 	public int getNumeroPartecipanti() {return fruitori.size();}
+	
 	public Utente getUtenteCreatore() { return utente_creatore; }
 	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
+	
 	public void setFruitori(LinkedList<Utente> fruitori) {this.fruitori = fruitori;}
 
 	public int getId() {return id_evento;}
 	public void setId(int id) {this.id_evento = id;}
-	public StatoEvento getStato() {return stato;}
-	public void setStato(StatoEvento stato) {this.stato = stato;}
 	
+	public StatoEvento getStato() {return stato;}
+	public void setStato(StatoEvento stato) {this.stato = stato;}	
+	
+	public CategorieEvento getNomeCategoria() {return nome_categoria;}
+	public static void setNomeCategoria(CategorieEvento nomeCategoria) {Evento.nome_categoria = nomeCategoria;}
+
 	@Override
 	public String toString() 
 	{

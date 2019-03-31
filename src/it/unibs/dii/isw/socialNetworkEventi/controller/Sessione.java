@@ -2,6 +2,7 @@ package it.unibs.dii.isw.socialNetworkEventi.controller;
 
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
@@ -50,6 +52,8 @@ public class Sessione
 			e.printStackTrace();
 		}
 	}
+
+	
 	
 	private static void creaLogger()
 	{
@@ -75,6 +79,11 @@ public class Sessione
 		} 
 		catch (SQLException e) {e.printStackTrace();}
 		return false;
+	}
+	
+	public static void setUtente_corrente(Utente utente_corrente) 
+	{
+		Sessione.utente_corrente = utente_corrente;
 	}
 
 	
@@ -108,8 +117,8 @@ public class Sessione
 	
 	
 	/**
-	 * Questo metodo controlla e in caso aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
-	 * oppure se l'evento ha raggiunto la sua conclusione 
+	 * Questo metodo controlla e in caso sia cambiato aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
+	 * se l'evento ha raggiunto la sua conclusione oppure se è concluso
 	 * @return true se lo stato cambia
 	 * @throws SQLException 
 	 */
@@ -119,27 +128,29 @@ public class Sessione
 		//Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
 		//boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
 		boolean DataFineEventoNelFuturo;		
-		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;
-		else DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
+		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) 
+			DataFineEventoNelFuturo= Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()) < 0;		
+		else 
+			DataFineEventoNelFuturo = Calendar.getInstance().compareTo((Calendar)evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()) < 0;
 		int numero_iscritti_attuali = db.getNumeroUtentiDiEvento(evento);
 		int numero_minimo_iscritti = (Integer)evento.getCampo(NomeCampi.PARTECIPANTI).getContenuto();
 		//int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
 		
 		StatoEvento statoEvento = evento.getStato();
 		
-		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")) && (numero_iscritti_attuali < numero_minimo_iscritti))
+		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getString().equals("Aperta")) && (numero_iscritti_attuali < numero_minimo_iscritti))
 		{
 			evento.setStato(StatoEvento.FALLITA);
 			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a FALLITO", evento.getId()));
 			return true;
 		}
-		else if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Aperta")) && (numero_iscritti_attuali > numero_minimo_iscritti))
+		else if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getString().equals("Aperta")) && (numero_iscritti_attuali > numero_minimo_iscritti))
 		{
 			evento.setStato(StatoEvento.CHIUSA);
 			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a CHIUSO", evento.getId()));
 			return true;
 		}
-		else if(DataFineEventoNelFuturo == false && (statoEvento.getCodNomeCampi().equals("Chiusa")))
+		else if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
 		{
 			evento.setStato(StatoEvento.CONCLUSA);
 			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da CHIUSO a CONCLUSO", evento.getId()));
@@ -150,6 +161,7 @@ public class Sessione
 	}
 	
 	
+	
 	public static boolean aggiungiEvento(Evento evento)
 	{
 		try
@@ -157,6 +169,7 @@ public class Sessione
 			db.insertEvento(evento); 
 			iscrizioneUtenteInEvento(evento);
 			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da VALIDO a APERTO", evento.getId()));
+			db.segnalaNuovoEventoAgliInteressati(evento);
 			return true;
 		}
 		catch(SQLException e) {e.printStackTrace();}
@@ -179,54 +192,6 @@ public class Sessione
 		}
 	}
 	
-	
-	public static boolean insertNotifica(Notifica notifica, Utente utente)
-	{
-		try
-		{
-			notifica = db.insertNotifica(notifica); 
-			db.collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
-			return true;
-		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
-	
-	public static void deleteEvento(Evento evento) throws RuntimeException
-	{
-		try
-		{
-			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
-			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
-			if(termine_ritiro_scaduto)
-				throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");
-			else
-			{
-				evento.setStato(StatoEvento.RITIRATA);
-				db.updateStatoPartitaCalcio(evento); 
-				db.segnalaRitiroEvento(evento);
-				logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a RITIRATO", evento.getId()));
-			}
-		}
-		catch(SQLException e)
-		{throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");}
-	}
-	
-	
-	public static ArrayList<Evento> getEventi() {
-		return db.getEventi();
-	}
-	
-	
-	public static PartitaCalcio selectPartita(int id_partita) {
-		return db.selectPartitaCalcio(id_partita);
-	}
-	
-	
 	public static boolean insertUtente(Utente utente) 
 	{
 		try 
@@ -244,43 +209,69 @@ public class Sessione
 		return true;
 	}
 	
-	
-	public static LinkedList<Notifica> getNotificheUtente() 
+	public static boolean aggiungiInteresseUtenteCorrente(CategorieEvento nome_categoria)
 	{
-		
-		LinkedList<Notifica> notifiche = null;
-		
-		try 
+		try
 		{
-			notifiche = db.selectNotificheDiUtente(utente_corrente.getId_utente());
-			utente_corrente.setNotifiche(notifiche);
-		} 
-		catch (SQLException e) 
-		{
-			System.out.println("Errore durante il caricamento delle notifiche utente");
-			e.printStackTrace();
+			if(utente_corrente.getCategorieInteressi().contains(nome_categoria))
+				return true;
+			else
+				db.collegaUtenteCategoria(getUtente_corrente(), nome_categoria);
 		}
-		
-		return notifiche;
-	}
-	
-	
-	public static LinkedList<Notifica> eliminaNotificaUtente(Notifica notifica)
-	{
-		try 
-		{
-			db.deleteCollegamentoNotificaUtente(utente_corrente, notifica);
-			utente_corrente.rimuoviNotifica(notifica);
-		} 
-		catch (SQLException e) 
+		catch(SQLException e)
 		{
 			e.printStackTrace();
-			System.out.println("Errore durante l'eliminazione della notifica selezionata");
+			return false;
 		}
-		
-		return getNotificheUtente();
+		return true;
 	}
 	
+	public static boolean eliminaInteresseUtenteCorrente(String nome_categoria)
+	{
+		try
+		{
+			if(utente_corrente.getCategorieInteressi().contains(nome_categoria))
+				db.deleteCollegamentoCategoriaUtente(getUtente_corrente().getId_utente(), nome_categoria);
+			else
+				return true;
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean updateFasciaEtaUtente(Utente utente)
+	{
+		try
+		{
+			db.updateEtaMinUtente(utente.getId_utente(), utente.getEtaMin());
+			db.updateEtaMaxtente(utente.getId_utente(), utente.getEtaMax());
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean insertNotifica(Notifica notifica, Utente utente)
+	{
+		try
+		{
+			notifica = db.insertNotifica(notifica); 
+			db.collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			return true;
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
 	
 	public static void iscrizioneUtenteInEvento(Evento evento)
 	{
@@ -331,6 +322,94 @@ public class Sessione
 		}
 	}
 	
+	public static void deleteEvento(Evento evento) throws RuntimeException
+	{
+		try
+		{
+			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
+			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
+			if(termine_ritiro_scaduto)
+				throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");
+			else
+			{
+				evento.setStato(StatoEvento.RITIRATA);
+				db.updateStatoPartitaCalcio(evento); 
+				db.segnalaRitiroEvento(evento);
+				logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a RITIRATO", evento.getId()));
+			}
+		}
+		catch(SQLException e)
+		{throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");}
+	}
+	
+	
+	
+	
+	public static PartitaCalcio selectPartita(int id_partita) 
+	{
+		return db.selectPartitaCalcio(id_partita);
+	}
+	
+	
+	public static ArrayList<Evento> getEventi() {
+		return db.getEventi();
+	}
+	
+	
+	public static LinkedList<Notifica> getNotificheUtente() 
+	{
+		
+		LinkedList<Notifica> notifiche = null;
+		
+		try 
+		{
+			notifiche = db.selectNotificheDiUtente(utente_corrente.getId_utente());
+			utente_corrente.setNotifiche(notifiche);
+		} 
+		catch (SQLException e) 
+		{
+			System.out.println("Errore durante il caricamento delle notifiche utente");
+			e.printStackTrace();
+		}
+		
+		return notifiche;
+	}
+	
+	public HashMap<CategorieEvento,LinkedList<Utente>> getPossibiliUtentiInteressati(Utente utente)
+	{
+		
+		try 
+		{
+			return db.selectUtentiDaEventiPassati(utente.getId_utente());
+		} 
+		catch (SQLException e) 
+		{
+			System.out.println("Errore durante il caricamento dei possibili utenti interessati");
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	
+	
+	
+	
+	public static LinkedList<Notifica> eliminaNotificaUtente(Notifica notifica)
+	{
+		try 
+		{
+			db.deleteCollegamentoNotificaUtente(utente_corrente, notifica);
+			utente_corrente.rimuoviNotifica(notifica);
+		} 
+		catch (SQLException e) 
+		{
+			e.printStackTrace();
+			System.out.println("Errore durante l'eliminazione della notifica selezionata");
+		}
+		
+		return getNotificheUtente();
+	}
 	
 	public static void disiscrizioneUtenteEvento(Evento evento) throws RuntimeException{
 		if(utente_corrente == null) throw new RuntimeException("L'utente corrente è null");
@@ -351,9 +430,7 @@ public class Sessione
 		} break;
 		}
 	}
-	
-	
-	
+		
 	public static boolean utenteIscrittoAllaPartita(PartitaCalcio partita)
 	{
 		if(utente_corrente == null)
@@ -371,13 +448,12 @@ public class Sessione
 		
 		return false;
 	}
-
 	
-	public static LinkedList<PartitaCalcio> getEventiUtenteCorrente()
+	public static LinkedList<Evento> getEventiUtenteCorrente()
 	{
 		try
 		{
-			return db.selectPartiteDiUtente(utente_corrente);
+			return db.selectEventiDiUtente(utente_corrente.getId_utente());
 		} 
 		catch (SQLException e) 
 		{
@@ -387,12 +463,8 @@ public class Sessione
 		return null;
 	}
 
-	public static Utente getUtente_corrente() {
+	public static Utente getUtente_corrente() 
+	{
 		return utente_corrente;
-	}
-
-
-	public static void setUtente_corrente(Utente utente_corrente) {
-		Sessione.utente_corrente = utente_corrente;
 	}
 }
