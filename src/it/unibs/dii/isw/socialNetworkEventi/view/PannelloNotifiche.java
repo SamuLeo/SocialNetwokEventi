@@ -91,12 +91,12 @@ public class PannelloNotifiche extends JPanel {
 			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.8), altezzaStringhe);
 			if (contenuto==null) {contenuto=new JLabel("<HTML>" + n.getContenuto() + "</HTML>"); this.add(contenuto);}
 			contenuto.setFont(testo);
-			contenuto.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.8), nRighe*altezzaStringhe);
-			if (elimina==null) {elimina=new JButton("X"); this.add(elimina); elimina.addActionListener(e -> eliminaNotifica(n));}
+			contenuto.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.85), nRighe*altezzaStringhe);
+			if (elimina==null) {elimina=new JButton("❌"); this.add(elimina); elimina.addActionListener(e -> eliminaNotifica(n));}
 			elimina.setFont(testoBottoni);
 			elimina.setBackground(sfondo);
 			elimina.setBorderPainted(false);
-			elimina.setBounds(w/5*4, 15, altezzaStringhe/5*8, altezzaStringhe/5*8);
+			elimina.setBounds(w/5*4, 15, altezzaStringhe*9/5, altezzaStringhe*9/5);
 		}
 		
 		private int calcolaY() {

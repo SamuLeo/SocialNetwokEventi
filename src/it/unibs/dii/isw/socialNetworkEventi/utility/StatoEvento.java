@@ -30,6 +30,7 @@ public enum StatoEvento
 		case "Chiusa" : return StatoEvento.CHIUSA;
 		case "Conclusa" : return StatoEvento.CONCLUSA;
 		case "Fallita" : return StatoEvento.FALLITA;
+		case "Ritirata" : return StatoEvento.RITIRATA;
 		default : return null;
 		}
 	}

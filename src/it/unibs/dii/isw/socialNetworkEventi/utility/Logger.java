@@ -13,8 +13,7 @@ public class Logger
 	File fileDiLog;
 	PrintWriter output;
 	
-	public Logger(String percorsoFile)
-	{
+	public Logger(String percorsoFile){
 		fileDiLog = new File(percorsoFile);
 		
 		try 
@@ -24,9 +23,7 @@ public class Logger
 							new FileOutputStream(fileDiLog,true),"UTF-8"),true);  //il primo true serve per fare l'append su file, il secondo per fare l'autoFlush per println
 			output.flush();
 		} 
-		catch (FileNotFoundException | UnsupportedEncodingException e) 
-		{
-		}
+		catch (FileNotFoundException | UnsupportedEncodingException e) {}
 	}
 	
 	public void scriviLog(String messaggioDiLog)

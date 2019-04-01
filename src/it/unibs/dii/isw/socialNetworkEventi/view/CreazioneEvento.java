@@ -251,21 +251,21 @@ public class CreazioneEvento extends JPanel {
 			
 			if (comboBox.getSelectedItem().equals(categoriaPartita)){
 				Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null, termineRitiroIscrizione = null;
-				//Acquisizione data e ora, l'aggiunta del "+ 1" è posta in corrispondenza del mese, in quanto Java associa lo 0 a Gennaio				
+				//Acquisizione data e ora, l'aggiunta del "- 1" è posta in corrispondenza del mese in quanto Java associa lo 0 a Gennaio				
 				termineIscrizione = Calendar.getInstance();
 				termineIscrizione.set(
 						Integer.parseInt(testoCampiComuniData[0][2].getText()),
 						Integer.parseInt(testoCampiComuniData[0][1].getText())-1,
 						Integer.parseInt(testoCampiComuniData[0][0].getText()),
 						Integer.parseInt(testoCampiComuniOra[0][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[0][1].getText()));
+						Integer.parseInt(testoCampiComuniOra[0][1].getText()),0);
 				dataInizioEvento = Calendar.getInstance();
 				dataInizioEvento.set(
 						Integer.parseInt(testoCampiComuniData[1][2].getText()),
 						Integer.parseInt(testoCampiComuniData[1][1].getText())-1,
 						Integer.parseInt(testoCampiComuniData[1][0].getText()),
 						Integer.parseInt(testoCampiComuniOra[1][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[1][1].getText()));
+						Integer.parseInt(testoCampiComuniOra[1][1].getText()),0);
 				
 				//Questo parametro è opzionale percui si compila solo se è presente
 				if (!testoCampiComuniData[2][2].getText().equals("") || !testoCampiComuniData[2][1].getText().equals("") || !testoCampiComuniData[2][0].getText().equals("") || !testoCampiComuniOra[2][1].getText().equals("") || !testoCampiComuniOra[2][0].getText().equals("")) {
@@ -275,7 +275,7 @@ public class CreazioneEvento extends JPanel {
 							Integer.parseInt(testoCampiComuniData[2][1].getText())-1,
 							Integer.parseInt(testoCampiComuniData[2][0].getText()),
 							Integer.parseInt(testoCampiComuniOra[2][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[2][1].getText()));
+							Integer.parseInt(testoCampiComuniOra[2][1].getText()),0);
 				}
 				//Questo parametro è opzionale percui si compila solo se è presente
 				if (!testoCampiComuniData[3][2].getText().equals("") || !testoCampiComuniData[3][1].getText().equals("") || !testoCampiComuniData[3][0].getText().equals("") || !testoCampiComuniOra[3][1].getText().equals("") || !testoCampiComuniOra[3][0].getText().equals("")) {
@@ -285,12 +285,17 @@ public class CreazioneEvento extends JPanel {
 							Integer.parseInt(testoCampiComuniData[3][1].getText())-1,
 							Integer.parseInt(testoCampiComuniData[3][0].getText()),
 							Integer.parseInt(testoCampiComuniOra[3][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[3][1].getText()));
+							Integer.parseInt(testoCampiComuniOra[3][1].getText()),0);
 				}
 				//Controllo se le date inserite sono tutte nl futuro
 				Calendar adesso = Calendar.getInstance();
 				if (termineIscrizione.before(adesso) || dataInizioEvento.before(adesso) || (dataFineEvento==null? false: dataFineEvento.before(adesso)) || (termineRitiroIscrizione==null? false: termineRitiroIscrizione.before(adesso)))
 					throw new IllegalArgumentException("Necessario inserire date nel futuro");
+				
+				int tolleranza;
+				if (testoCampiComuni[2].getText().equals("")) tolleranza = 0;
+				else tolleranza = Integer.parseInt(testoCampiComuni[2].getText());
+				if (tolleranza <0 ) throw new IllegalArgumentException ("<HTML>La tolleranza è il numero di iscritti che possono esserci o non, oltre alla base obbligatoria espressa cal campo \"Numero Partecipanti\". Pertanto non può essere negativa</HTML>");
 				
 				e = new PartitaCalcio(
 						Grafica.getIstance().chiediUtenteCorrente(),
@@ -304,7 +309,7 @@ public class CreazioneEvento extends JPanel {
 /*Opz.	COMPRESO*/		testoCampiComuni[5].getText(),
 /*Opz.	Data-ora FINE*/	dataFineEvento,
 /*Opz.	Termine ritiro*/termineRitiroIscrizione,
-/*Opz.	Tolleranza*/	(testoCampiComuni[2].getText().equals("") ? null : Integer.parseInt(testoCampiComuni[2].getText())),
+/*Opz.	Tolleranza*/	tolleranza,
 /*Ob.	ETA MIN*/		Integer.parseInt(testoCampiPartitaCalcio[0].getText()),
 /*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
 /*Ob.	GENERE*/		(String)sesso.getSelectedItem());

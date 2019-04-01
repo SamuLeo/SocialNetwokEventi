@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -16,6 +17,7 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Campo;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class SchedaEvento extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -37,15 +39,18 @@ public class SchedaEvento extends JPanel {
 		Y=20+altezzaRighe/5*12;
 		add(titolo);
 		//System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
-		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto())>0;
-		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto) {
-			iscriviti = new JButton("Elimina evento");
+		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
+				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
+				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampi.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
+		//JOptionPane.showMessageDialog(null, termine_ritiro_scaduto + " "+ termineIscrizioneScaduto +" "+ eventoHaSpazio + " " + Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e), "", JOptionPane.INFORMATION_MESSAGE);
+		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
+			iscriviti = new JButton(" 🗑  Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
-		} else if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
-			iscriviti = new JButton("Iscriviti");
+		} else if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e) && eventoHaSpazio && !termineIscrizioneScaduto) {
+			iscriviti = new JButton(" 🖋  Iscriviti");
 			iscriviti.addActionListener(click -> Grafica.getIstance().iscriviEvento(e));
-		} else if (!termine_ritiro_scaduto) {
-			iscriviti = new JButton("Annulla iscrizione");
+		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
+			iscriviti = new JButton(" ✖  Annulla iscrizione");
 			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
 		}
 		if (iscriviti != null) {

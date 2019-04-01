@@ -6,6 +6,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicArrowButton;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
@@ -39,6 +41,7 @@ public class Grafica {
 	PannelloNotifiche pannelloNotifiche;
 	SchedaEvento schedaEvento;
 	PannelloUtente schedaUtente;
+	SceltaInviti invitatore;
 	JComboBox<String> selettoreCategoria = new JComboBox<>();
 	
 	private ComponentListener listenerRidimensionamento = new listenerRidimensionamento();
@@ -51,7 +54,7 @@ public class Grafica {
 	static final Font fontTesto=new Font("DOBBIAMO TROVARE UN FONT CARINO", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
 	static final Color coloreBottoni = new Color(255,255,255);
 	static final Color coloreSfondo = new Color(244,244,244);
-	static final Color coloreBarra = new Color(200,200,200);
+	static final Color coloreBarra = new Color(210,210,210);
 	
 	public void crea() {
 		//Ottenimento icona della finestra
@@ -70,6 +73,12 @@ public class Grafica {
 			calcolaDimensioniStringhe();
 			UIManager.put("OptionPane.messageFont", fontTesto);
 			UIManager.put("OptionPane.buttonFont", fontTestoBottoni);
+			UIManager.put("TextField.font", fontTesto);
+			UIManager.put("Button.background", coloreBottoni);
+			UIManager.put("Button.select", new Color(240,255,245));
+			UIManager.put("ScrollBar.background", coloreSfondo);
+			UIManager.put("ComboBox.selectionBackground", coloreBottoni);
+			UIManager.put("ComboBox.background", coloreBottoni);
 		//Inizializzazione componenti
 			btnNuovoEvento.setFont(fontTestoBottoni);
 			btnNuovoEvento.setBackground(coloreBottoni);
@@ -119,6 +128,7 @@ public class Grafica {
 		try {frame.getContentPane().remove(btnProfilo);} catch (Exception e) {}
 		try {frame.getContentPane().remove(pannelloCentrale);} catch (Exception e) {}
 		try {frame.getContentPane().remove(schedaUtente);} catch (Exception e) {}
+		try {frame.getContentPane().remove(invitatore);} catch (Exception e) {}
 		frame.getContentPane().revalidate();
 	}
 	
@@ -152,6 +162,7 @@ public class Grafica {
 		bacheca = new Bacheca(Sessione.getEventi(), frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-toolbarBacheca.getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -174,6 +185,7 @@ public class Grafica {
 		form = new CreazioneEvento(fontTesto, frame.getContentPane().getWidth(), altezzaStringhe, coloreSfondo);
 		pannelloCentrale = new JScrollPane(form);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraForm.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -196,6 +208,7 @@ public class Grafica {
 		pannelloNotifiche=new PannelloNotifiche(Sessione.getNotificheUtente(), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()-btnProfilo.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -219,6 +232,7 @@ public class Grafica {
 		schedaEvento=new SchedaEvento(e, fontTesto, fontTestoBottoni, altezzaStringhe, frame.getContentPane().getWidth());
 		pannelloCentrale = new JScrollPane(schedaEvento);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
@@ -241,12 +255,32 @@ public class Grafica {
 		schedaUtente = new PannelloUtente(chiediUtenteCorrente(), fontTesto, fontTestoBottoni, altezzaStringhe, frame.getContentPane().getWidth());
 		pannelloCentrale = new JScrollPane(schedaUtente);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
 		frame.getContentPane().revalidate();
 		barraFunzioni.repaint(200);
 		schedaUtente.ridimensiona(frame.getContentPane().getWidth());
+	}
+	
+	public void visualizzaFormInviti(Evento e, CategorieEvento categoria) {
+		frame.setTitle("Scegli chi invitare al tuo evento");
+		svuotaFrame();
+		if (form != null) form.setVisible(false);
+		if (schedaEvento != null) schedaEvento.setVisible(false);
+		if (pannelloNotifiche != null) pannelloNotifiche.setVisible(false);
+		if (bacheca != null) bacheca.setVisible(false);
+		if (schedaUtente != null) schedaUtente.setVisible(false);
+		//Creazione pannello principale
+		invitatore = new SceltaInviti(e, Sessione.UtentiDaEventiPassati(categoria), fontTesto, frame.getContentPane().getWidth(), altezzaStringhe);
+		pannelloCentrale = new JScrollPane(invitatore);
+		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
+		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()));
+		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
+		frame.getContentPane().revalidate();
 	}
 	
 	private void calcolaDimensioniStringhe() {
@@ -278,6 +312,9 @@ public class Grafica {
 			} else if (schedaUtente != null && pannelloCentrale.isVisible() && schedaUtente.isVisible()) {
 				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 				schedaUtente.ridimensiona(frame.getContentPane().getWidth());
+			} else if (invitatore != null && pannelloCentrale.isVisible() && invitatore.isVisible()) {
+				pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()));
+				invitatore.ridimensiona(frame.getContentPane().getWidth());
 			}
 		}
 	}
@@ -308,12 +345,12 @@ public class Grafica {
 	
 	void aggiungiEvento(Evento e) {
 		if (Sessione.aggiungiEvento(e)) {
-			visualizzaBacheca();
-			try {barraForm.remove(btnConfermaCreazioneEvento);} catch (Exception ekkhh) {}
+			try {barraForm.remove(btnConfermaCreazioneEvento);} catch (Exception ex) {}
 			btnConfermaCreazioneEvento = new JButton(" ✔ Conferma");
 			btnConfermaCreazioneEvento.setFont(fontTestoBottoni);
 			btnConfermaCreazioneEvento.setBackground(coloreBottoni);
 			barraForm.add(btnConfermaCreazioneEvento, BorderLayout.CENTER);
+			visualizzaFormInviti(e, e.getNomeCategoria());
 		}	
 		else JOptionPane.showMessageDialog(null, "Impossibile creare l'evento", "Errore DB", JOptionPane.ERROR_MESSAGE);
 	}
@@ -339,9 +376,36 @@ public class Grafica {
 		pannelloNotifiche =new PannelloNotifiche(Sessione.eliminaNotificaUtente(n), frame.getContentPane().getWidth(), fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(pannelloNotifiche);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
+		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
 		pannelloCentrale.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		pannelloCentrale.setPreferredSize(new Dimension(frame.getContentPane().getWidth(),frame.getContentPane().getHeight()-barraFunzioni.getHeight()));
 		frame.getContentPane().add(pannelloCentrale, BorderLayout.CENTER);
 		frame.getContentPane().revalidate();
+	}
+	void invitaUtenteAdEvento (Evento e, Utente invitato) {
+		Sessione.notificaUtentePerEvento(e, invitato);
+	}
+}
+
+final class BellaScrlb extends BasicScrollBarUI {
+	protected void configureScrollBarColors() {
+		thumbColor = Grafica.coloreBarra;
+		thumbDarkShadowColor = Grafica.coloreBarra;
+		thumbHighlightColor = Grafica.coloreBarra;
+		thumbLightShadowColor = Grafica.coloreBarra;
+		trackColor = Grafica.coloreSfondo;
+		trackHighlightColor = Grafica.coloreBarra;
+	}
+	protected JButton createDecreaseButton(int orientation) {
+		JButton button = new BasicArrowButton(orientation);
+	    button.setBackground(Grafica.coloreBottoni);
+	    button.setForeground(Grafica.coloreBarra);
+	    return button;
+	 }
+	protected JButton createIncreaseButton(int orientation) {
+		 JButton button = new BasicArrowButton(orientation);
+		 button.setBackground(Grafica.coloreBottoni);
+		 button.setForeground(Grafica.coloreBarra);
+		 return button;
 	}
 }

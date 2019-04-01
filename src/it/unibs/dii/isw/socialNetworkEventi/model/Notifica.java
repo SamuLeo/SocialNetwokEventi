@@ -48,7 +48,6 @@ public class Notifica implements Serializable
 		builder.append("\ndata : ");
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
 		builder.append(sdf.format(data.getTime()) + "\n");
-
 		return builder.toString();
 	}
 

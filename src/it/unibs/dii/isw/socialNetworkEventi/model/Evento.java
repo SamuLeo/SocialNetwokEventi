@@ -70,7 +70,7 @@ public abstract class Evento
 		if(titolo != null) aggiungiCampo(titolo, false, NomeCampi.TITOLO, "Titolo evento");
 		if(note != null) aggiungiCampo(note, false, NomeCampi.NOTE, "Note aggiuntive ");			
 		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampi.BENEFICI_QUOTA, "Servizi compresi");
-		if(tolleranza != null && tolleranza>0) aggiungiCampo(tolleranza, false, NomeCampi.TOLLERANZA_MAX, "Iscrizioni in esubero");
+		if(tolleranza != null && tolleranza>=0) aggiungiCampo(tolleranza, false, NomeCampi.TOLLERANZA_MAX, "Iscrizioni in esubero");
 		if(data_ora_termine_evento != null)	{
 			if(data1PrecedenteData2(data_ora_termine_evento, data_ora_inizio_evento)) throw new IllegalArgumentException("Necessario inserire una data di termine evento nel futuro e posteriore alla data di inizio evento");
 				aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Fine evento");						
