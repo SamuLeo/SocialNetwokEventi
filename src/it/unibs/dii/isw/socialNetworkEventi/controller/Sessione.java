@@ -13,12 +13,14 @@ import javax.swing.JOptionPane;
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
+import it.unibs.dii.isw.socialNetworkEventi.utility.MsgLog;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
 
 public class Sessione 
 {
+
 	
 	private static Utente utente_corrente;
 	public static void setUtente_corrente(Utente utente_corrente) {Sessione.utente_corrente = utente_corrente;}
@@ -27,6 +29,8 @@ public class Sessione
 	
 	private static  String nome_file_log_sessione ;
 	private static Logger logger;
+	private static  String nome_file_error_sessione;
+	private static Logger error_logger;
 	
 	public static void main(String[] args) throws SQLException 
 	{
@@ -55,10 +59,15 @@ public class Sessione
 		String operatingSystem = System.getProperty("os.name").toLowerCase();
 		
 		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) 
-			nome_file_log_sessione = "Dati//file_log//log_sessione.log";
+			{
+				nome_file_log_sessione = "Dati//file_log//log_sessione.log";
+				nome_file_error_sessione = "Dati//file_log//error_sessione.log";
+			}
 		else if(operatingSystem.indexOf("win") >= 0) 
+		{
 			nome_file_log_sessione = "Dati\\file_log\\log_sessione.log";
-		
+			nome_file_error_sessione = "Dati\\file_log\\error_sessione.log";
+		}		
 		logger = new Logger(nome_file_log_sessione);
 	}
 	
@@ -81,18 +90,23 @@ public class Sessione
 		try 
 		{
 			db.refreshDatiRAM();
-			ArrayList<Evento> eventi = db.getEventi();
-			for(Evento evento : eventi){
-				if(controllaStatoEvento(evento) == true)
-				{	//Stato cambiato
-					db.updateStatoPartitaCalcio(evento);
-					switch(evento.getStato())
-					{
+			HashMap<CategorieEvento, ArrayList<Evento>> eventi = db.getEventi();			
+//			primo for per ottenere tutte le chiavi, il secondo for per ottenere le LinkedList delle categorie di eventi
+			for(CategorieEvento categoria : eventi.keySet())
+			{
+				for(Evento evento : eventi.get(categoria))
+				{
+					if(controllaStatoEvento(evento) == true)
+					{	//Stato cambiato
+						db.updateStatoPartitaCalcio(evento);
+						switch(evento.getStato())
+						{
 						case FALLITA : db.segnalaFallimentoEvento(evento); break;
 						case CHIUSA : db.segnalaChiusuraEvento(evento); break;
 						case CONCLUSA : db.segnalaConclusioneEvento(evento); break;
 						default : break;
-					}
+						}
+					}		
 				}
 			}
 		} 
@@ -125,24 +139,23 @@ public class Sessione
 		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getString().equals("Aperta")) && (numero_iscritti_attuali < numero_minimo_iscritti))
 		{
 			evento.setStato(StatoEvento.FALLITA);
-			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a FALLITO", evento.getId()));
+			logger.scriviLog(String.format(MsgLog.APERTO_FALLITO, evento.getId()));
 			return true;
 		}
 		else if(((DataChiusuraIscrizioniNelFuturo == false  && numero_iscritti_attuali > numero_minimo_iscritti) || (termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)) && (statoEvento.getString().equals("Aperta")))
 		{
 			evento.setStato(StatoEvento.CHIUSA);
-			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a CHIUSO", evento.getId()));
+			logger.scriviLog(String.format(MsgLog.APERTO_CHIUSO, evento.getId()));
 			return true;
 		}
 		else if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
 		{
 			evento.setStato(StatoEvento.CONCLUSA);
-			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da CHIUSO a CONCLUSO", evento.getId()));
+			logger.scriviLog(String.format(MsgLog.CHIUSO_CONCLUSO, evento.getId()));
 			return true;
 		}
 		return false;
 	}
-	
 	
 	
 	public static boolean aggiungiEvento(Evento evento)
@@ -151,12 +164,14 @@ public class Sessione
 		{
 			db.insertEvento(evento); 
 			iscrizioneUtenteInEvento(evento);
-			logger.scriviLog(String.format("Stato dell'evento con id : %d passato da VALIDO a APERTO", evento.getId()));
+			logger.scriviLog(String.format(MsgLog.VALIDO_APERTO, evento.getId()));
 			db.segnalaNuovoEventoAgliInteressati(evento);
 			return true;
 		}
-		catch(SQLException e) {e.printStackTrace();}
-		catch(Exception e) {System.out.println("ECCEZIONE");e.printStackTrace();}
+		catch(SQLException e) {
+			e.printStackTrace();
+			error_logger.scriviLog(String.format(MsgLog.E_AGGIUNTA_EVENTO,evento.getCampo(NomeCampi.TITOLO)));}
+		catch(Exception e) {e.printStackTrace();}
 		return false;
 	}
 	
@@ -175,15 +190,14 @@ public class Sessione
 		}
 	}
 	
-	public static void notificaUtentePerEvento (Evento e, Utente u) {
-		String formato = "Caro utente, è stato invitato da %s all'evento di nome %s";
-		try {
-			String titolo = String.format("Sei stato invitato ad un Evento!");
-			String contenuto = String.format(formato, utente_corrente.getNome(), e.getCampo(NomeCampi.TITOLO) == null? "Evento anonimo" : e.getCampo(NomeCampi.TITOLO).getContenuto());
-			Notifica notifica = new Notifica(titolo, contenuto);
-			notifica = db.insertNotifica(notifica);
-			db.collegaUtenteNotifica(u.getId_utente(), notifica.getIdNotifica());
-		} catch (SQLException exc) {exc.printStackTrace();}
+	public static void notificaUtentePerEvento (Evento evento, Utente utente_destinatario) 
+	{
+		try 
+		{
+			db.segnalaEventoPerUtente(evento, utente_corrente, utente_destinatario);
+		} 
+		catch (SQLException exc) 
+		{exc.printStackTrace();}
 	}
 	
 	public static boolean insertUtente(Utente utente) 
@@ -196,9 +210,8 @@ public class Sessione
 		} 
 		catch (SQLException e) 
 		{
-			System.out.println("L'inserzione utente non è andata a buon fine");
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE);
+//			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE);
 		}
 		return true;
 	}
@@ -219,11 +232,7 @@ public class Sessione
 		return true;
 	}
 
-	public static LinkedList<Utente> UtentiDaEventiPassati(CategorieEvento nomeCategoria) {
-		try {
-			return db.selectUtentiDaEventiPassati(utente_corrente.getId_utente()).get(nomeCategoria);
-		} catch (SQLException e) {e.printStackTrace(); return new LinkedList<>();}
-	}
+
 	
 	public static boolean eliminaInteresseUtenteCorrente(CategorieEvento nome_categoria)
 	{
@@ -241,14 +250,14 @@ public class Sessione
 		return true;
 	}
 	
-	public static boolean updateFasciaEta(int etm, int etM)
+	public static boolean updateFasciaEta(int eta_min, int eta_max)
 	{
 		try
 		{
-			db.updateEtaMinUtente(utente_corrente.getId_utente(), etm);
-			db.updateEtaMaxtente(utente_corrente.getId_utente(), etM);
-			utente_corrente.setEtaMin(etm);
-			utente_corrente.setEtaMax(etM);
+			db.updateEtaMinUtente(utente_corrente.getId_utente(), eta_min);
+			db.updateEtaMaxtente(utente_corrente.getId_utente(), eta_max);
+			utente_corrente.setEtaMin(eta_min);
+			utente_corrente.setEtaMax(eta_max);
 		}
 		catch(SQLException e)
 		{
@@ -277,19 +286,17 @@ public class Sessione
 	{
 		if(utente_corrente == null)
 		{
-			System.out.println("L'utente corrente è null");
 			return;
 		}
 		
-		switch(evento.getClass().getSimpleName()) {
-		case "PartitaCalcio" : 
+		switch(evento.getNomeCategoria()) {
+		case PARTITA_CALCIO : 
 			{
 				PartitaCalcio partita = (PartitaCalcio)evento;
 				try
 				{
-					if(utenteIscrittoAllaPartita(partita))
+					if(utenteIscrittoInEvento(partita))
 					{
-						System.out.println("Utente già iscritto alla partita");
 						return;
 					}	
 					int numero_iscritti_attuali = db.getNumeroUtentiDiEvento(partita);
@@ -299,20 +306,19 @@ public class Sessione
 					//se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
 					if((numero_iscritti_attuali == (numero_massimo_iscritti_possibili-1)) && termine_ritiro_scaduto)
 					{
-						db.collegaUtentePartita(utente_corrente, partita);
+						db.collegaUtenteEvento(utente_corrente, partita);
 						db.segnalaChiusuraEvento(partita);
 						partita.setStato(StatoEvento.CHIUSA);
 						db.updateStatoPartitaCalcio(partita);
-						logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a CHIUSO", evento.getId()));
+						logger.scriviLog(String.format(MsgLog.APERTO_CHIUSO, evento.getId()));
 					}
 					else if (numero_iscritti_attuali < numero_massimo_iscritti_possibili)
-						db.collegaUtentePartita(utente_corrente, partita);
+						db.collegaUtenteEvento(utente_corrente, partita);
 					else
 						return;
 				} 
 				catch (SQLException e) 
 				{
-					System.out.println("Errore durante l'iscrizione dell'utente corrente alla partita selezionata");
 					e.printStackTrace();
 				}
 			}
@@ -334,7 +340,7 @@ public class Sessione
 				evento.setStato(StatoEvento.RITIRATA);
 				db.updateStatoPartitaCalcio(evento); 
 				db.segnalaRitiroEvento(evento);
-				logger.scriviLog(String.format("Stato dell'evento con id : %d passato da APERTO a RITIRATO", evento.getId()));
+				logger.scriviLog(String.format(MsgLog.APERTO_RITIRATO, evento.getId()));
 			}
 		}
 		catch(SQLException e)
@@ -342,8 +348,7 @@ public class Sessione
 	}
 	
 	
-	public static PartitaCalcio selectPartita(int id_partita) {return db.selectPartitaCalcio(id_partita);}
-	public static ArrayList<Evento> getEventi() {return db.getEventi();}
+	public static HashMap<CategorieEvento,ArrayList<Evento>> getEventi() {return db.getEventi();}
 	
 	
 	public static LinkedList<Notifica> getNotificheUtente() 
@@ -354,7 +359,6 @@ public class Sessione
 			utente_corrente.setNotifiche(notifiche);
 		} 
 		catch (SQLException e) {
-			System.out.println("Errore durante il caricamento delle notifiche utente");
 			e.printStackTrace();
 		}
 		return notifiche;
@@ -365,10 +369,16 @@ public class Sessione
 		try {
 			return db.selectUtentiDaEventiPassati(utente.getId_utente());
 		} catch (SQLException e) {
-			System.out.println("Errore durante il caricamento dei possibili utenti interessati");
+			error_logger.scriviLog(MsgLog.E_RICERCA_POSSIBILI_U_INTERESSATI);
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static LinkedList<Utente> getUtentiDaEventiPassati(CategorieEvento nomeCategoria) {
+		try {
+			return db.selectUtentiDaEventiPassati(utente_corrente.getId_utente()).get(nomeCategoria);
+		} catch (SQLException e) {e.printStackTrace(); return new LinkedList<>();}
 	}
 
 	
@@ -383,7 +393,6 @@ public class Sessione
 		catch (SQLException e) 
 		{
 			e.printStackTrace();
-			System.out.println("Errore durante l'eliminazione della notifica selezionata");
 		}
 		
 		return getNotificheUtente();
@@ -397,39 +406,43 @@ public class Sessione
 		if(termine_ritiro_scaduto)
 			throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
 		
-		switch(evento.getClass().getSimpleName()) {
-			case "PartitaCalcio" : 
-				try {
+		switch(evento.getNomeCategoria()) 
+		{
+			case PARTITA_CALCIO : 
+				try 
+				{
 					PartitaCalcio partita = (PartitaCalcio)evento;
-					if(!utenteIscrittoAllaPartita(partita)) throw new RuntimeException ("Utente non iscritto alla partita");	
-					db.deleteCollegamentoPartitaCalcioUtente(utente_corrente.getId_utente(), partita.getId());
-				} catch (SQLException e) {e.printStackTrace();}
+					if(!utenteIscrittoInEvento(partita)) throw new RuntimeException ("Utente non iscritto alla partita");	
+					db.deleteCollegamentoEventoUtente(utente_corrente.getId_utente(), partita);
+					break;
+				} 
+				catch (SQLException e) 
+				{e.printStackTrace();}
+		default:
 			break;
 		}
 	}
 		
-	public static boolean utenteIscrittoAllaPartita(PartitaCalcio partita)
+	public static boolean utenteIscrittoInEvento(Evento evento)
 	{
 		if(utente_corrente == null)
-			System.out.println("L'utente corrente è null");
+			return false;
 		
 		try {
-			return db.existUtenteInPartita(utente_corrente, partita);
+			return db.existUtenteInEvento(utente_corrente, evento);
 		} 
 		catch (SQLException e) {
-			System.out.println("L'utente non è iscritto alla partita selezionata");
 			e.printStackTrace();
 		}
 		return false;
 	}
 	
-	public static LinkedList<Evento> getEventiUtenteCorrente()
+	public static HashMap<CategorieEvento,LinkedList<Evento>> getEventiUtenteCorrente()
 	{
 		try {
 			return db.selectEventiDiUtente(utente_corrente.getId_utente());
 		} 
 		catch (SQLException e) {
-			System.out.println("Errore durante il caricamento degli eventi utente");
 			e.printStackTrace();
 		}
 		return null;

@@ -46,10 +46,10 @@ public class SchedaEvento extends JPanel {
 		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
-		} else if (!Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e) && eventoHaSpazio && !termineIscrizioneScaduto) {
+		} else if (!Sessione.utenteIscrittoInEvento((PartitaCalcio)e) && eventoHaSpazio && !termineIscrizioneScaduto) {
 			iscriviti = new JButton(" 🖋  Iscriviti");
 			iscriviti.addActionListener(click -> Grafica.getIstance().iscriviEvento(e));
-		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e)) {
+		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoInEvento((PartitaCalcio)e)) {
 			iscriviti = new JButton(" ✖  Annulla iscrizione");
 			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
 		}

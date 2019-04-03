@@ -24,14 +24,14 @@ public class DataBase
 	private static final String NOTIFICA_CHIUSURA_EVENTO 	= "Caro utente,\n l'evento %s a cui si era iscritto ha raggiunto il numero massimo si iscrizioni, per tanto si svolgerà";
 	private static final String NOTIFICA_RITIRO_EVENTO 		= "Caro utente,\n siamo spiacenti: l'evento %s a cui era iscritto è stato ritirato";
 	private static final String NOTIFICA_NUOVO_EVENTO 		= "Caro utente, la informiamo che un nuovo evento della categoria %s dal nome %s è disponibile";
-
-	private static final String tabelle_db_eventi[][] = {{CategorieEvento.PARTITA_CALCIO.toString().toLowerCase(),"relazione_utente_partita"}};
+	private static final String NOTIFICA_PER_INVITO_UTENTE	= "Caro utente, è stato invitato da %s all'evento di nome %s";
+	private static final String tabelle_db_eventi[][] = {{CategorieEvento.PARTITA_CALCIO.getString(),"relazione_utente_partita"}};
 
 	
 	private Connection con;
-	private ArrayList<Evento> eventi;
+	private HashMap<CategorieEvento,ArrayList<Evento>> eventi;
 	private ArrayList<Utente> utenti;
-	public ArrayList<Evento> getEventi() {return eventi;}
+	public HashMap<CategorieEvento,ArrayList<Evento>> getEventi() {return eventi;}
 	public ArrayList<Utente> getUtenti() {return utenti;}
 	
 //	Connessione a mysql creata tramite pattern Singleton
@@ -49,7 +49,7 @@ public class DataBase
 			
 			con = dataSource.getConnection();
 			
-			eventi = new ArrayList<>();
+			eventi = new HashMap<CategorieEvento,ArrayList<Evento>>();
 			utenti = new ArrayList<>();
 		}
 		return con;
@@ -75,9 +75,9 @@ public class DataBase
 	
 	public Evento insertEvento(Evento evento) throws SQLException
 	{
-		switch(evento.getClass().getSimpleName())
+		switch(evento.getNomeCategoria())
 		{
-		case "PartitaCalcio" : 
+		case PARTITA_CALCIO : 
 			{
 				//Estrazione campi dall'oggetto evento: obbligatori
 				int id_creatore									= evento.getUtenteCreatore().getId_utente();
@@ -153,6 +153,8 @@ public class DataBase
 		ResultSet rs = ps.getGeneratedKeys();	
 		rs.next();
 		utente.setId_utente(rs.getInt(1));
+		
+		utenti = selectUtentiAll();
 
 		return utente;
 	}
@@ -178,28 +180,31 @@ public class DataBase
 	}
 	
 	
-	public void /*int*/ collegaUtenteNotifica(int id_utente, int id_notifica) throws SQLException
+	public void collegaUtenteNotifica(int id_utente, int id_notifica) throws SQLException
 	{	    
 		String sql = "INSERT INTO relazione_utente_notifica (id_user, id_notifica) VALUES (?,?)";
 		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setInt(1, id_utente);
 		ps.setInt(2, id_notifica);		
 		ps.executeUpdate();
-		//ResultSet rs = ps.getGeneratedKeys();
-		//rs.next();
-		//return rs.getInt(1);
 	}
 	
-	public void /*int*/ collegaUtentePartita(Utente utente, PartitaCalcio partita_calcio) throws SQLException
-	{	    
-		String sql = "INSERT INTO relazione_utente_partita (id_utente, id_partita) VALUES (?,?)";
-		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-		ps.setInt(1, utente.getId_utente());
-		ps.setInt(2, partita_calcio.getId());		
-		ps.executeUpdate();
-		//ResultSet rs = ps.getGeneratedKeys();	
-		//rs.next();
-		//return rs.getInt(1);
+	public void collegaUtenteEvento(Utente utente, Evento evento) throws SQLException
+	{	
+		switch(evento.getNomeCategoria())
+		{
+		case PARTITA_CALCIO:
+			{
+				String sql = "INSERT INTO relazione_utente_partita (id_utente, id_partita) VALUES (?,?)";
+				PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				ps.setInt(1, utente.getId_utente());
+				ps.setInt(2, evento.getId());		
+				ps.executeUpdate();
+				break;
+			}
+		default:
+			break;
+		}
 	}
 	
 	
@@ -213,29 +218,32 @@ public class DataBase
 	}
 	
 
-	public void segnalaFallimentoEvento(Evento evento) throws SQLException {
+	public void segnalaFallimentoEvento(Evento evento) throws SQLException 
+	{
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
 
-		switch(evento.getClass().getSimpleName()) {
-			case "PartitaCalcio" :
-					segnalaFallimentoPartitaCalcio(evento.getId(), titolo_evento);
+		switch(evento.getNomeCategoria()) 
+		{
+			case PARTITA_CALCIO :
+					segnalaFallimentoPartitaCalcio((PartitaCalcio)evento, titolo_evento);
 					break;
 			default : break;
 		}
 	}
 	
 	
-	public void segnalaFallimentoPartitaCalcio(int id_partita, String titolo_evento) throws SQLException {
+	public void segnalaFallimentoPartitaCalcio(PartitaCalcio partita, String titolo_evento) throws SQLException 
+	{
 		String titolo = String.format("Evento %s fallito", titolo_evento);
 		String contenuto = String.format(NOTIFICA_FALLIMENTO_EVENTO,titolo_evento);	
 		Notifica notifica = new Notifica(titolo, contenuto);
 		notifica = insertNotifica(notifica);
-		LinkedList<Utente>list_utenti = selectUtentiDiPartita(id_partita);
+		LinkedList<Utente>list_utenti = selectUtentiDiEvento(partita);
 		
 		for(Utente utente : list_utenti)
 		{
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
-			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+			deleteCollegamentoEventoUtente(utente.getId_utente(), partita);
 		}
 	}
 
@@ -244,7 +252,7 @@ public class DataBase
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
 		switch(evento.getClass().getSimpleName()) {
 			case "PartitaCalcio" :
-					segnalaConclusionePartitaCalcio(evento.getId(), titolo_evento);
+					segnalaConclusionePartitaCalcio((PartitaCalcio)evento, titolo_evento);
 					break;
 			default : break;
 		}
@@ -252,17 +260,17 @@ public class DataBase
 	}
 	
 	
-	public void segnalaConclusionePartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	public void segnalaConclusionePartitaCalcio(PartitaCalcio partita, String titolo_evento) throws SQLException
 	{
 		String titolo = String.format("Evento %s concluso", titolo_evento);
 		String contenuto = String.format(NOTIFICA_CONCLUSIONE_EVENTO,titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = selectUtentiDiPartita(id_partita);
+		LinkedList<Utente> list_utenti = selectUtentiDiEvento(partita);
 		
 		for(Utente utente : list_utenti)
 		{
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
-			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+			deleteCollegamentoEventoUtente(utente.getId_utente(), partita);
 		}
 	}
 	
@@ -271,19 +279,19 @@ public class DataBase
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
 		switch(evento.getClass().getSimpleName()) {
 			case "PartitaCalcio" : 
-					segnalaChiusuraPartitaCalcio(evento.getId(), titolo_evento);
+					segnalaChiusuraPartitaCalcio((PartitaCalcio)evento, titolo_evento);
 					break;
 			default : break;
 		}
 	}
 	
 	
-	public void segnalaChiusuraPartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	public void segnalaChiusuraPartitaCalcio(PartitaCalcio partita, String titolo_evento) throws SQLException
 	{
 		String titolo = String.format("Iscrizioni dell'evento %s concluse", titolo_evento);
 		String contenuto = String.format(NOTIFICA_CHIUSURA_EVENTO, titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = selectUtentiDiPartita(id_partita);
+		LinkedList<Utente> list_utenti = selectUtentiDiEvento(partita);
 		
 		for(Utente utente : list_utenti)
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
@@ -295,24 +303,24 @@ public class DataBase
 		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
 		switch(evento.getClass().getSimpleName()) {
 			case "PartitaCalcio" : 
-					segnalaRitiroPartitaCalcio(evento.getId(), titolo_evento);
+					segnalaRitiroPartitaCalcio((PartitaCalcio)evento, titolo_evento);
 					break;
 			default : break;
 		}
 	}
 	
 	
-	public void segnalaRitiroPartitaCalcio(int id_partita, String titolo_evento) throws SQLException
+	public void segnalaRitiroPartitaCalcio(PartitaCalcio partita, String titolo_evento) throws SQLException
 	{
 		String titolo = String.format("Partita %s ritirata", titolo_evento);
 		String contenuto = String.format(NOTIFICA_RITIRO_EVENTO, titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = selectUtentiDiPartita(id_partita);
+		LinkedList<Utente> list_utenti = selectUtentiDiEvento(partita);
 		
 		for(Utente utente : list_utenti)
 		{
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
-			deleteCollegamentoPartitaCalcioUtente(utente.getId_utente(), id_partita);
+			deleteCollegamentoEventoUtente(utente.getId_utente(), partita);
 		}
 	}
 	
@@ -335,20 +343,44 @@ public class DataBase
 		String titolo = String.format("Nuova partita di calcio disponbile!");
 		String contenuto = String.format(NOTIFICA_NUOVO_EVENTO, CategorieEvento.PARTITA_CALCIO.toString(), titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
-		LinkedList<Utente> list_utenti = selectUtentiCuiPiaceCategoria(CategorieEvento.PARTITA_CALCIO);
+		LinkedList<Utente> list_utenti = selectUtentiInteressatiACategoria(CategorieEvento.PARTITA_CALCIO);
+//		rimozione utente creatore per non notificarlo del suo evento appena creato in caso abbia mostrato interesse verso la categoria dell'evento da lui creato
+		list_utenti.remove(selectPartitaCalcio(id_partita).getUtenteCreatore());
 		
 		for(Utente utente : list_utenti)
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
 	}
 	
 	
+	public void segnalaEventoPerUtente(Evento evento, Utente utente_mittente, Utente utente_destinatario) throws SQLException
+	{
+		String nome_categoria = evento.getNomeCategoria().getString().replaceAll("_", " di ");
+		String titolo = String.format("Sei stato invitato ad un nuovo evento della categoria %s!", nome_categoria);
+		String contenuto = String.format(NOTIFICA_PER_INVITO_UTENTE, utente_mittente.getNome(), evento.getCampo(NomeCampi.TITOLO).getContenuto());
+		Notifica notifica = new Notifica(titolo, contenuto);
+		
+		notifica = insertNotifica(notifica);
+		collegaUtenteNotifica(utente_destinatario.getId_utente(), notifica.getIdNotifica());
+	}
+	
 /*
  * READ : OPERAZIONI DI SELECT
  */
 	
-	public ArrayList<Evento> selectEventiAll() throws SQLException
+	public HashMap<CategorieEvento,ArrayList<Evento>> selectEventiAll() throws SQLException
 	{
-		ArrayList<Evento> eventi = new ArrayList<>();
+		HashMap<CategorieEvento,ArrayList<Evento>> eventi = new HashMap<CategorieEvento,ArrayList<Evento>>();
+		
+		eventi.put(CategorieEvento.PARTITA_CALCIO, selectParititeCalcioAll());
+		
+		return eventi;
+	}
+
+	
+	public ArrayList<Evento> selectParititeCalcioAll() throws SQLException
+	{
+		ArrayList<Evento> partite = new ArrayList<Evento>();
+	
 		String sql = "SELECT id, id_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti,"
 				+ " costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione,"
 				+ " tolleranza_max, stato, eta_minima, eta_massima, genere FROM partita_calcio";
@@ -368,10 +400,7 @@ public class DataBase
 			Calendar data_ora_termine_ritiro_iscrizione = Calendar.getInstance(); 
 				if (rs.getTimestamp(12) != null) data_ora_termine_ritiro_iscrizione.setTimeInMillis(rs.getTimestamp(12).getTime()); 
 				else data_ora_termine_ritiro_iscrizione=null;
-			/* Logica per gestione degli eventi scaduti che non dovrebbe stare qui	
-			if(Calendar.getInstance().compareTo(data_ora_termine_ultimo_iscrizione) > 0) 
-				segnalaFallimentoPartitaCalcio(id_partita, titolo_evento);
-			*/
+			
 			Utente creatore = selectUtente(rs.getInt(2));
 			String string_stato = rs.getString(14);
 			
@@ -394,15 +423,18 @@ public class DataBase
 					(Integer)rs.getInt(16),
 					(String)rs.getString(17));
 
-				partita.setFruitori(selectUtentiDiPartita(partita.getId()));
-				eventi.add(partita);
+				partita.setFruitori(selectUtentiDiEvento(partita));
+				partite.add(partita);
 		}
-		return eventi;
+		return partite;
 	}
-
 	
-	public PartitaCalcio selectPartitaCalcio(int id) {
-		for (Evento e : eventi)
+	
+	public PartitaCalcio selectPartitaCalcio(int id) 
+	{
+		if(eventi == null)
+			return null;
+		for (Evento e : eventi.get(CategorieEvento.PARTITA_CALCIO))
 			if (e instanceof PartitaCalcio && ((PartitaCalcio)e).getId() == id) return (PartitaCalcio)e;
 		return null;
 	}
@@ -419,7 +451,7 @@ public class DataBase
 		while(rs.next())
 		{		
 			Utente utente = new Utente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5));	
-			utente.setCategorieInteressi(selectCategorieUtente(utente.getId_utente()));
+			utente.setCategorieInteressi(selectCateorieDiUtente(utente.getId_utente()));
 			utente.setEventi(selectEventiDiUtente(utente.getId_utente()));
 			utente.setNotifiche(selectNotificheDiUtente(utente.getId_utente()));
 			utenti.add(utente);
@@ -472,28 +504,42 @@ public class DataBase
 	}
 	
 	
-	public LinkedList<Evento> selectEventiDiUtente(int id_utente) throws SQLException
+	public HashMap<CategorieEvento,LinkedList<Evento>> selectEventiDiUtente(int id_utente) throws SQLException
 	{
-		LinkedList<Evento> partite = new LinkedList<>();
-		String sql = "SELECT id_partita FROM relazione_utente_partita WHERE id_utente=?";		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setInt(1, id_utente);
+		HashMap<CategorieEvento,LinkedList<Evento>> hashmap = new HashMap<CategorieEvento,LinkedList<Evento>>();
+		if(eventi == null)
+			return null;
 		
-		ResultSet rs = ps.executeQuery();		
-		rs.beforeFirst();		
-		while(rs.next())
-			partite.add(selectPartitaCalcio(rs.getInt(1)));
-		return partite;
+		for(CategorieEvento categoria : eventi.keySet())
+		{
+			LinkedList<Evento> list = new LinkedList<>();
+			for(Evento evento : eventi.get(categoria))
+				if(evento.getFruitori().contains(selectUtente(id_utente)))
+					list.add(evento);
+			hashmap.put(categoria, list);
+		}		
+		return hashmap;
+//		String sql = "SELECT id_partita FROM relazione_utente_partita WHERE id_utente=?";		
+//		PreparedStatement ps = getConnection().prepareStatement(sql);
+//		ps.setInt(1, id_utente);
+//
+//		ResultSet rs = ps.executeQuery();		
+//		rs.beforeFirst();		
+//		while(rs.next())
+//			eventi.add(selectPartitaCalcio(rs.getInt(1)));		
+//		}
+//		return partite;
 	}
 	
 	
-	public LinkedList<Utente> selectUtentiDiPartita(int id_partita) throws SQLException
+	public LinkedList<Utente> selectUtentiDiEvento(Evento evento) throws SQLException
 	{
+		
 		LinkedList<Utente> utenti = new LinkedList<>();
 		
 		String sql = "SELECT id_utente FROM relazione_utente_partita WHERE id_partita=?";		
 		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setInt(1, id_partita);
+		ps.setInt(1, evento.getId());
 		
 		ResultSet rs = ps.executeQuery();		
 		rs.beforeFirst();		
@@ -502,7 +548,7 @@ public class DataBase
 		return utenti;
 	}
 	
-	private LinkedList<CategorieEvento> selectCategorieUtente(int id_utente) throws SQLException
+	private LinkedList<CategorieEvento> selectCateorieDiUtente(int id_utente) throws SQLException
 	{
 		LinkedList<CategorieEvento> categorie = new LinkedList<>();
 		
@@ -520,7 +566,7 @@ public class DataBase
 		return categorie;
 	}
 	
-	public LinkedList<Utente> selectUtentiCuiPiaceCategoria(CategorieEvento nome_categoria) throws SQLException
+	public LinkedList<Utente> selectUtentiInteressatiACategoria(CategorieEvento nome_categoria) throws SQLException
 	{
 		LinkedList<Utente> utenti = new LinkedList<>();
 		String sql = "SELECT id_u FROM relazione_utente_categoria WHERE nome_categoria=?";	
@@ -547,7 +593,8 @@ public class DataBase
 	}
 	
 
-	public HashMap<CategorieEvento,LinkedList<Utente>> selectUtentiDaEventiPassati(int id_utente_creatore) throws SQLException {
+	public HashMap<CategorieEvento,LinkedList<Utente>> selectUtentiDaEventiPassati(int id_utente_creatore) throws SQLException 
+	{
 		HashMap<CategorieEvento,LinkedList<Utente>> hash_map= new HashMap<>();
 		String sql1 = "SELECT id FROM %s WHERE id_creatore=?";
 		String tabella, sql_con_nome_tabella, sql2, nome_tabella_relazione, sql_con_nome_relazione;
@@ -563,12 +610,13 @@ public class DataBase
 			
 			rs1.beforeFirst();
 			while(rs1.next()) {
-				sql2 = "SELECT id_utente FROM %s WHERE id_partita=?";
+				sql2 = "SELECT id_utente FROM %s WHERE id_partita=? AND id_utente!=?";
 				nome_tabella_relazione = tabelle_db_eventi[i][1];
 				sql_con_nome_relazione = String.format(sql2, nome_tabella_relazione);
 				
 				PreparedStatement ps2 = getConnection().prepareStatement(sql_con_nome_relazione);
 				ps2.setInt(1, rs1.getInt(1));
+				ps2.setInt(2, id_utente_creatore);
 				ResultSet rs2 = ps2.executeQuery();
 				
 				rs2.beforeFirst();
@@ -681,13 +729,20 @@ public class DataBase
 	}
 	
 	
-	public void deleteCollegamentoPartitaCalcioUtente(int id_utente, int id_partita) throws SQLException {
+	public void deleteCollegamentoEventoUtente(int id_utente, Evento evento) throws SQLException {
 //		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
-		String sql = "DELETE FROM relazione_utente_partita WHERE id_utente=? AND id_partita=?" ;
-		PreparedStatement ps = getConnection().prepareStatement(sql);
-		ps.setInt(1, id_utente);
-		ps.setInt(2, id_partita);
-		ps.executeUpdate();
+		switch(evento.getNomeCategoria())
+		{
+		case PARTITA_CALCIO:
+			{				
+				String sql = "DELETE FROM relazione_utente_partita WHERE id_utente=? AND id_partita=?" ;
+				PreparedStatement ps = getConnection().prepareStatement(sql);
+				ps.setInt(1, id_utente);
+				ps.setInt(2, evento.getId());
+				ps.executeUpdate();
+				break;
+			}
+		}
 	}
 
 	
@@ -714,12 +769,14 @@ public class DataBase
 		return null;
 	}
 
-	public boolean existUtenteInPartita(Utente utente, PartitaCalcio partita) throws SQLException {
-		LinkedList<Evento> partite = selectEventiDiUtente(utente.getId_utente());
+	public boolean existUtenteInEvento(Utente utente, Evento evento) throws SQLException 
+	{
+		LinkedList<Evento> partite = selectEventiDiUtente(utente.getId_utente()).get(evento.getNomeCategoria());
 		if(partite == null)
 			return false;
-		for(Evento elemento : partite) {
-			if(elemento.getId() == partita.getId())
+		for(Evento elemento : partite) 
+		{
+			if(elemento.getId() == evento.getId())
 				return true;
 		}
 		return false;
@@ -735,4 +792,6 @@ public class DataBase
 		String dateTime = sdf.format(dt);
 		return dateTime;
 	}
+	
+	
 }

@@ -1,4 +1,5 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
@@ -11,7 +12,7 @@ public class Utente  {
 	private int eta_max;
 	private LinkedList<CategorieEvento> categorie_di_interesse = new LinkedList<>();
 	
-	private LinkedList<Evento> eventi;
+	private HashMap<CategorieEvento,LinkedList<Evento>> eventi;
 	private LinkedList<Notifica> notifiche;
 
 	public Utente(String nome) {
@@ -26,7 +27,7 @@ public class Utente  {
 	
 	public Utente(String nome, String password, int eta_min, int eta_max) {
 		this(nome, password);
-		//if (eta_min > eta_max) throw new IllegalArgumentException("La fascia di età minima non può superare la massima");
+//		if (eta_min > eta_max) throw new IllegalArgumentException("La fascia di età minima non può superare la massima");
 		this.eta_min = eta_min;
 		this.eta_max = eta_max;
 	}
@@ -73,8 +74,8 @@ public class Utente  {
 	public int getEtaMax() {return eta_max;}
 	public void setEtaMax(int etaMax) {this.eta_max = etaMax;}
 	
-	public LinkedList<Evento> getEventi() {return eventi;}
-	public void setEventi(LinkedList<Evento> eventi) {this.eventi = eventi;}
+	public HashMap<CategorieEvento,LinkedList<Evento>> getEventi() {return eventi;}
+	public void setEventi(HashMap<CategorieEvento,LinkedList<Evento>> eventi) {this.eventi = eventi;}
 
 	public LinkedList<Notifica> getNotifiche() {return notifiche;}
 	public void setNotifiche(LinkedList<Notifica> notifiche) {this.notifiche = notifiche;}

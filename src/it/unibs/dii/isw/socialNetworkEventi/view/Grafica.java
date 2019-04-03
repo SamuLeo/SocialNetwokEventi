@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -159,7 +162,12 @@ public class Grafica {
 		//Se la Bacheca è già in mostra, va solo aggiornata
 		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
 		//JOptionPane.showMessageDialog(null, "Frame: " + frame.getWidth() + " C.P.: " + frame.getContentPane().getWidth() + " Pannello: " +pannelloCentrale.getWidth(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
-		bacheca = new Bacheca(Sessione.getEventi(), frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
+		HashMap<CategorieEvento,ArrayList<Evento>> hashmap = Sessione.getEventi();
+		ArrayList<Evento> eventi = new ArrayList<>();
+		for(CategorieEvento categoria : hashmap.keySet())
+			for(Evento evento : hashmap.get(categoria))
+				eventi.add(evento);
+		bacheca = new Bacheca(eventi, frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());
@@ -273,7 +281,7 @@ public class Grafica {
 		if (bacheca != null) bacheca.setVisible(false);
 		if (schedaUtente != null) schedaUtente.setVisible(false);
 		//Creazione pannello principale
-		invitatore = new SceltaInviti(e, Sessione.UtentiDaEventiPassati(categoria), fontTesto, frame.getContentPane().getWidth(), altezzaStringhe);
+		invitatore = new SceltaInviti(e, Sessione.getUtentiDaEventiPassati(categoria), fontTesto, frame.getContentPane().getWidth(), altezzaStringhe);
 		pannelloCentrale = new JScrollPane(invitatore);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());

@@ -8,7 +8,7 @@ import java.util.*;
 @SuppressWarnings("rawtypes")
 public abstract class Evento 
 {
-	private static CategorieEvento nome_categoria = CategorieEvento.DEFAULT;
+	private CategorieEvento nome_categoria = CategorieEvento.DEFAULT;
 	
 	private int id_evento;
 	private Utente utente_creatore;
@@ -67,7 +67,10 @@ public abstract class Evento
 			) throws IllegalArgumentException {
 		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo);
 
-		if(titolo != null) aggiungiCampo(titolo, false, NomeCampi.TITOLO, "Titolo evento");
+		if(titolo != null) 
+			aggiungiCampo(titolo, false, NomeCampi.TITOLO, "Titolo evento");
+		else
+			aggiungiCampo("Evento Anonimo", false, NomeCampi.TITOLO, "Titolo evento");			
 		if(note != null) aggiungiCampo(note, false, NomeCampi.NOTE, "Note aggiuntive ");			
 		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampi.BENEFICI_QUOTA, "Servizi compresi");
 		if(tolleranza != null && tolleranza>=0) aggiungiCampo(tolleranza, false, NomeCampi.TOLLERANZA_MAX, "Iscrizioni in esubero");
@@ -186,7 +189,7 @@ public abstract class Evento
 	public void setStato(StatoEvento stato) {this.stato = stato;}	
 	
 	public CategorieEvento getNomeCategoria() {return nome_categoria;}
-	public static void setNomeCategoria(CategorieEvento nomeCategoria) {Evento.nome_categoria = nomeCategoria;}
+	public  void setNomeCategoria(CategorieEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
 
 	@Override
 	public String toString() 
