@@ -8,7 +8,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
