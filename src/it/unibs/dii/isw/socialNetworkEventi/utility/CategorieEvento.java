@@ -4,7 +4,8 @@ public enum CategorieEvento
 {
 
 	DEFAULT("Default"),
-	PARTITA_CALCIO("partita_calcio"); //WARNING : non cambiare la string, coincide con il nome della tabella a livello DB
+	PARTITA_CALCIO("partita_calcio"), //WARNING : non cambiare la string, coincide con il nome della tabella a livello DB
+	SCIATA("sciata");
 	
 	private String codCategorieEventi;
 	
@@ -23,6 +24,7 @@ public enum CategorieEvento
 		switch(string_categoria)
 		{
 		case "partita_calcio" : return CategorieEvento.PARTITA_CALCIO;
+		case "sciata" : return CategorieEvento.SCIATA;
 		case "Default" : return CategorieEvento.DEFAULT;
 		default : return null;
 		}

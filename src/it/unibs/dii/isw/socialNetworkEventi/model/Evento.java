@@ -39,6 +39,7 @@ public abstract class Evento
 		if(!data1PrecedenteData2(data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento))			throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di termine iscrizione");
 		if(partecipanti < 2) 																			throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
 		if(creatore == null) 																			throw new IllegalArgumentException("Necessario inserire un utente creatore");
+		if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
 		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");

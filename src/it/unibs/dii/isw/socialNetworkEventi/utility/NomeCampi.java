@@ -17,7 +17,11 @@ public enum NomeCampi
 //	Campi dell'evento partita di calcio
 	ETA_MINIMA(11),
 	ETA_MASSIMA(12),
-	GENERE(13);
+	GENERE(13),
+//	Campi dell'evento sciata
+	BIGLIETTO_BUS(14),
+	PRANZO(15),
+	AFFITTO_SCI(16);
 
 	
 	private int codCampo;
