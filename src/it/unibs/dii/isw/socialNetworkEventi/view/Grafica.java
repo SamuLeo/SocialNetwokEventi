@@ -6,8 +6,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.font.FontRenderContext;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -88,7 +86,8 @@ public class Grafica {
 			btnNuovoEvento.addActionListener(e -> iniziaCreazioneEvento());
 			selettoreCategoria.setFont(fontTesto);
 			selettoreCategoria.insertItemAt(" ⚽ Calcio", 0);
-			selettoreCategoria.setSelectedIndex(0);
+			selettoreCategoria.setSelectedIndex(0);	//Istruzione che deve stare prima dell'aggiunta del listener
+			selettoreCategoria.addItemListener(selezione -> visualizzaBacheca());
 			selettoreCategoria.setBackground(coloreBottoni);
 			selettoreCategoria.setFocusable(false);
 			btnBacheca.setBackground(coloreBottoni);
@@ -162,12 +161,10 @@ public class Grafica {
 		//Se la Bacheca è già in mostra, va solo aggiornata
 		if (bacheca != null && bacheca.isVisible()) Sessione.aggiornatore.run();
 		//JOptionPane.showMessageDialog(null, "Frame: " + frame.getWidth() + " C.P.: " + frame.getContentPane().getWidth() + " Pannello: " +pannelloCentrale.getWidth(), "Partecipanti", JOptionPane.INFORMATION_MESSAGE);
-		HashMap<CategorieEvento,ArrayList<Evento>> hashmap = Sessione.getEventi();
-		ArrayList<Evento> eventi = new ArrayList<>();
-		for(CategorieEvento categoria : hashmap.keySet())
-			for(Evento evento : hashmap.get(categoria))
-				eventi.add(evento);
-		bacheca = new Bacheca(eventi, frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
+		CategorieEvento catSelezionata = selettoreCategoria.getSelectedIndex() == 0 ? CategorieEvento.PARTITA_CALCIO : CategorieEvento.DEFAULT;
+		ArrayList<Evento> listaEventi = Sessione.getEventi().get(catSelezionata);
+		if (listaEventi == null) listaEventi = new ArrayList<>();
+		bacheca = new Bacheca(listaEventi, frame.getContentPane().getWidth(),fontTesto, fontTestoBottoni, altezzaStringhe);
 		pannelloCentrale = new JScrollPane(bacheca);
 		pannelloCentrale.getVerticalScrollBar().setUnitIncrement(screenH/250);
 		pannelloCentrale.getVerticalScrollBar().setUI(new BellaScrlb());

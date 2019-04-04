@@ -1,5 +1,8 @@
 ﻿package it.unibs.dii.isw.socialNetworkEventi.model;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Toolkit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,7 +12,8 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
-
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import java.util.ArrayList;
 
@@ -43,11 +47,21 @@ public class DataBase
 //			specifica dei dettagli necessari alla connessione
 			dataSource.setDatabaseName("social_network_db");
 			dataSource.setPortNumber(3306);
-			dataSource.setServerName("127.0.0.1");
+			dataSource.setServerName("localhost");
 			dataSource.setUser("admin_social");
 			dataSource.setPassword("StefanoLoveLinux");
 			
-			con = dataSource.getConnection();
+			try {con = dataSource.getConnection();}
+			catch (SQLException e) {
+				e.printStackTrace();
+				Font f = new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+				UIManager.put("OptionPane.messageFont", f);
+				UIManager.put("OptionPane.buttonFont", f);
+				UIManager.put("Button.background", Color.white);
+				UIManager.put("Button.select", new Color(240,255,245));
+				JOptionPane.showMessageDialog(null, "Impossibile connettersi alla base di dati", "Errore di connessione", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
 			
 			eventi = new HashMap<CategorieEvento,ArrayList<Evento>>();
 			utenti = new ArrayList<>();
@@ -742,6 +756,8 @@ public class DataBase
 				ps.executeUpdate();
 				break;
 			}
+		default:
+			break;
 		}
 	}
 
