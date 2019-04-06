@@ -65,7 +65,7 @@ public class Bacheca extends JPanel {
 		Evento e;
 		int w, altezzaStringhe;
 		Font testo, testoBottoni;
-		JLabel titolo, data, ora, sesso, capienza;
+		JLabel titolo, data, ora, catDip, capienza;
 		AnelloNumerico anello;
 		ActionListener azione;
 		
@@ -104,9 +104,14 @@ public class Bacheca extends JPanel {
 			ora.setFont(testo);
 			ora.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
 			//Sesso dei partecipanti alla partita
-			if (sesso==null) {sesso = new JLabel("Sesso: " + e.getCampi().get(NomeCampi.GENERE).getContenuto()); this.add(sesso);}
-			sesso.setFont(testo);
-			sesso.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
+			if (e.getCampi().get(NomeCampi.GENERE) != null) 
+				if (catDip==null) 
+					{catDip = new JLabel("Sesso: " + e.getCampi().get(NomeCampi.GENERE).getContenuto()); this.add(catDip);}
+			if (e.getCampi().get(NomeCampi.AFFITTO_SCII) != null)
+				if (catDip==null) 
+				{catDip = new JLabel("Luogo: " + e.getCampi().get(NomeCampi.LUOGO).getContenuto()); this.add(catDip);}
+			catDip.setFont(testo);
+			catDip.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
 			//Anello di visualizzazione degli iscritti
 			int latoAnello = 40+altezzaStringhe*3;
 			if (anello==null) {
@@ -119,17 +124,6 @@ public class Bacheca extends JPanel {
 				addMouseListener(new lambdaJPanel(this, cardEvento.class, new lambdaJPanel(anello, AnelloNumerico.class, null,azione),azione));
 			}
 			anello.setBounds(Math.min(w/5*4, w-w/10-latoAnello), altezzaStringhe/5*6 +15, latoAnello, latoAnello);
-			/*g.setColor(sfondoAnello);
-			g.fillOval(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3);
-			g.setColor(new Color((int)(255*Math.pow((double)iscritti/(double)partecipanti,0.5)),(int)(255-255*Math.pow((double)iscritti/(double)partecipanti, 2)),30));
-			g.fillArc(w/3*2, altezzaStringhe/5*6 +15, 40+altezzaStringhe*3, 40+altezzaStringhe*3, 90, -360/partecipanti*iscritti);
-			g.setColor(sfondoCard);
-			g.fillOval(w/3*2+10, altezzaStringhe/5*6+25, 20+altezzaStringhe*3, 20+altezzaStringhe*3);
-			g.setColor(Color.darkGray);
-			if (capienza==null) {capienza = new JLabel(""+iscritti +'/'+partecipanti); this.add(capienza);}
-			capienza.setFont(testo);
-			capienza.setBounds(w/3*2+30, altezzaStringhe/5*11+35, altezzaStringhe*3-20, altezzaStringhe);
-			capienza.setHorizontalAlignment(SwingConstants.CENTER);*/
 			this.setPreferredSize(new Dimension(w,80+altezzaStringhe/5*21));
 		}
 		

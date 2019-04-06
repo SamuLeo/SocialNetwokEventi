@@ -61,7 +61,7 @@ class PannelloUtente extends JPanel {
 		
 		JCheckBox temp;
 		categorie = new LinkedList<>();
-		for (String cl : new String[] {"partita_calcio"}) {
+		for (String cl : new String[] {"partita_calcio","scii"}) {
 			temp = new JCheckBox(cl);
 			temp.setFont(testo);
 			temp.setBackground(Grafica.coloreSfondo);

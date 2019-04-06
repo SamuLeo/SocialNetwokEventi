@@ -9,14 +9,17 @@ import java.util.function.Consumer;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
+import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
+import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 
 public class CreazioneEvento extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private static final String categoriaPartita = "Partita di calcio";
-	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti", "Partecipanti in esubero ammessi", "Luogo", "Quota individuale", "Compreso nella quota", "Note"};
-	private static final String[] nomeCampiPartitaDiCalcio = {"Eta minima", "Eta massima", "Sesso"};
-	private static final String[] nomeCampiComuniData = {"Termine ultimo di iscrizione", "Data inizio", "Data conclusiva","Termine ritiro iscrizione"};
-	private static final String[] nomeCampiComuniOra = {"Ora termine iscrizioni", "Ora inizio", "Ora conclusiva","Ora termine ritiro iscrizione"};
+	private static final String categoriaPartita = " ⚽ Partita di calcio", categoriaSciata = " ⛷ Scii";
+	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti *", "Partecipanti in esubero ammessi", "Luogo *", "Quota individuale *", "Compreso nella quota", "Note"};
+	private static final String[] nomeCampiPartitaDiCalcio = {"Eta minima *", "Eta massima *", "Sesso *"};
+	private static final String[] nomeCampiSciata = {"Costo trasporto *", "Costo pranzo *", "Costo noleggio scii *"}; 
+	private static final String[] nomeCampiComuniData = {"Termine ultimo di iscrizione *", "Data inizio *", "Data conclusiva","Termine ritiro iscrizione"};
+	private static final String[] nomeCampiComuniOra = {"Ora termine iscrizioni *", "Ora inizio *", "Ora conclusiva","Ora termine ritiro iscrizione"};
 	private static final String[] GMA = {"G", "M", "A"};
 	private static final String[] MO = {"h", "m"};
 	public static final int cordinataX = 35;
@@ -40,6 +43,9 @@ public class CreazioneEvento extends JPanel {
 	JLabel[] campiPartitaCalcio;
 	JTextField[] testoCampiPartitaCalcio;
 	
+	JLabel[] campiSciata;
+	JTextField[] testoCampiSciata;
+	
 	/**
 	 * @param testo Font usato per il testo
 	 * @param frameWidth Larghezza della finestra (di conseguenza anche del pannello)
@@ -53,6 +59,7 @@ public class CreazioneEvento extends JPanel {
 		comboBox.setBounds(cordinataX, 20+(int)(fontHeight*1.1), frameWidth-100, (int)(fontHeight*1.1));
 		this.add(comboBox);
 		comboBox.addItem(categoriaPartita);
+		comboBox.addItem(categoriaSciata);
 		comboBox.setSelectedItem(null);
 		comboBox.setFont(testo);
 		comboBox.addFocusListener(tabList);
@@ -144,7 +151,35 @@ public class CreazioneEvento extends JPanel {
 	 * crea i vari componenti in base alla categoria
 	 */
 	void formCategoria(String comboBox, int frameWidth, int fontHeight) {
-		formCampiComuni(frameWidth, fontHeight);
+		if (campiComuni[0] == null) formCampiComuni(frameWidth, fontHeight);
+		if (campiPartitaCalcio != null) {
+			for (JLabel l : campiPartitaCalcio) {
+				Y -= (l.getHeight() + 10);
+				remove(l);
+			}
+			campiPartitaCalcio = null;
+			for (JTextField f: testoCampiPartitaCalcio) {
+				Y -= (f.getHeight() + 10);
+				remove(f);
+			}
+			testoCampiPartitaCalcio = null;
+			Y -= (sesso.getHeight() + 30);
+			remove(sesso);
+			sesso = null;
+		}
+		if (campiSciata != null) {
+			for (JLabel l : campiSciata) {
+				Y -= (l.getHeight() + 10);
+				remove(l);
+			}
+			campiSciata = null;
+			for (JTextField f: testoCampiSciata) {
+				Y -= (f.getHeight() + 10);
+				remove(f);
+			}
+			Y -= 40;
+			testoCampiSciata = null;
+		}
 		if(comboBox.equals(categoriaPartita)) {
 			campiPartitaCalcio = new JLabel[nomeCampiPartitaDiCalcio.length];
 			testoCampiPartitaCalcio = new JTextField[nomeCampiPartitaDiCalcio.length-1];
@@ -170,7 +205,27 @@ public class CreazioneEvento extends JPanel {
 			sesso.setFont(testo);
 			sesso.setBounds(cordinataX, Y, frameWidth-100, (int)(fontHeight*1.1));
 			add(sesso);
-			Y+=20+(int)(fontHeight*1.1)*2;
+			Y+=30+(int)(fontHeight*1.1);
+		}
+		if (comboBox.equals(categoriaSciata)) {
+			campiSciata = new JLabel[nomeCampiSciata.length];
+			testoCampiSciata = new JTextField[nomeCampiSciata.length];
+			Y += 10;
+			for (int i=0; i<campiSciata.length; i++) {
+				campiSciata[i] = new JLabel(nomeCampiSciata[i]);
+				add(campiSciata[i]);
+				campiSciata[i].setFont(testo);
+				campiSciata[i].setBounds(cordinataX, Y, frameWidth-100, (int)(fontHeight*1.1));
+				Y += (int)(fontHeight*1.1) + 10;
+				
+				testoCampiSciata[i] = new JTextField();
+				testoCampiSciata[i].addFocusListener(tabList);
+				add(testoCampiSciata[i]);
+				testoCampiSciata[i].setFont(testo);
+				testoCampiSciata[i].setBounds(cordinataX, Y, frameWidth-100, (int)(fontHeight*1.1));
+				Y += (int)(fontHeight*1.1) + 10;
+			}
+			Y += 30;
 		}
 		this.setPreferredSize(new Dimension(frameWidth,Y));
 	}
@@ -201,6 +256,7 @@ public class CreazioneEvento extends JPanel {
 			for (JTextField[] j: testoCampiComuniOra)
 				for (int i=0; i<j.length; i++)
 					j[i].setBounds(cordinataX+i*((frameWidth-100)/2)+(frameWidth-100)/6, j[i].getY(), (frameWidth-100)/3, (int)(a*1.1));
+			
 			if (campiPartitaCalcio != null) 
 				for (JLabel l : campiPartitaCalcio)
 					if (l.isVisible()) l.setSize(frameWidth-100, a);
@@ -209,6 +265,13 @@ public class CreazioneEvento extends JPanel {
 					if (f.isVisible()) f.setSize(frameWidth-100, a);
 			if (sesso!=null && sesso.isVisible())
 				sesso.setSize(frameWidth-100, a);
+			
+			if (testoCampiSciata != null)
+				for (JTextField f : testoCampiSciata)
+					if (f.isVisible()) f.setSize(frameWidth-100, a);
+			if (campiSciata != null)
+				for (JLabel l : campiSciata)
+					if (l.isVisible()) l.setSize(frameWidth-100, a);
 		}
 		this.setPreferredSize(new Dimension(frameWidth,Y));
 	}
@@ -248,55 +311,56 @@ public class CreazioneEvento extends JPanel {
 		{ 
 			Evento e;
 			if (comboBox.getSelectedItem()==null) return;	//Nessuna categoria selezionata
+			// Compilazione campi comuni
+			Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null, termineRitiroIscrizione = null;
+			//Acquisizione data e ora, l'aggiunta del "- 1" è posta in corrispondenza del mese in quanto Java associa lo 0 a Gennaio				
+			termineIscrizione = Calendar.getInstance();
+			termineIscrizione.set(
+					Integer.parseInt(testoCampiComuniData[0][2].getText()),
+					Integer.parseInt(testoCampiComuniData[0][1].getText())-1,
+					Integer.parseInt(testoCampiComuniData[0][0].getText()),
+					Integer.parseInt(testoCampiComuniOra[0][0].getText()),
+					Integer.parseInt(testoCampiComuniOra[0][1].getText()),0);
+			dataInizioEvento = Calendar.getInstance();
+			dataInizioEvento.set(
+					Integer.parseInt(testoCampiComuniData[1][2].getText()),
+					Integer.parseInt(testoCampiComuniData[1][1].getText())-1,
+					Integer.parseInt(testoCampiComuniData[1][0].getText()),
+					Integer.parseInt(testoCampiComuniOra[1][0].getText()),
+					Integer.parseInt(testoCampiComuniOra[1][1].getText()),0);
 			
+			//Questo parametro è opzionale percui si compila solo se è presente
+			if (!testoCampiComuniData[2][2].getText().equals("") || !testoCampiComuniData[2][1].getText().equals("") || !testoCampiComuniData[2][0].getText().equals("") || !testoCampiComuniOra[2][1].getText().equals("") || !testoCampiComuniOra[2][0].getText().equals("")) {
+				dataFineEvento = Calendar.getInstance();
+				dataFineEvento.set(
+						Integer.parseInt(testoCampiComuniData[2][2].getText()),
+						Integer.parseInt(testoCampiComuniData[2][1].getText())-1,
+						Integer.parseInt(testoCampiComuniData[2][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[2][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[2][1].getText()),0);
+			}
+			//Questo parametro è opzionale percui si compila solo se è presente
+			if (!testoCampiComuniData[3][2].getText().equals("") || !testoCampiComuniData[3][1].getText().equals("") || !testoCampiComuniData[3][0].getText().equals("") || !testoCampiComuniOra[3][1].getText().equals("") || !testoCampiComuniOra[3][0].getText().equals("")) {
+				termineRitiroIscrizione = Calendar.getInstance();
+				termineRitiroIscrizione.set(
+						Integer.parseInt(testoCampiComuniData[3][2].getText()),
+						Integer.parseInt(testoCampiComuniData[3][1].getText())-1,
+						Integer.parseInt(testoCampiComuniData[3][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[3][0].getText()),
+						Integer.parseInt(testoCampiComuniOra[3][1].getText()),0);
+			}
+			//Controllo se le date inserite sono tutte nel futuro
+			Calendar adesso = Calendar.getInstance();
+			if (termineIscrizione.before(adesso) || dataInizioEvento.before(adesso) || (dataFineEvento==null? false: dataFineEvento.before(adesso)) || (termineRitiroIscrizione==null? false: termineRitiroIscrizione.before(adesso)))
+				throw new IllegalArgumentException("Necessario inserire date nel futuro");
+			
+			int tolleranza;
+			if (testoCampiComuni[2].getText().equals("")) tolleranza = 0;
+			else tolleranza = Integer.parseInt(testoCampiComuni[2].getText());
+			if (tolleranza <0 ) throw new IllegalArgumentException ("<HTML>La tolleranza è il numero di iscritti che possono esserci o non, oltre alla base obbligatoria espressa cal campo \"Numero Partecipanti\". Pertanto non può essere negativa</HTML>");
+			
+			//Compilazione dipendente dalla categoria selezionata
 			if (comboBox.getSelectedItem().equals(categoriaPartita)){
-				Calendar termineIscrizione, dataInizioEvento, dataFineEvento = null, termineRitiroIscrizione = null;
-				//Acquisizione data e ora, l'aggiunta del "- 1" è posta in corrispondenza del mese in quanto Java associa lo 0 a Gennaio				
-				termineIscrizione = Calendar.getInstance();
-				termineIscrizione.set(
-						Integer.parseInt(testoCampiComuniData[0][2].getText()),
-						Integer.parseInt(testoCampiComuniData[0][1].getText())-1,
-						Integer.parseInt(testoCampiComuniData[0][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[0][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[0][1].getText()),0);
-				dataInizioEvento = Calendar.getInstance();
-				dataInizioEvento.set(
-						Integer.parseInt(testoCampiComuniData[1][2].getText()),
-						Integer.parseInt(testoCampiComuniData[1][1].getText())-1,
-						Integer.parseInt(testoCampiComuniData[1][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[1][0].getText()),
-						Integer.parseInt(testoCampiComuniOra[1][1].getText()),0);
-				
-				//Questo parametro è opzionale percui si compila solo se è presente
-				if (!testoCampiComuniData[2][2].getText().equals("") || !testoCampiComuniData[2][1].getText().equals("") || !testoCampiComuniData[2][0].getText().equals("") || !testoCampiComuniOra[2][1].getText().equals("") || !testoCampiComuniOra[2][0].getText().equals("")) {
-					dataFineEvento = Calendar.getInstance();
-					dataFineEvento.set(
-							Integer.parseInt(testoCampiComuniData[2][2].getText()),
-							Integer.parseInt(testoCampiComuniData[2][1].getText())-1,
-							Integer.parseInt(testoCampiComuniData[2][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[2][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[2][1].getText()),0);
-				}
-				//Questo parametro è opzionale percui si compila solo se è presente
-				if (!testoCampiComuniData[3][2].getText().equals("") || !testoCampiComuniData[3][1].getText().equals("") || !testoCampiComuniData[3][0].getText().equals("") || !testoCampiComuniOra[3][1].getText().equals("") || !testoCampiComuniOra[3][0].getText().equals("")) {
-					termineRitiroIscrizione = Calendar.getInstance();
-					termineRitiroIscrizione.set(
-							Integer.parseInt(testoCampiComuniData[3][2].getText()),
-							Integer.parseInt(testoCampiComuniData[3][1].getText())-1,
-							Integer.parseInt(testoCampiComuniData[3][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[3][0].getText()),
-							Integer.parseInt(testoCampiComuniOra[3][1].getText()),0);
-				}
-				//Controllo se le date inserite sono tutte nl futuro
-				Calendar adesso = Calendar.getInstance();
-				if (termineIscrizione.before(adesso) || dataInizioEvento.before(adesso) || (dataFineEvento==null? false: dataFineEvento.before(adesso)) || (termineRitiroIscrizione==null? false: termineRitiroIscrizione.before(adesso)))
-					throw new IllegalArgumentException("Necessario inserire date nel futuro");
-				
-				int tolleranza;
-				if (testoCampiComuni[2].getText().equals("")) tolleranza = 0;
-				else tolleranza = Integer.parseInt(testoCampiComuni[2].getText());
-				if (tolleranza <0 ) throw new IllegalArgumentException ("<HTML>La tolleranza è il numero di iscritti che possono esserci o non, oltre alla base obbligatoria espressa cal campo \"Numero Partecipanti\". Pertanto non può essere negativa</HTML>");
-				
 				e = new PartitaCalcio(
 						Grafica.getIstance().chiediUtenteCorrente(),
 /*Ob.	LUOGO*/			testoCampiComuni[3].getText(),
@@ -314,7 +378,30 @@ public class CreazioneEvento extends JPanel {
 /*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
 /*Ob.	GENERE*/		(String)sesso.getSelectedItem());
 				
-				System.out.println("Creata una partita di calcio con successo: ora salvo");
+				Grafica.getIstance().aggiungiEvento(e);
+			}
+			if (comboBox.getSelectedItem().equals(categoriaSciata)) {
+				Utente corrente = Grafica.getIstance().chiediUtenteCorrente();
+				e = new Scii (
+						corrente,
+/*Ob.	LUOGO*/			testoCampiComuni[3].getText(),
+/*Ob.	Data FINE ISCR*/termineIscrizione,
+/*Ob.	Data-ora iniz*/	dataInizioEvento,
+/*Ob.	Partecip.*/		Integer.parseInt(testoCampiComuni[1].getText()),
+/*Ob.	COSTO*/			Integer.parseInt(testoCampiComuni[4].getText()),
+/*Opz.	TITOLO*/		(testoCampiComuni[0].getText().equals("")? "Evento anonimo" : testoCampiComuni[0].getText()),
+/*Opz.	NOTE*/			testoCampiComuni[6].getText(),
+/*Opz.	COMPRESO*/		testoCampiComuni[5].getText(),
+/*Opz.	Data-ora FINE*/	dataFineEvento,
+/*Opz.	Termine ritiro*/termineRitiroIscrizione,
+/*Opz.	Tolleranza*/	tolleranza,
+/*Ob.	Costo trasp*/	Integer.parseInt(testoCampiSciata[0].getText()),
+/*Ob.	Costo cibo*/	Integer.parseInt(testoCampiSciata[1].getText()),
+/*Ob.	Costo noleggio*/Integer.parseInt(testoCampiSciata[2].getText()));
+				
+				//Scelte personali
+				e.setCampiOptPerUtente(corrente, Grafica.getIstance().sceltePersonali());
+				
 				Grafica.getIstance().aggiungiEvento(e);
 			}
 		} 

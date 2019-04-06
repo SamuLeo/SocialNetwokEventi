@@ -3,107 +3,165 @@ package it.unibs.dii.isw.socialNetworkEventi.view;
 
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
-import it.unibs.dii.isw.socialNetworkEventi.model.Campo;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
+import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class SchedaEvento extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private int Y=0;
-	private JLabel[] desc, val;
+	private int Y=0, X;
+	private JLabel[] obbligatori = new JLabel[7],
+			valObbligatori = new JLabel[7],
+			opzionali = new JLabel[4],
+			valOpzionali = new JLabel[4],
+			dipendenti = new JLabel[3],
+			valDipendenti = new JLabel[3];
 	JLabel titolo;
 	JButton iscriviti;
 	AnelloNumerico anello;
-
-	@SuppressWarnings({ "rawtypes", "static-access" })
+	Font testo, testoBottoni;
+	int altezzaRighe;
+	DateFormat formattaDate = DateFormat.getInstance();
+	
 	public SchedaEvento(Evento e, Font testo, Font testoBottoni, int altezzaRighe, int larghezza) {
 		super();
+		this.testo=testo; this.testoBottoni=testoBottoni; this.altezzaRighe=altezzaRighe; X=larghezza;
 		setLayout(null);
 		setBackground(Grafica.coloreSfondo);
+		//Inizializzazione dati comuni ed obbligatori
 		titolo = new JLabel((String)e.getCampi().get(NomeCampi.TITOLO).getContenuto());
 		titolo.setFont(testoBottoni.deriveFont(testoBottoni.getSize()*2F));
 		titolo.setHorizontalAlignment(SwingConstants.CENTER);
-		titolo.setBounds(20, 20, larghezza-40,altezzaRighe/5*12);
-		Y=20+altezzaRighe/5*12;
 		add(titolo);
-		//System.out.println(e.getUtenteCreatore().getId_utente() + " " + Sessione.getUtente_corrente().getId_utente());
+		
 		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
 				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
 				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampi.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
-		//JOptionPane.showMessageDialog(null, termine_ritiro_scaduto + " "+ termineIscrizioneScaduto +" "+ eventoHaSpazio + " " + Sessione.utenteIscrittoAllaPartita((PartitaCalcio)e), "", JOptionPane.INFORMATION_MESSAGE);
 		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
-		} else if (!Sessione.utenteIscrittoInEvento((PartitaCalcio)e) && eventoHaSpazio && !termineIscrizioneScaduto) {
+		} else if (!Sessione.utenteIscrittoInEvento(e) && eventoHaSpazio && !termineIscrizioneScaduto) {
 			iscriviti = new JButton(" 🖋  Iscriviti");
-			iscriviti.addActionListener(click -> Grafica.getIstance().iscriviEvento(e));
-		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoInEvento((PartitaCalcio)e)) {
+			iscriviti.addActionListener(click -> iscriviEvento(e));
+		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoInEvento(e)){
 			iscriviti = new JButton(" ✖  Annulla iscrizione");
 			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
 		}
 		if (iscriviti != null) {
 			iscriviti.setFont(testoBottoni);
-			iscriviti.setBounds(20, Y+10, larghezza-40,altezzaRighe/5*6);
-			iscriviti.setBackground(Grafica.getIstance().coloreBottoni);
+			iscriviti.setBackground(Grafica.coloreBottoni);
 			add(iscriviti);
 		}
-		
-		
-		Y+=20+altezzaRighe/5*6;
-		LinkedList<Campo> llist = new LinkedList<>();
-		for (Campo c: e.getCampi().values())
-			if (c!=null) llist.add(c);
-		Campo[] s = llist.toArray(new Campo[0]);
-		desc=new JLabel[s.length];
-		val=new JLabel[s.length];
-		Object temp;
-		DateFormat formattaDate = DateFormat.getInstance();
-		for (int i=0; i<s.length;i++) {
-			desc[i]= new JLabel(s[i].getDescrizione_campo());
-			temp=s[i].getContenuto();
-			if (temp instanceof Calendar) {
-				Calendar t = (Calendar)temp;
-				val[i]= new JLabel(formattaDate.format(t.getTime())); //+t.get(Calendar.HOUR_OF_DAY) +  '/'+ (t.get(Calendar.MONTH)+1) + '/' + t.get(Calendar.YEAR)+ ' ' + t.getTime().getHours() + '.'+ t.getTime().getMinutes());
-			}
-			else val[i] = new JLabel(temp.toString());
-			desc[i].setFont(testo); val[i].setFont(testo);
-			desc[i].setBounds(20, Y, (larghezza-60)/2, altezzaRighe);
-			val[i].setBounds(20+(larghezza-60)/2, Y, (larghezza-60)/2, altezzaRighe);
-			Y+= altezzaRighe+20;
-			add(desc[i]); add(val[i]);
+		obbligatori[0]= new JLabel ("Utente creatore: "); valObbligatori[0] = new JLabel(e.getUtenteCreatore().getNome());
+		obbligatori[1]= new JLabel ("Numero minimo partecipanti: "); valObbligatori[1] = new JLabel(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto().toString());
+		obbligatori[2]= new JLabel ("Ulteriori partecipanti ammessi: "); valObbligatori[2] = new JLabel(e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto().toString());
+		obbligatori[3]= new JLabel ("Luogo: "); valObbligatori[3] = new JLabel(e.getCampo(NomeCampi.LUOGO).getContenuto().toString());
+		obbligatori[4]= new JLabel ("Quota di adesione: "); valObbligatori[4] = new JLabel(e.getCampo(NomeCampi.COSTO).getContenuto().toString() + " €");
+		obbligatori[5]= new JLabel ("Inizio: "); valObbligatori[5] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime()));
+		obbligatori[6]= new JLabel ("Termine iscrizioni: "); valObbligatori[6] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()).getTime()));
+		for (int i=0; i<7; i++) {
+			obbligatori[i].setFont(testo);
+			valObbligatori[i].setFont(testo);
+			add(valObbligatori[i]);
+			add(obbligatori[i]);
 		}
+		
 		int partecipanti = (int)(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto());
 		if (e.getCampo(NomeCampi.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
-		anello=new AnelloNumerico(larghezza/3, partecipanti, e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
-		anello.setBounds(larghezza/3, Y+25, larghezza/3, larghezza/3);
-		Y+=larghezza/3+50;
+		anello = new AnelloNumerico(larghezza/3, partecipanti, e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
 		add(anello);
-		setPreferredSize(new Dimension(larghezza, Y));
+		
+		//Inizializzazione dati comuni non obbligatori
+		if (e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE) != null) {
+			opzionali[0] = new JLabel("Iscrizione ritirabile fino a: "); valOpzionali[0] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()).getTime()));}
+		if (e.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null) {
+			opzionali[1] = new JLabel("Fine evento: "); valOpzionali[1] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()).getTime()));}
+		if (e.getCampo(NomeCampi.NOTE) != null) {
+			opzionali[2] = new JLabel("Note: "); valOpzionali[2] = new JLabel(e.getCampo(NomeCampi.NOTE).getContenuto().toString());}
+		if (e.getCampo(NomeCampi.BENEFICI_QUOTA) != null) {
+			opzionali[3] = new JLabel("Incluso nella quota: "); valOpzionali[3] = new JLabel(e.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto().toString());}
+		for (int i=0; i<4; i++) {
+			if (opzionali[i] == null) continue;
+			opzionali[i].setFont(testo);
+			valOpzionali[i].setFont(testo);
+			add(valOpzionali[i]);
+			add(opzionali[i]);
+		}
+		
+		//Configurazione dati dipendenti dalla categoria
+		if (e instanceof PartitaCalcio) configura((PartitaCalcio)e);
+		if (e instanceof Scii) configura((Scii)e);
 	}
 	
-	void ridimensiona(int larghezza) {
-		titolo.setSize(larghezza-40,titolo.getHeight());
-		if (iscriviti != null) iscriviti.setSize(larghezza-40,iscriviti.getHeight());
-		int altezzaVecchia = anello.getWidth();
-		anello.ridimensiona(larghezza/3);
-		anello.setBounds(larghezza/3, Y-25-altezzaVecchia, larghezza/3, larghezza/3);
-		Y-=altezzaVecchia-larghezza/3;
-		for (JLabel d: desc)
-			d.setSize((larghezza-60)/2, d.getHeight());
-		for (JLabel v: val)
-			v.setBounds(20+(larghezza-60)/2, v.getY(), (larghezza-60)/2, v.getHeight());
-		setPreferredSize(new Dimension(larghezza, Y));
+	private void configura(PartitaCalcio p) {
+		dipendenti[0] = new JLabel("Fascia di età: ");
+		dipendenti[1] = new JLabel("Sesso: ");
+		valDipendenti[0] = new JLabel(p.getCampo(NomeCampi.ETA_MINIMA).getContenuto() + " - " + p.getCampo(NomeCampi.ETA_MASSIMA).getContenuto());
+		valDipendenti[1] = new JLabel(p.getCampo(NomeCampi.GENERE).getContenuto().toString());
+		dipendenti[0].setFont(testo); dipendenti[1].setFont(testo);
+		valDipendenti[0].setFont(testo); valDipendenti[1].setFont(testo);
+		add(dipendenti[0]); add(dipendenti[1]);
+		add(valDipendenti[0]); add(valDipendenti[1]);
+	}
+	
+	private void configura(Scii s) {
+		dipendenti[0] = new JLabel("Prezzo del trasporto: "); valDipendenti[0] = new JLabel(s.getCampo(NomeCampi.BIGLIETTO_BUS).getContenuto() + " €");
+		dipendenti[1] = new JLabel("Prezzo del pasto: "); valDipendenti[1] = new JLabel(s.getCampo(NomeCampi.PRANZO).getContenuto() + " €");
+		dipendenti[2] = new JLabel("Prezzo del noleggio: "); valDipendenti[2] = new JLabel(s.getCampo(NomeCampi.AFFITTO_SCII).getContenuto() + " €");
+		dipendenti[0].setFont(testo); dipendenti[1].setFont(testo); dipendenti[2].setFont(testo);
+		valDipendenti[0].setFont(testo); valDipendenti[1].setFont(testo); valDipendenti[2].setFont(testo);
+		add(dipendenti[0]); add(dipendenti[1]); add(dipendenti[2]);
+		add(valDipendenti[0]); add(valDipendenti[1]); add(valDipendenti[2]);
+	}
+	
+	public void paintComponent (Graphics g) {
+		super.paintComponent(g);
+		titolo.setBounds(20, 20, X-40,altezzaRighe/5*12);
+		Y=20+altezzaRighe/5*12;
+		anello.ridimensiona(X/3);
+		anello.setBounds(X/3, Y+25, X/3, X/3);
+		Y+=X/3+50;
+		int ldesc = (int)testo.getStringBounds("Ulteriori partecipanti ammessi:aa", ((Graphics2D)g).getFontRenderContext()).getWidth();
+		for (int i=0; i<obbligatori.length; i++) {
+			obbligatori[i].setBounds(20, Y, ldesc, altezzaRighe);
+			valObbligatori[i].setBounds(30+ldesc, Y, X-50-ldesc, altezzaRighe);
+			Y += altezzaRighe + 10;
+		}
+		for (int i=0; i<opzionali.length; i++) {
+			if (opzionali[i] == null) continue;
+			opzionali[i].setBounds(20, Y, ldesc, altezzaRighe);
+			valOpzionali[i].setBounds(30+ldesc, Y, X-50-ldesc, altezzaRighe);
+			Y += altezzaRighe + 10;
+		}
+		for (int i=0; i<dipendenti.length; i++) {
+			if (dipendenti[i] == null) continue;
+			dipendenti[i].setBounds(20, Y, ldesc, altezzaRighe);
+			valDipendenti[i].setBounds(30+ldesc, Y, X-50-ldesc, altezzaRighe);
+			Y += altezzaRighe + 10;
+		}
+		if (iscriviti != null) {
+			iscriviti.setBounds(20, Y+10, X-40,altezzaRighe/5*6);
+			Y+=20+altezzaRighe/5*6;
+		}
+		setPreferredSize(new Dimension(X, Y));
+	}
+	
+	void ridimensiona(int larghezza) {X = larghezza;}
+	
+	void iscriviEvento(Evento e) {
+		if (e instanceof Scii) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), Grafica.getIstance().sceltePersonali());
+		Grafica.getIstance().iscriviEvento(e);
 	}
 }

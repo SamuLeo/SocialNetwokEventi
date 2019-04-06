@@ -109,22 +109,6 @@ public abstract class Evento
 		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento,data_ora_ritiro_iscrizione,tolleranza_max);
 		id_evento= id;
 		this.stato = stato;
-		
-/*TUTTO IL CODICE SOPRA È INUTILE FACENDO QUESTO COSTRUTTORE, DOBBIAMO TROVARE UN ALTRO MODO PER RISOLVERE IL PROBLEMA DEGLI EVENTI SCADUTI,..		
-		campi = new HashMap<>();
-		fruitori = new LinkedList<>();
-		//inserimento dei campi obbligatori nella HashMap dei campi	
-		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
-		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
-		aggiungiCampo(data_ora_inizio_evento, true, NomeCampi.D_O_INIZIO_EVENTO, "Inizio evento");
-		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
-		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
-		setUtenteCreatore(creatore);
-		fruitori.add(creatore);
-		if(titolo != null) aggiungiCampo(titolo, false, NomeCampi.TITOLO, "Titolo evento");
-		if(note != null) aggiungiCampo(note, false, NomeCampi.NOTE, "Note aggiuntive ");			
-		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampi.BENEFICI_QUOTA, "Servizi compresi");						
-		if(data_ora_termine_evento != null)	aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Fine evento");*/					
 	}
 	
 	
@@ -142,7 +126,6 @@ public abstract class Evento
 
 	private boolean data1PrecedenteData2(Calendar data1, Calendar data2)
 	 {
-//	  if(!dataNelFuturo(data1)) return false;
 	  return data1.compareTo(data2) < 0;
 	 }
 	 
@@ -171,7 +154,6 @@ public abstract class Evento
 	} 
 	 
 	public HashMap<NomeCampi, Campo> getCampi()	{return campi;}
-	
 	public Campo getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
 	
 	public int getNumeroPartecipanti() {return partecipanti_campiOpt.keySet().size();}
@@ -245,6 +227,4 @@ public abstract class Evento
 		}
 		return stringa.toString();
 	}
-	
-	
 }

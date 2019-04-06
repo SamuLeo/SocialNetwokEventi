@@ -140,7 +140,7 @@ public class DataBase
 			    int affitto_scii							= (Integer) evento.getCampo(NomeCampi.AFFITTO_SCII).getContenuto();
 			    
 //				Stringa contenente script sql per inserire la partita di calcio
-				sql = "INSERT INTO scii " + tabelle_db_eventi[1][0]
+				sql = "INSERT INTO " + tabelle_db_eventi[1][0]
 						+ " (id_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note,"
 						+ "benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max, stato, biglietto_bus, pranzo, affitto_scii)"
 						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

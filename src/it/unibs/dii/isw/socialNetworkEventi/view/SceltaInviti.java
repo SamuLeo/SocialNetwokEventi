@@ -27,7 +27,6 @@ public class SceltaInviti extends JPanel {
 
 	public SceltaInviti(Evento e, LinkedList<Utente> invitabili, Font font, int larghezza, int altezzaStr) {
 		super();
-		System.out.println("CI ENTRO");
 		evento = e;
 		this.invitabili=invitabili;
 		X = larghezza;
@@ -40,7 +39,6 @@ public class SceltaInviti extends JPanel {
 		intestazione.setBounds(20, 20, X-40, altezzaStr);
 		add(intestazione);
 		Y = 30 + altezzaStr;
-		System.out.println("CI ARRIVO");
 		if (invitabili != null) {
 			utenti = new JCheckBox[invitabili.size()];
 			for (int i=0; i<utenti.length; i++) {
@@ -53,7 +51,6 @@ public class SceltaInviti extends JPanel {
 				utenti[i].setText(invitabili.get(i).getNome());
 			}
 		}
-		System.out.println("CI PASSO");
 		//invita=new JButton ("Invita un fruitore specifico"); 
 		//invita.setFont(font); 
 		//invita.setBackground(Grafica.coloreBottoni); 
@@ -70,7 +67,6 @@ public class SceltaInviti extends JPanel {
 		
 		setPreferredSize(new Dimension(X,Y));
 		setBounds(screenW/2-X/2, screenH/2-Y/2, X, Y);
-		System.out.println("CI ESCO");
 	}
 	
 	void ridimensiona(int larghezza) {
