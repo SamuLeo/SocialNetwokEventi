@@ -21,7 +21,7 @@ public enum NomeCampi
 //	Campi dell'evento sciata
 	BIGLIETTO_BUS(14),
 	PRANZO(15),
-	AFFITTO_SCI(16);
+	AFFITTO_SCII(16);
 
 	
 	private int codCampo;

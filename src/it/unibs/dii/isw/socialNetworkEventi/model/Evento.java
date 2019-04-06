@@ -15,7 +15,7 @@ public abstract class Evento
 	private StatoEvento stato = StatoEvento.VALIDA;
 	
 	private HashMap<NomeCampi, Campo> campi;
-	private LinkedList<Utente> fruitori;
+	private HashMap<Utente,HashMap<NomeCampi,Boolean>> partecipanti_campiOpt;
 	
 	/**
 	 * Costruttore con parametri obbligatori
@@ -30,7 +30,7 @@ public abstract class Evento
 			) throws IllegalArgumentException {
 		//controlli sui campi obbligatori 
 		campi = new HashMap<>();
-		fruitori = new LinkedList<>();
+		partecipanti_campiOpt = new HashMap<Utente,HashMap<NomeCampi,Boolean>>();
 		
 		if(luogo == null) 																				throw new IllegalArgumentException("Necessario inserire un luogo");
 		if(data_ora_termine_ultimo_iscrizione == null) 													throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni");
@@ -39,7 +39,7 @@ public abstract class Evento
 		if(!data1PrecedenteData2(data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento))			throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di termine iscrizione");
 		if(partecipanti < 2) 																			throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
 		if(creatore == null) 																			throw new IllegalArgumentException("Necessario inserire un utente creatore");
-		if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
+//		if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
 		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
@@ -47,7 +47,7 @@ public abstract class Evento
 		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
 		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
 		this.setUtenteCreatore(creatore);
-		fruitori.add(creatore);		
+//		partecipanti_campiOpt.add(creatore);
 	}
 	
 	/** Costruttore con parametri obbligatori e facoltativi */
@@ -148,15 +148,15 @@ public abstract class Evento
 	 
 	 public boolean aggiungiFruitore(Utente utente)
 	 {
-		 if((Integer)getCampo(NomeCampi.PARTECIPANTI).getContenuto() > fruitori.size())
-			 {fruitori.add(utente); return true;}
+		 if((Integer)getCampo(NomeCampi.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
+			 {partecipanti_campiOpt.put(utente,null); return true;}
 		 else return false;
 	 }
 	 
-	 public boolean rimuoviFruitore(Utente utente)
+	 public void rimuoviFruitore(Utente utente)
 	 {
-		 if(fruitori.size()==0 || fruitori.get(0).equals(utente)) return false;
-		 return fruitori.remove(utente);
+		 if(getNumeroPartecipanti() == 0 /*|| fruitori.get(0).equals(utente)*/) return;
+		 	partecipanti_campiOpt.remove(utente);
 	 }
 
 /**
@@ -173,15 +173,49 @@ public abstract class Evento
 	public HashMap<NomeCampi, Campo> getCampi()	{return campi;}
 	
 	public Campo getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
-
-	public LinkedList<Utente> getFruitori() { return fruitori; }
 	
-	public int getNumeroPartecipanti() {return fruitori.size();}
+	public int getNumeroPartecipanti() {return partecipanti_campiOpt.keySet().size();}
 	
 	public Utente getUtenteCreatore() { return utente_creatore; }
 	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
 	
-	public void setFruitori(LinkedList<Utente> fruitori) {this.fruitori = fruitori;}
+	public void setPartecipanti_campiOpt(HashMap<Utente,HashMap<NomeCampi,Boolean>> partecipanti_campiOpt) {this.partecipanti_campiOpt = partecipanti_campiOpt;}
+	public HashMap<Utente,HashMap<NomeCampi,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt; }
+
+	public void setCampoOptPerUtente(Utente utente, NomeCampi nome_campo, Boolean bool)
+	{		
+		if(partecipanti_campiOpt.get(utente) == null)
+		{
+			HashMap<NomeCampi,Boolean> campi_opt = new HashMap<NomeCampi,Boolean>();
+			campi_opt.put(nome_campo, bool);
+			partecipanti_campiOpt.put(utente, campi_opt);
+		}
+		else
+		{
+			partecipanti_campiOpt.get(utente).put(nome_campo, bool);
+		}
+	}
+	
+	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampi,Boolean> campi_opt)
+	{
+		partecipanti_campiOpt.put(utente, campi_opt);
+	}
+	
+	public Boolean getCampoOptDiUtente(Utente utente, NomeCampi nome_campi)
+	{
+		if(partecipanti_campiOpt.containsKey(utente))
+			return partecipanti_campiOpt.get(utente).get(nome_campi);
+		else
+			return null;
+	}
+	
+	public HashMap<NomeCampi,Boolean> getCampiOptDiUtente(Utente utente)
+	{
+		if(partecipanti_campiOpt.containsKey(utente))
+			return partecipanti_campiOpt.get(utente);
+		else
+			return null;
+	}
 
 	public int getId() {return id_evento;}
 	public void setId(int id) {this.id_evento = id;}
