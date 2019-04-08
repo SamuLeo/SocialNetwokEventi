@@ -23,12 +23,7 @@ public class Calendario extends JFrame {
 	 
 	Calendario(Font font, int lato, Consumer<Calendar> azione) {
 		this.lato=lato;
-		
-		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
-		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//Icona.png";
-		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\Icona.png";
-		setIconImage(new ImageIcon(percorso).getImage());
-		
+		setIconImage(Grafica.icona.getImage());
 	    setTitle("Scegli una data");
 	    setSize(lato, lato);
 	    setBounds(screenW/2-lato/2, screenH/2-lato/2, lato, lato);

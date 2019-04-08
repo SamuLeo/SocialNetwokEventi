@@ -8,13 +8,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Logger;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Messaggi;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
-import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
 
 public class Sessione 
@@ -24,9 +19,9 @@ public class Sessione
 	public static Utente getUtente_corrente() {return utente_corrente;}
 	private static DataBase db;
 	
-	private static  String nome_file_log_sessione ;
+	private static String nome_file_log_sessione ;
 	private static Logger logger;
-	private static  String nome_file_error_sessione;
+	private static String nome_file_error_sessione;
 	private static Logger error_logger;
 	
 	public static void main(String[] args) throws SQLException 
@@ -249,22 +244,17 @@ public class Sessione
 	
 	public static void iscrizioneUtenteInEvento(Evento evento)
 	{
-		if(utente_corrente == null)
-		{
-			return;
-		}
+		if(utente_corrente == null) return;
 		try
 		{
 			if(utenteIscrittoInEvento(evento))
-			{
 				return;
-			}	
 			int numero_iscritti_attuali = evento.getNumeroPartecipanti();
 			int numero_massimo_iscritti_possibili = ((Integer)evento.getCampo(NomeCampi.PARTECIPANTI).getContenuto() + (Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
 			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();
 			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
 			//se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-			if((numero_iscritti_attuali == (numero_massimo_iscritti_possibili-1)) && termine_ritiro_scaduto)
+			if(numero_iscritti_attuali == numero_massimo_iscritti_possibili && termine_ritiro_scaduto)
 			{
 				db.collegaUtenteEvento(utente_corrente, evento);
 				db.segnalaChiusuraEvento(evento);
@@ -272,10 +262,9 @@ public class Sessione
 				db.updateEvento(evento);
 				logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
 			}
-			else if (numero_iscritti_attuali < numero_massimo_iscritti_possibili)
+			else if (numero_iscritti_attuali < numero_massimo_iscritti_possibili || (!termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)) 
 				db.collegaUtenteEvento(utente_corrente, evento);
-			else
-				return;
+			else return;
 		} 
 		catch (Exception e) 
 		{

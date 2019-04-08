@@ -312,7 +312,7 @@ public class DataBase
 			String contenuto = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, titolo_evento, sdf.format(data_inizio_evento), getCostoEventoPerUtente(evento, utente));
 			Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
 			collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
-			deleteCollegamentoEventoUtente(utente.getId_utente(), evento);
+			//deleteCollegamentoEventoUtente(utente.getId_utente(), evento);
 		}
 	}
 	
@@ -354,7 +354,7 @@ public class DataBase
 		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
 		
-		LinkedList<Utente> list_utenti = selectUtentiInteressatiACategoria(CategorieEvento.PARTITA_CALCIO);
+		LinkedList<Utente> list_utenti = selectUtentiInteressatiACategoria(evento.getNomeCategoria());
 //		rimozione utente creatore per non notificarlo del suo evento appena creato in caso abbia mostrato interesse verso la categoria dell'evento da lui creato
 		list_utenti.remove(selectEvento(evento.getId()).getUtenteCreatore());		
 		for(Utente utente : list_utenti)

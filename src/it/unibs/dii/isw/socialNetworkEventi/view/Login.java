@@ -3,9 +3,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -26,15 +24,9 @@ public class Login extends JPanel {
 	private final ActionListener creaUtLambda = e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword()));
 	
 	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) {
-		JLabel img;
-		String percorso = "", operatingSystem = System.getProperty("os.name").toLowerCase();
-		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) percorso = "Dati//Icona.png";
-		else if(operatingSystem.indexOf("win") >= 0) percorso="Dati\\Icona.png";
-		try { img = new JLabel(new ImageIcon(ImageIO.read(new File(percorso)).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));
-		} catch (IOException e) {
-			e.printStackTrace();
-			img =new JLabel();
-		}
+		JLabel img = new JLabel();
+		try { img = new JLabel(new ImageIcon(ImageIO.read(Grafica.percorsoIcona).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));}
+		catch (IOException e) {e.printStackTrace();}
 		
 		setLayout(null);
 		setBackground(coloreSfondo);

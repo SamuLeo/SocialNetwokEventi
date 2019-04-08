@@ -162,6 +162,7 @@ public class SchedaEvento extends JPanel {
 	
 	void iscriviEvento(Evento e) {
 		if (e instanceof Scii) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), Grafica.getIstance().sceltePersonali());
+		if (e instanceof PartitaCalcio) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), null);
 		Grafica.getIstance().iscriviEvento(e);
 	}
 }
