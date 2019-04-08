@@ -23,7 +23,8 @@ public class Login extends JPanel {
 	private final ActionListener accediLambda = e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword()));
 	private final ActionListener creaUtLambda = e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword()));
 	
-	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) {
+	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
+	{
 		JLabel img = new JLabel();
 		try { img = new JLabel(new ImageIcon(ImageIO.read(Grafica.percorsoIcona).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));}
 		catch (IOException e) {e.printStackTrace();}

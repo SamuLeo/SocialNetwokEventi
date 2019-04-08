@@ -36,15 +36,16 @@ public class Utente  {
 		this(nome, password, eta_min, eta_max);
 		id_utente = id;
 	}
-	
-	public boolean equals(Utente utente) {
-		if(nome.equals(utente.getNome()) && password.equals(utente.getPassword()))
-			return true;
-		else
-			return false;
+
+
+		
+	 @Override
+	public boolean equals(Object utente) 
+	 {
+		return this.nome.equals(((Utente)utente).getNome());
 	}
-	
-	 public void aggiungiNotifica(Notifica notifica) {notifiche.add(notifica);}
+
+	public void aggiungiNotifica(Notifica notifica) {notifiche.add(notifica);}
 	 
 	 public boolean rimuoviNotifica(Notifica notifica) {
 		 if(notifiche.contains(notifica))

@@ -45,7 +45,11 @@ public class Sessione
 		try {
 			db.getConnection();
 			db.initializeDatiRAM();
-		} catch(SQLException e) {e.printStackTrace();}
+		} 
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(Messaggi.E_DATABASE);
+		}
 	}
 	
 	private static void creaLogger() {
@@ -62,6 +66,7 @@ public class Sessione
 			nome_file_error_sessione = "Dati\\file_log\\error_sessione.log";
 		}		
 		logger = new Logger(nome_file_log_sessione);
+		error_logger = new Logger(nome_file_error_sessione);
 	}
 	
 	public static boolean accedi(Utente utente) {
@@ -73,13 +78,17 @@ public class Sessione
 				 return true;
 			 }
 			 else return false;
-		} 
-		catch (SQLException e) {e.printStackTrace();}
-		return false;
+		 } 
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_ACCEDI, utente.getNome()));
+		 }
+		 return false;
 	}
 	
 	public static Runnable aggiornatore = new Runnable() {
-		public void run(){	
+		public void run()
+		{	
 		try 
 		{
 			db.refreshDatiRAM();
@@ -103,8 +112,11 @@ public class Sessione
 				}
 			}
 		} 
-		catch (SQLException e)  {e.printStackTrace();}
-	}
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(Messaggi.E_AGGIORNATORE);
+		}	
+		}
 };
 	
 	/**
@@ -163,10 +175,9 @@ public class Sessione
 			db.segnalaNuovoEventoAgliInteressati(evento);
 			return true;
 		}
-		catch(SQLException e) {
-			e.printStackTrace();
-			error_logger.scriviLog(String.format(Messaggi.E_AGGIUNTA_EVENTO,evento.getCampo(NomeCampi.TITOLO)));}
-		catch(Exception e) {e.printStackTrace();}
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Messaggi.E_INSERT_E,evento.getCampo(NomeCampi.TITOLO)));}
 		return false;
 	}
 	
@@ -178,11 +189,11 @@ public class Sessione
 			db.collegaUtenteNotifica(utente_corrente.getId_utente(), notifica.getIdNotifica());
 			return true;
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_N, utente_corrente.getId_utente(), notifica.getIdNotifica()));
+			 return false;
+		 }
 	}
 	
 	public static void notificaUtentePerEvento (Evento evento, Utente utente_destinatario) 
@@ -191,8 +202,10 @@ public class Sessione
 		{
 			db.segnalaEventoPerUtente(evento, utente_corrente, utente_destinatario);
 		} 
-		catch (SQLException exc) 
-		{exc.printStackTrace();}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_N_PER_E, utente_destinatario.getId_utente(), evento.getId()));
+		 }
 	}
 	
 	public static boolean insertUtente(Utente utente) 
@@ -203,11 +216,10 @@ public class Sessione
 				return false;
 			utente_corrente = db.insertUtente(utente);
 		} 
-		catch (SQLException e) 
-		{
-			e.printStackTrace();
-//			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.INFORMATION_MESSAGE);
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_INSERT_U, utente.getNome()));
+		 }
 		return true;
 	}
 	
@@ -219,11 +231,11 @@ public class Sessione
 				utente_corrente.aggiungiInteresse(nome_categoria);
 			}
 		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_C, utente_corrente.getId_utente(), nome_categoria.getString()));
+			 return false;
+		 }
 		return true;
 	}
 	
@@ -235,11 +247,11 @@ public class Sessione
 			db.collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
 			return true;
 		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_INSERT_U, notifica.getTitolo()));
+			 return false;
+		 }
 	}
 	
 	public static void iscrizioneUtenteInEvento(Evento evento)
@@ -266,10 +278,10 @@ public class Sessione
 				db.collegaUtenteEvento(utente_corrente, evento);
 			else return;
 		} 
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
+		 catch(Exception e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_E, utente_corrente.getId_utente(), evento.getId()));
+		 }
 	}
 
 	
@@ -285,9 +297,10 @@ public class Sessione
 			notifiche = db.selectNotificheDiUtente(utente_corrente.getId_utente());
 			utente_corrente.setNotifiche(notifiche);
 		} 
-		catch (SQLException e) {
-			e.printStackTrace();
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_N, utente_corrente.getId_utente()));
+		 }
 		return notifiche;
 	}
 	
@@ -295,18 +308,24 @@ public class Sessione
 	{
 		try {
 			return db.selectUtentiDaEventiPassati(utente.getId_utente());
-		} catch (SQLException e) {
-			error_logger.scriviLog(Messaggi.E_RICERCA_POSSIBILI_U_INTERESSATI);
-			e.printStackTrace();
-		}
+		} 
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_POSSIBILI_U_INTERESSATI, utente.getId_utente()));
+		 }
 		return null;
 	}
 	
-	public static LinkedList<Utente> getUtentiDaEventiPassati(CategorieEvento nomeCategoria) {
+	public static LinkedList<Utente> getUtentiDaEventiPassati(CategorieEvento nome_categoria) {
 		try {
-			return db.selectUtentiDaEventiPassati(utente_corrente.getId_utente()).get(nomeCategoria);
-		} catch (SQLException e) {e.printStackTrace(); return new LinkedList<>();}
-	}
+			return db.selectUtentiDaEventiPassati(utente_corrente.getId_utente()).get(nome_categoria);
+		} 
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_POSSIBILI_U_INTERESSATI_A_C, utente_corrente.getId_utente(), nome_categoria.getString() ));
+			 return new LinkedList<>();
+		 }	
+		}
 
 	public static boolean utenteIscrittoInEvento(Evento evento)
 	{
@@ -316,9 +335,10 @@ public class Sessione
 		try {
 			return db.existUtenteInEvento(utente_corrente, evento);
 		} 
-		catch (SQLException e) {
-			e.printStackTrace();
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_U_ISCRITTO_IN_E, utente_corrente.getId_utente(), evento.getId()));
+		 }
 		return false;
 	}
 	
@@ -327,10 +347,11 @@ public class Sessione
 		try {
 			return db.selectEventiDiUtente(utente_corrente.getId_utente());
 		} 
-		catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_E, utente_corrente.getId_utente()));
+				return null;
+		 }
 	}
 	
 
@@ -346,14 +367,15 @@ public class Sessione
 			utente_corrente.setEtaMin(eta_min);
 			utente_corrente.setEtaMax(eta_max);
 		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_UPDATE_U, utente_corrente.getId_utente()));
+				return false;
+		 }
 		return true;
 	}
 	
+
 
 //	METODI DI ELIMINAZIONE
 	
@@ -365,39 +387,32 @@ public class Sessione
 			db.deleteCollegamentoNotificaUtente(utente_corrente, notifica);
 			utente_corrente.rimuoviNotifica(notifica);
 		} 
-		catch (SQLException e) 
-		{
-			e.printStackTrace();
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_N, notifica.getIdNotifica(), utente_corrente.getId_utente()));
+		 }
 		
 		return getNotificheUtente();
 	}
 	
 	public static void disiscrizioneUtenteEvento(Evento evento) throws RuntimeException{
 		if(utente_corrente == null) throw new RuntimeException("L'utente corrente è null");
-		
+
 		Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
 		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
 		if(termine_ritiro_scaduto)
 			throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
-		
-		switch(evento.getNomeCategoria()) 
+		try 
 		{
-			case PARTITA_CALCIO : 
-				try 
-				{
-					PartitaCalcio partita = (PartitaCalcio)evento;
-					if(!utenteIscrittoInEvento(partita)) throw new RuntimeException ("Utente non iscritto alla partita");	
-					db.deleteCollegamentoEventoUtente(utente_corrente.getId_utente(), partita);
-					break;
-				} 
-				catch (SQLException e) 
-				{e.printStackTrace();}
-		default:
-			break;
+			if(!utenteIscrittoInEvento(evento)) throw new RuntimeException ("Utente non iscritto alla partita");	
+			db.deleteCollegamentoEventoUtente(utente_corrente.getId_utente(), evento);
+		} 
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Messaggi.E_DELETE_U_DA_E, utente_corrente.getId_utente(), evento.getId() ));
 		}
 	}
-		
+
 	public static boolean eliminaInteresseUtenteCorrente(CategorieEvento nome_categoria)
 	{
 		try {
@@ -407,10 +422,11 @@ public class Sessione
 			} else
 				return true;
 		}
-		catch(SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_C_DA_U, utente_corrente.getId_utente(), nome_categoria.getString()));
+			 return false;
+		 }
 		return true;
 	}
 	
@@ -430,7 +446,9 @@ public class Sessione
 				logger.scriviLog(String.format(Messaggi.APERTO_RITIRATO, evento.getId()));
 			}
 		}
-		catch(SQLException e)
-		{throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");}
-	}
+		 catch(SQLException e) 
+		 {
+			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_E, evento.getId()));
+		 }
+		}
 }

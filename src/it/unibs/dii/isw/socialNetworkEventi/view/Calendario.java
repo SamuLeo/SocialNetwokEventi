@@ -23,7 +23,9 @@ public class Calendario extends JFrame {
 	 
 	Calendario(Font font, int lato, Consumer<Calendar> azione) {
 		this.lato=lato;
+		
 		setIconImage(Grafica.icona.getImage());
+		
 	    setTitle("Scegli una data");
 	    setSize(lato, lato);
 	    setBounds(screenW/2-lato/2, screenH/2-lato/2, lato, lato);

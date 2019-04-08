@@ -185,18 +185,22 @@ public abstract class Evento
 	
 	public Boolean getCampoOptDiUtente(Utente utente, NomeCampi nome_campi)
 	{
-		if(partecipanti_campiOpt.containsKey(utente))
-			return partecipanti_campiOpt.get(utente).get(nome_campi);
-		else
-			return null;
+//		if(partecipanti_campiOpt.containsKey(utente))
+//			return partecipanti_campiOpt.get(utente).get(nome_campi);
+//		else
+//			return null;
+		for(Utente u : partecipanti_campiOpt.keySet())
+			if(u.equals(utente))
+				return partecipanti_campiOpt.get(u).get(nome_campi);
+		return null;
 	}
 	
 	public HashMap<NomeCampi,Boolean> getCampiOptDiUtente(Utente utente)
 	{
-		if(partecipanti_campiOpt.containsKey(utente))
-			return partecipanti_campiOpt.get(utente);
-		else
-			return null;
+		for(Utente u : partecipanti_campiOpt.keySet())
+			if(u.equals(utente))
+				return partecipanti_campiOpt.get(u);
+		return null;
 	}
 
 	public int getId() {return id_evento;}
