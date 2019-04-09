@@ -12,10 +12,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
+import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
@@ -49,13 +49,14 @@ public class SchedaEvento extends JPanel {
 		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
 				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
 				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampi.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
-		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
+		Utente uCorrente = Grafica.getIstance().chiediUtenteCorrente();
+		if (e.getUtenteCreatore().equals(uCorrente) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
-		} else if (!Sessione.utenteIscrittoInEvento(e) && eventoHaSpazio && !termineIscrizioneScaduto) {
+		} else if (!e.contieneUtente(uCorrente) && eventoHaSpazio && !termineIscrizioneScaduto) {
 			iscriviti = new JButton(" 🖋  Iscriviti");
 			iscriviti.addActionListener(click -> iscriviEvento(e));
-		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoInEvento(e)){
+		} else if (!termine_ritiro_scaduto && e.contieneUtente(uCorrente)){
 			iscriviti = new JButton(" ✖  Annulla iscrizione");
 			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
 		}

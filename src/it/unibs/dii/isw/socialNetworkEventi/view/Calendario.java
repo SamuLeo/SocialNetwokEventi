@@ -97,13 +97,18 @@ public class Calendario extends JFrame {
 	}
  
 	void updateMonth() {
-	    //cal.set(Calendar.DAY_OF_MONTH, 0);
+		//In questo caso i salvataggi e ripristini non servono a nulla perché la data non viene usata altrove, ma si usa il contenuto della cella cliccata nelle lambda 
+		//Date prima = cal.getTime();	//Si porta temporaneamente la data al primo del mese (selezionato sul calendario adesso!) per scoprire che giorno è
+		
 		cal.setFirstDayOfWeek(GregorianCalendar.MONDAY);
 	    String mese = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.ITALY).toUpperCase();
 	    nomeMese.setText(mese + " " +  cal.get(Calendar.YEAR));
-	 
-	    int startDay = cal.get(Calendar.DAY_OF_WEEK);
+    	cal.set(Calendar.DAY_OF_MONTH, 1);
+	    int startDay = cal.get(Calendar.DAY_OF_WEEK) == 1? 6 : cal.get(Calendar.DAY_OF_WEEK)-2;
 	    int numberOfDays = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+	    
+	    //cal.setTime(prima);	//E poi si ripristina la data a quella di prima
+	    
 	    model.setRowCount(0);
 	    model.setRowCount(1);
 	    int offset = startDay % 7;

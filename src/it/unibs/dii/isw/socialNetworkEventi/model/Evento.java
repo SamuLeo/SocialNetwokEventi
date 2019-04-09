@@ -202,6 +202,14 @@ public abstract class Evento
 				return partecipanti_campiOpt.get(u);
 		return null;
 	}
+	
+	public boolean contieneUtente(Utente utente)
+	{
+		for(Utente u : partecipanti_campiOpt.keySet())
+			if(u.equals(utente))
+				return true;
+		return false;
+	}
 
 	public int getId() {return id_evento;}
 	public void setId(int id) {this.id_evento = id;}
