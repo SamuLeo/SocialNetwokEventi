@@ -26,8 +26,8 @@ public class Sessione
 	
 	public static void main(String[] args) throws SQLException 
 	{
-		connettiDB();
 		creaLogger();
+		connettiDB();
 		
 		Grafica.getIstance().crea();
 		Grafica.getIstance().mostraLogin();		
