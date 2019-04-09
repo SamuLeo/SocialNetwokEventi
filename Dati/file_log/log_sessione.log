@@ -234,3 +234,19 @@
 08-04-2019 22:40  :  Effettuato accesso da parte di 
 08-04-2019 22:41  :  Stato dell'evento con id : 10 passato da VALIDO a APERTO
 08-04-2019 22:42  :  Stato dell'evento con id : 10 passato da APERTO a CHIUSO
+09-04-2019 10:55  :  Stato dell'evento con id : 2 passato da APERTO a FALLITO
+09-04-2019 10:58  :  Effettuato accesso da parte di samu
+09-04-2019 11:00  :  Stato dell'evento con id : 3 passato da VALIDO a APERTO
+09-04-2019 11:23  :  Stato dell'evento con id : 3 passato da APERTO a FALLITO
+09-04-2019 11:23  :  Effettuato accesso da parte di samu
+09-04-2019 11:24  :  Stato dell'evento con id : 4 passato da VALIDO a APERTO
+09-04-2019 11:25  :  Effettuato accesso da parte di stef
+09-04-2019 11:25  :  Stato dell'evento con id : 4 passato da APERTO a CHIUSO
+09-04-2019 11:27  :  Stato dell'evento con id : 5 passato da VALIDO a APERTO
+09-04-2019 11:29  :  Stato dell'evento con id : 5 passato da APERTO a CHIUSO
+09-04-2019 11:29  :  Stato dell'evento con id : 55 passato da VALIDO a APERTO
+09-04-2019 11:31  :  Stato dell'evento con id : 55 passato da APERTO a RITIRATO
+09-04-2019 11:32  :  Stato dell'evento con id : 56 passato da VALIDO a APERTO
+09-04-2019 11:33  :  Stato dell'evento con id : 57 passato da VALIDO a APERTO
+09-04-2019 11:34  :  Stato dell'evento con id : 56 passato da APERTO a CHIUSO
+09-04-2019 11:35  :  Stato dell'evento con id : 57 passato da APERTO a CHIUSO

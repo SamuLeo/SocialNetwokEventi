@@ -1,4 +1,4 @@
-CREATE DATABASE  IF NOT EXISTS `social_network_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+CREATE DATABASE  IF NOT EXISTS `social_network_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
 USE `social_network_db`;
 -- MySQL dump 10.13  Distrib 8.0.15, for Win64 (x86_64)
 --
@@ -31,7 +31,7 @@ CREATE TABLE `notifica` (
   `data` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `tipo_notifica` blob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7790 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7790 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,7 @@ DROP TABLE IF EXISTS `partita_calcio`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `partita_calcio` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_creatore` varchar(100) NOT NULL,
+  `id_creatore` int(11) NOT NULL,
   `luogo` varchar(100) NOT NULL,
   `data_ora_termine_ultimo_iscrizione` timestamp NULL DEFAULT NULL,
   `data_ora_inizio_evento` timestamp NULL DEFAULT NULL,
@@ -61,8 +61,8 @@ CREATE TABLE `partita_calcio` (
   `genere` varchar(10) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_utente_idx` (`id_creatore`),
-  CONSTRAINT `id_creatore` FOREIGN KEY (`id_creatore`) REFERENCES `utente` (`nome`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `id_creatore` FOREIGN KEY (`id_creatore`) REFERENCES `utente` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,11 +73,11 @@ DROP TABLE IF EXISTS `relazione_utente_categoria`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `relazione_utente_categoria` (
-  `id_u` varchar(100) NOT NULL,
+  `id_u` int(11) NOT NULL,
   `nome_categoria` varchar(50) NOT NULL,
   PRIMARY KEY (`id_u`,`nome_categoria`),
-  CONSTRAINT `id_u` FOREIGN KEY (`id_u`) REFERENCES `utente` (`nome`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `id_u` FOREIGN KEY (`id_u`) REFERENCES `utente` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -88,14 +88,14 @@ DROP TABLE IF EXISTS `relazione_utente_notifica`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `relazione_utente_notifica` (
-  `id_user` varchar(100) NOT NULL,
+  `id_user` int(11) NOT NULL,
   `id_notifica` int(11) NOT NULL,
   PRIMARY KEY (`id_user`,`id_notifica`),
   KEY `id_utente_idx` (`id_user`),
   KEY `id_notifica_idx` (`id_notifica`),
   CONSTRAINT `id_notifica` FOREIGN KEY (`id_notifica`) REFERENCES `notifica` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `id_user` FOREIGN KEY (`id_user`) REFERENCES `utente` (`nome`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `id_user` FOREIGN KEY (`id_user`) REFERENCES `utente` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -106,14 +106,14 @@ DROP TABLE IF EXISTS `relazione_utente_partita_calcio`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `relazione_utente_partita_calcio` (
-  `id_utente` varchar(100) NOT NULL,
+  `id_utente` int(11) NOT NULL,
   `id_evento` int(11) NOT NULL,
   PRIMARY KEY (`id_utente`,`id_evento`),
   KEY `id_utente_idx` (`id_utente`),
   KEY `id_partita_idx` (`id_evento`),
   CONSTRAINT `id_partita` FOREIGN KEY (`id_evento`) REFERENCES `partita_calcio` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `id_utente` FOREIGN KEY (`id_utente`) REFERENCES `utente` (`nome`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `id_utente` FOREIGN KEY (`id_utente`) REFERENCES `utente` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,16 +124,16 @@ DROP TABLE IF EXISTS `relazione_utente_scii`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `relazione_utente_scii` (
-  `id_utente` varchar(100) NOT NULL,
+  `id_utente` int(11) NOT NULL,
   `id_evento` int(11) NOT NULL,
   `biglietto_bus` tinyint(1) NOT NULL,
   `pranzo` tinyint(1) NOT NULL,
   `affitto_scii` tinyint(1) NOT NULL,
   PRIMARY KEY (`id_utente`,`id_evento`),
   KEY `fk_relazione_utente_scii_2_idx` (`id_evento`),
-  CONSTRAINT `fk_relazione_utente_scii_1` FOREIGN KEY (`id_utente`) REFERENCES `utente` (`nome`),
+  CONSTRAINT `fk_relazione_utente_scii_1` FOREIGN KEY (`id_utente`) REFERENCES `utente` (`id`),
   CONSTRAINT `fk_relazione_utente_scii_2` FOREIGN KEY (`id_evento`) REFERENCES `scii` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -145,7 +145,7 @@ DROP TABLE IF EXISTS `scii`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `scii` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_creatore` varchar(100) NOT NULL,
+  `id_creatore` int(11) NOT NULL,
   `luogo` varchar(100) NOT NULL,
   `data_ora_termine_ultimo_iscrizione` timestamp NULL DEFAULT NULL,
   `data_ora_inizio_evento` timestamp NULL DEFAULT NULL,
@@ -163,8 +163,8 @@ CREATE TABLE `scii` (
   `affitto_scii` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_creatore_idx` (`id_creatore`),
-  CONSTRAINT `id` FOREIGN KEY (`id_creatore`) REFERENCES `utente` (`nome`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `id` FOREIGN KEY (`id_creatore`) REFERENCES `utente` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -175,12 +175,13 @@ DROP TABLE IF EXISTS `utente`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `utente` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `nome` varchar(100) NOT NULL,
   `password` varchar(50) DEFAULT NULL,
   `eta_min` int(11) DEFAULT NULL,
   `eta_max` int(11) DEFAULT NULL,
-  PRIMARY KEY (`nome`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

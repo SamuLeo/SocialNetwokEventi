@@ -169,6 +169,7 @@ public class Sessione
 	{
 		try
 		{
+			evento.setUtenteCreatore(utente_corrente);
 			db.insertEvento(evento); 
 			iscrizioneUtenteInEvento(evento);
 			logger.scriviLog(String.format(Messaggi.VALIDO_APERTO, evento.getId()));
@@ -186,12 +187,12 @@ public class Sessione
 		try
 		{
 			notifica = db.insertNotifica(notifica); 
-			db.collegaUtenteNotifica(utente_corrente.getId_utente(), notifica.getIdNotifica());
+			db.collegaUtenteNotifica(utente_corrente.getNome(), notifica.getIdNotifica());
 			return true;
 		}
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_N, utente_corrente.getId_utente(), notifica.getIdNotifica()));
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_N, utente_corrente.getNome(), notifica.getIdNotifica()));
 			 return false;
 		 }
 	}
@@ -204,7 +205,7 @@ public class Sessione
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_N_PER_E, utente_destinatario.getId_utente(), evento.getId()));
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_N_PER_E, utente_destinatario.getNome(), evento.getId()));
 		 }
 	}
 	
@@ -214,7 +215,9 @@ public class Sessione
 		{
 			if(db.existUtente(utente) != null)
 				return false;
-			utente_corrente = db.insertUtente(utente);
+			
+			db.insertUtente(utente);
+			utente_corrente = utente;
 		} 
 		 catch(SQLException e) 
 		 {
@@ -233,7 +236,7 @@ public class Sessione
 		}
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_C, utente_corrente.getId_utente(), nome_categoria.getString()));
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_C, utente_corrente.getNome(), nome_categoria.getString()));
 			 return false;
 		 }
 		return true;
@@ -244,7 +247,7 @@ public class Sessione
 		try
 		{
 			notifica = db.insertNotifica(notifica); 
-			db.collegaUtenteNotifica(utente.getId_utente(), notifica.getIdNotifica());
+			db.collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
 			return true;
 		}
 		 catch(SQLException e) 
@@ -280,7 +283,7 @@ public class Sessione
 		} 
 		 catch(Exception e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_E, utente_corrente.getId_utente(), evento.getId()));
+			 error_logger.scriviLog(String.format(Messaggi.E_COLLEGAMENTO_U_E, utente_corrente.getNome(), evento.getId()));
 		 }
 	}
 
@@ -294,12 +297,12 @@ public class Sessione
 	{
 		LinkedList<Notifica> notifiche = null;
 		try {
-			notifiche = db.selectNotificheDiUtente(utente_corrente.getId_utente());
+			notifiche = db.selectNotificheDiUtente(utente_corrente.getNome());
 			utente_corrente.setNotifiche(notifiche);
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_GET_N, utente_corrente.getId_utente()));
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_N, utente_corrente.getNome()));
 		 }
 		return notifiche;
 	}
@@ -307,22 +310,22 @@ public class Sessione
 	public HashMap<CategorieEvento,LinkedList<Utente>> getPossibiliUtentiInteressati(Utente utente)
 	{
 		try {
-			return db.selectUtentiDaEventiPassati(utente.getId_utente());
+			return db.selectUtentiDaEventiPassati(utente.getNome());
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_GET_POSSIBILI_U_INTERESSATI, utente.getId_utente()));
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_POSSIBILI_U_INTERESSATI, utente.getNome()));
 		 }
 		return null;
 	}
 	
 	public static LinkedList<Utente> getUtentiDaEventiPassati(CategorieEvento nome_categoria) {
 		try {
-			return db.selectUtentiDaEventiPassati(utente_corrente.getId_utente()).get(nome_categoria);
+			return db.selectUtentiDaEventiPassati(utente_corrente.getNome()).get(nome_categoria);
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_GET_POSSIBILI_U_INTERESSATI_A_C, utente_corrente.getId_utente(), nome_categoria.getString() ));
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_POSSIBILI_U_INTERESSATI_A_C, utente_corrente.getNome(), nome_categoria.getString() ));
 			 return new LinkedList<>();
 		 }	
 		}
@@ -337,7 +340,7 @@ public class Sessione
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_GET_U_ISCRITTO_IN_E, utente_corrente.getId_utente(), evento.getId()));
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_U_ISCRITTO_IN_E, utente_corrente.getNome(), evento.getId()));
 		 }
 		return false;
 	}
@@ -345,11 +348,11 @@ public class Sessione
 	public static HashMap<CategorieEvento,LinkedList<Evento>> getEventiUtenteCorrente()
 	{
 		try {
-			return db.selectEventiDiUtente(utente_corrente.getId_utente());
+			return db.selectEventiDiUtente(utente_corrente.getNome());
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_GET_E, utente_corrente.getId_utente()));
+			 error_logger.scriviLog(String.format(Messaggi.E_GET_E, utente_corrente.getNome()));
 				return null;
 		 }
 	}
@@ -362,14 +365,15 @@ public class Sessione
 	{
 		try
 		{
-			db.updateEtaMinUtente(utente_corrente.getId_utente(), eta_min);
-			db.updateEtaMaxtente(utente_corrente.getId_utente(), eta_max);
-			utente_corrente.setEtaMin(eta_min);
 			utente_corrente.setEtaMax(eta_max);
+			utente_corrente.setEtaMin(eta_min);
+			db.updateEtaMaxtente(utente_corrente.getNome(), eta_max);
+			db.updateEtaMinUtente(utente_corrente.getNome(), eta_min);
+			db.refreshDatiRAM();
 		}
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_UPDATE_U, utente_corrente.getId_utente()));
+			 error_logger.scriviLog(String.format(Messaggi.E_UPDATE_U, utente_corrente.getNome()));
 				return false;
 		 }
 		return true;
@@ -389,7 +393,7 @@ public class Sessione
 		} 
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_N, notifica.getIdNotifica(), utente_corrente.getId_utente()));
+			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_N, notifica.getIdNotifica(), utente_corrente.getNome()));
 		 }
 		
 		return getNotificheUtente();
@@ -405,11 +409,11 @@ public class Sessione
 		try 
 		{
 			if(!utenteIscrittoInEvento(evento)) throw new RuntimeException ("Utente non iscritto alla partita");	
-			db.deleteCollegamentoEventoUtente(utente_corrente.getId_utente(), evento);
+			db.deleteCollegamentoEventoUtente(utente_corrente.getNome(), evento);
 		} 
 		catch(SQLException e) 
 		{
-			error_logger.scriviLog(String.format(Messaggi.E_DELETE_U_DA_E, utente_corrente.getId_utente(), evento.getId() ));
+			error_logger.scriviLog(String.format(Messaggi.E_DELETE_U_DA_E, utente_corrente.getNome(), evento.getId() ));
 		}
 	}
 
@@ -417,14 +421,14 @@ public class Sessione
 	{
 		try {
 			if(utente_corrente.getCategorieInteressi().contains(nome_categoria)) {
-				db.deleteCollegamentoCategoriaUtente(getUtente_corrente().getId_utente(), nome_categoria);
+				db.deleteCollegamentoCategoriaUtente(utente_corrente.getNome(), nome_categoria);
 				utente_corrente.rimuoviInteresse(nome_categoria);
 			} else
 				return true;
 		}
 		 catch(SQLException e) 
 		 {
-			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_C_DA_U, utente_corrente.getId_utente(), nome_categoria.getString()));
+			 error_logger.scriviLog(String.format(Messaggi.E_DELETE_C_DA_U, utente_corrente.getNome(), nome_categoria.getString()));
 			 return false;
 		 }
 		return true;

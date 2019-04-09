@@ -4,8 +4,8 @@ import java.util.LinkedList;
 
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
 
-public class Utente  {
-	private int id_utente;
+public class Utente  
+{
 	private String nome;
 	private String password;
 	private int eta_min;
@@ -15,29 +15,25 @@ public class Utente  {
 	private HashMap<CategorieEvento,LinkedList<Evento>> eventi;
 	private LinkedList<Notifica> notifiche;
 
+	
 	public Utente(String nome) {
-		if (nome==null) throw new IllegalArgumentException("Necessario inserire un nome per questo account");
+		if (nome==null || nome.length()<4) throw new IllegalArgumentException("Necessario inserire un nome per questo account lungo almeno 4 caratteri");
 		this.nome = nome;
 	}
 	
 	public Utente(String nome, String password) {
 		this(nome);
+		if (nome==null || nome.length()<4) throw new IllegalArgumentException("Necessario inserire una password per questo account lunga almeno 4 caratteri");
 		this.password = password;
 	}
 	
 	public Utente(String nome, String password, int eta_min, int eta_max) {
 		this(nome, password);
-//		if (eta_min > eta_max) throw new IllegalArgumentException("La fascia di età minima non può superare la massima");
+		if (eta_min > eta_max) throw new IllegalArgumentException("La fascia di età minima non può superare la massima");
 		this.eta_min = eta_min;
 		this.eta_max = eta_max;
 	}
 	
-	public Utente(int id, String nome, String password, int eta_min, int eta_max)  {
-		this(nome, password, eta_min, eta_max);
-		id_utente = id;
-	}
-
-
 		
 	 @Override
 	public boolean equals(Object utente) 
@@ -67,9 +63,6 @@ public class Utente  {
 	public String getPassword() {return password;}
 	public void setPassword(String password) {this.password = password;}
 	
-	public int getId_utente() {return id_utente;}
-	public void setId_utente(int id_utente) {this.id_utente = id_utente;}
-	
 	public int getEtaMin() {return eta_min;}
 	public void setEtaMin(int etaMin) {this.eta_min = etaMin;}
 	public int getEtaMax() {return eta_max;}
@@ -83,19 +76,20 @@ public class Utente  {
 	
 	public LinkedList<CategorieEvento> getCategorieInteressi() {return categorie_di_interesse;}
 	public void setCategorieInteressi(LinkedList<CategorieEvento> interessi) {this.categorie_di_interesse = interessi;}
-//	public void setInteressi(LinkedList<Evento>[] interessi) 
-//	{
-//		this.interessi = (LinkedList<Evento>) Stream.of(interessi).collect(Collectors.toList());
-//	}
 
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Utente \nid_utente=");
-		builder.append(id_utente);
 		builder.append("\n nome=");
 		builder.append(nome);
 		builder.append("\n password=");
 		builder.append(password + "\n");
+		builder.append("\n fascia eta superiore=");
+		builder.append(eta_max + "\n");
+		builder.append("\n fascia età inferiore=");
+		builder.append(eta_min + "\n");
+		builder.append("\n interessi=");
+		for(CategorieEvento cat : categorie_di_interesse)
+			builder.append(cat.getString() + "\n");
 		return builder.toString();
 	}
 }
