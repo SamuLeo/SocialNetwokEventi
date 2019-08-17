@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import javax.swing.*;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 
 class PannelloUtente extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -71,7 +71,7 @@ class PannelloUtente extends JPanel {
 			categorie.add(temp);
 		}
 		
-		for (CategorieEvento c : u.getCategorieInteressi()) {
+		for (CategoriaEvento c : u.getCategorieInteressi()) {
 			for (JCheckBox chk_cat : categorie)
 				if (chk_cat.getText().equalsIgnoreCase(c.toString()))
 					chk_cat.setSelected(true);

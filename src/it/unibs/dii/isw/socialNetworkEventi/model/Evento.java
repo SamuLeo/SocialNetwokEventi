@@ -1,6 +1,6 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import java.util.*;
@@ -8,7 +8,7 @@ import java.util.*;
 @SuppressWarnings("rawtypes")
 public abstract class Evento 
 {
-	private CategorieEvento nome_categoria = CategorieEvento.DEFAULT;
+	private CategoriaEvento nome_categoria = CategoriaEvento.DEFAULT;
 	
 	private int id_evento;
 	private Utente utente_creatore;
@@ -65,7 +65,8 @@ public abstract class Evento
 		    Calendar data_ora_termine_evento,
 		    Calendar data_ora_termine_ritiro_iscrizione,
 		    Integer tolleranza
-			) throws IllegalArgumentException {
+			) throws IllegalArgumentException 
+	{
 		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo);
 
 		if(titolo != null) 
@@ -132,13 +133,18 @@ public abstract class Evento
 	 public boolean aggiungiFruitore(Utente utente)
 	 {
 		 if((Integer)getCampo(NomeCampi.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
-			 {partecipanti_campiOpt.put(utente,null); return true;}
-		 else return false;
+		 {
+			 partecipanti_campiOpt.put(utente,null); 
+			 return true;
+		 }
+		 else 
+			 return false;
 	 }
 	 
 	 public void rimuoviFruitore(Utente utente)
-	 {
-		 if(getNumeroPartecipanti() == 0 /*|| fruitori.get(0).equals(utente)*/) return;
+	 {	 
+		 Set<Utente> utenti = partecipanti_campiOpt.keySet();
+		 if(utenti.contains(utente)) 
 		 	partecipanti_campiOpt.remove(utente);
 	 }
 
@@ -154,7 +160,18 @@ public abstract class Evento
 	} 
 	 
 	public HashMap<NomeCampi, Campo> getCampi()	{return campi;}
-	public Campo getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
+	
+	
+	public Object getContenutoCampo(NomeCampi nomeCampo)	
+	{
+		return campi.get(nomeCampo).getContenuto();
+	}
+	
+	public Campo getCampo(NomeCampi nomeCampo)	
+	{
+		return campi.get(nomeCampo);
+	}
+	
 	
 	public int getNumeroPartecipanti() {return partecipanti_campiOpt.keySet().size();}
 	
@@ -202,6 +219,7 @@ public abstract class Evento
 				return partecipanti_campiOpt.get(u);
 		return null;
 	}
+	
 
 	public int getId() {return id_evento;}
 	public void setId(int id) {this.id_evento = id;}
@@ -209,13 +227,14 @@ public abstract class Evento
 	public StatoEvento getStato() {return stato;}
 	public void setStato(StatoEvento stato) {this.stato = stato;}	
 	
-	public CategorieEvento getNomeCategoria() {return nome_categoria;}
-	public  void setNomeCategoria(CategorieEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
+	public CategoriaEvento getNomeCategoria() {return nome_categoria;}
+	public  void setNomeCategoria(CategoriaEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
 
 	@Override
 	public String toString() 
 	{
 		StringBuffer stringa = new StringBuffer();
+		stringa.append("id : " + this.id_evento + "\n");
 		Collection<Campo> v = campi.values();
 		for (Campo c : v)
 		{
@@ -231,4 +250,10 @@ public abstract class Evento
 		}
 		return stringa.toString();
 	}
+
+	public boolean equals(Evento evento) 
+	{
+		return this.toString().equals(evento.toString());
+	}
 }
+

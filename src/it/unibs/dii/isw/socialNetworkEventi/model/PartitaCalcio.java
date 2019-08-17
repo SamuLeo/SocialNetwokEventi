@@ -2,7 +2,7 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.util.Calendar;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
@@ -37,7 +37,7 @@ public class PartitaCalcio extends Evento
 		aggiungiCampo(eta_massima, true, NomeCampi.ETA_MASSIMA, "Età massima");
 		aggiungiCampo(genere, true, NomeCampi.GENERE, "Genere richiesto");
 		
-		setNomeCategoria(CategorieEvento.PARTITA_CALCIO);
+		setNomeCategoria(CategoriaEvento.PARTITA_CALCIO);
 	}
 	
 	

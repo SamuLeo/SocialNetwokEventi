@@ -2,13 +2,14 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.util.Calendar;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class Scii extends Evento
 {
-	public Scii(
+	public Scii
+	(
 			Utente creatore,
 			String luogo,
 			Calendar data_ora_termine_ultimo_iscrizione,	
@@ -38,7 +39,7 @@ public class Scii extends Evento
 		aggiungiCampo(pranzo, false, NomeCampi.PRANZO, "Costo pranzo");
 		aggiungiCampo(affitto_scii, false, NomeCampi.AFFITTO_SCII, "Costo affitto sci");
 		
-		setNomeCategoria(CategorieEvento.SCII);
+		setNomeCategoria(CategoriaEvento.SCII);
 	}
 	
 	

@@ -26,4 +26,12 @@ public class Campo<T> implements Serializable
 	public void 	setObbligatorio(boolean obbligatorio) {this.obbligatorio = obbligatorio;}
 	public String getDescrizione_campo() {return descrizione_campo;}
 	public void setDescrizione_campo(String descrizione_campo) {this.descrizione_campo = descrizione_campo;}
+
+	public boolean equals(Campo<T> campo) 
+	{
+		if(contenuto.equals(campo.getContenuto()) && obbligatorio==campo.isObbligatorio())
+			return true;
+		else
+			return false;
+	}
 }

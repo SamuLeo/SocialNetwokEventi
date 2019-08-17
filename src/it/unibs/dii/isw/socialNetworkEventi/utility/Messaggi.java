@@ -40,6 +40,7 @@ public class Messaggi
 	public static final String E_DELETE_U_DA_E = "ERRORE : Non è stato possibile eliminare l'utente %s dall'evento %s";
 	public static final String E_DELETE_C_DA_U = "ERRORE : Non è stato possibile eliminare l'utente %s dalla categoria %s";
 	public static final String E_DELETE_E = "ERRORE : Non è stato possibile eliminare l'evento %s";
+	public static final String E_DELETE_E_ALL_U = "ERRORE : Non è stato possibile eliminare gli eventi dell'utente %s";	
 	
 	
 //	NOTIFICHE

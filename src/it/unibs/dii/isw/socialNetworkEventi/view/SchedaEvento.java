@@ -19,7 +19,8 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
-public class SchedaEvento extends JPanel {
+public class SchedaEvento extends JPanel 
+{
 	private static final long serialVersionUID = 1L;
 	private int Y=0, X;
 	private JLabel[] obbligatori = new JLabel[7],
@@ -52,10 +53,10 @@ public class SchedaEvento extends JPanel {
 		if (e.getUtenteCreatore().equals(Grafica.getIstance().chiediUtenteCorrente()) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
 			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
-		} else if (!Sessione.utenteIscrittoInEvento(e) && eventoHaSpazio && !termineIscrizioneScaduto) {
+		} else if (!Sessione.getInstance().utenteIscrittoInEvento(e) && eventoHaSpazio && !termineIscrizioneScaduto) {
 			iscriviti = new JButton(" 🖋  Iscriviti");
 			iscriviti.addActionListener(click -> iscriviEvento(e));
-		} else if (!termine_ritiro_scaduto && Sessione.utenteIscrittoInEvento(e)){
+		} else if (!termine_ritiro_scaduto && Sessione.getInstance().utenteIscrittoInEvento(e)){
 			iscriviti = new JButton(" ✖  Annulla iscrizione");
 			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
 		}

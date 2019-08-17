@@ -45,10 +45,16 @@ public class Notifica implements Serializable
 		builder.append(titolo);
 		builder.append("\ncontenuto: ");
 		builder.append(contenuto);
-		builder.append("\ndata : ");
-		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
-		builder.append(sdf.format(data.getTime()) + "\n");
+//		builder.append("\ndata : ");
+//		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
+//		builder.append(sdf.format(data.getTime()) + "\n");
 		return builder.toString();
+	}
+	
+	@Override	
+	public boolean equals(Object notifica)
+	{
+		return this.toString().equals(notifica.toString());
 	}
 
 	public String getTitolo() {return titolo;}
