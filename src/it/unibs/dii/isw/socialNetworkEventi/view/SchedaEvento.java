@@ -67,7 +67,7 @@ public class SchedaEvento extends JPanel
 		}
 		obbligatori[0]= new JLabel ("Utente creatore: "); valObbligatori[0] = new JLabel(e.getUtenteCreatore().getNome());
 		obbligatori[1]= new JLabel ("Numero minimo partecipanti: "); valObbligatori[1] = new JLabel(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto().toString());
-		obbligatori[2]= new JLabel ("Ulteriori partecipanti ammessi: "); valObbligatori[2] = new JLabel(e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto().toString());
+		obbligatori[2]= new JLabel ("Esubero partecipanti ammessi: "); valObbligatori[2] = new JLabel(e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto().toString());
 		obbligatori[3]= new JLabel ("Luogo: "); valObbligatori[3] = new JLabel(e.getCampo(NomeCampi.LUOGO).getContenuto().toString());
 		obbligatori[4]= new JLabel ("Quota di adesione: "); valObbligatori[4] = new JLabel(e.getCampo(NomeCampi.COSTO).getContenuto().toString() + " €");
 		obbligatori[5]= new JLabel ("Inizio: "); valObbligatori[5] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime()));
@@ -162,8 +162,10 @@ public class SchedaEvento extends JPanel
 	void ridimensiona(int larghezza) {X = larghezza;}
 	
 	void iscriviEvento(Evento e) {
-		if (e instanceof Scii) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), Grafica.getIstance().sceltePersonali());
-		if (e instanceof PartitaCalcio) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), null);
+		if (e instanceof Scii) 
+			e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), Grafica.getIstance().sceltePersonali());
+		if (e instanceof PartitaCalcio) 
+			e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), null);
 		Grafica.getIstance().iscriviEvento(e);
 	}
 }

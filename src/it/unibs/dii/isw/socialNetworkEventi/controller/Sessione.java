@@ -14,8 +14,7 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
 
 public class Sessione 
-{
-	
+{	
 	private  static Sessione sessione;
 	private  Utente utente_corrente;
 	public  void setUtente_corrente(Utente utente_corrente) {this.utente_corrente = utente_corrente;}
@@ -103,6 +102,7 @@ public class Sessione
 		 return false;
 	}
 	
+	
 	public Runnable aggiornatore = new Runnable() {
 		public void run()
 		{	
@@ -144,8 +144,8 @@ public class Sessione
 	 */
 	private boolean controllaStatoEvento(Evento evento) {
 		Calendar oggi = Calendar.getInstance();
-		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto());
-		boolean termine_ritiro_scaduto = oggi.after((Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto());
+		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)evento.getContenutoCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI));
+		boolean termine_ritiro_scaduto = oggi.after((Calendar) evento.getContenutoCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE));
 		boolean DataFineEventoNelFuturo;		
 		if (evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO)==null) 
 		{
@@ -161,17 +161,22 @@ public class Sessione
 		
 		StatoEvento statoEvento = evento.getStato();
 		
-		if(DataChiusuraIscrizioniNelFuturo == false && (statoEvento.getString().equals("Aperta")) && (numero_iscritti_attuali < numero_minimo_iscritti))
+		if(statoEvento.getString().equals("Aperta"))
 		{
-			evento.setStato(StatoEvento.FALLITA);
-			logger.scriviLog(String.format(Messaggi.APERTO_FALLITO, evento.getId()));
-			return true;
-		}
-		else if(((DataChiusuraIscrizioniNelFuturo == false  && numero_iscritti_attuali > numero_minimo_iscritti) || (termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)) && (statoEvento.getString().equals("Aperta")))
-		{
-			evento.setStato(StatoEvento.CHIUSA);
-			logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
-			return true;
+			if(DataChiusuraIscrizioniNelFuturo == false && 
+					 (numero_iscritti_attuali < numero_minimo_iscritti))
+			{
+				evento.setStato(StatoEvento.FALLITA);
+				logger.scriviLog(String.format(Messaggi.APERTO_FALLITO, evento.getId()));
+				return true;
+			}
+			else if(((DataChiusuraIscrizioniNelFuturo == false  && numero_iscritti_attuali > numero_minimo_iscritti) ||
+					(termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)))
+			{
+				evento.setStato(StatoEvento.CHIUSA);
+				logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
+				return true;
+			}
 		}
 		else if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
 		{
@@ -288,24 +293,27 @@ public class Sessione
 			if(utenteIscrittoInEvento(evento))
 				return;
 			int numero_iscritti_attuali = evento.getNumeroPartecipanti();
-			int numero_massimo_iscritti_possibili = ((Integer)evento.getContenutoCampo(NomeCampi.PARTECIPANTI) + (Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
+			int numero_massimo_iscritti_possibili = ((Integer)evento.getContenutoCampo(NomeCampi.PARTECIPANTI) + 
+					(Integer)evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
+			
 			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getContenutoCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE);
 			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
 			Calendar chiusura_iscrizioni = (Calendar) evento.getContenutoCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI);
 			boolean chiusura_iscrizioni_superato = Calendar.getInstance().compareTo(chiusura_iscrizioni)>0;
+			
 			//se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
 			if(numero_iscritti_attuali == (numero_massimo_iscritti_possibili-1) && termine_ritiro_scaduto)
 			{
 				db.collegaUtenteEvento(utente_corrente, evento);
-				db.segnalaChiusuraEvento(evento);
-				evento.setStato(StatoEvento.CHIUSA);
-				db.updateEvento(evento);
-				logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
+//				db.segnalaChiusuraEvento(evento);
+//				evento.setStato(StatoEvento.CHIUSA);
+//				db.updateEvento(evento);
+//				logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
+				aggiornatore.run();
 			}
 			else if ((numero_iscritti_attuali < numero_massimo_iscritti_possibili && !chiusura_iscrizioni_superato)) 
 					db.collegaUtenteEvento(utente_corrente, evento);
 			else return;
-			db.refreshDatiRAM();
 			utente_corrente = db.selectUtente(utente_corrente.getNome());
 		} 
 		 catch(Exception e) 
@@ -319,7 +327,10 @@ public class Sessione
 //	METODI GETTER
 	
 	
-	public HashMap<CategoriaEvento,ArrayList<Evento>> getEventi() {return db.getEventi();}
+	public HashMap<CategoriaEvento,ArrayList<Evento>> getEventi() 
+	{
+		return db.getEventi();
+	}
 	
 	public LinkedList<Notifica> getNotificheUtente() 
 	{

@@ -420,8 +420,10 @@ public class DataBase
 		{	//Lettura e configurazione dei campi
 			int id_partita = rs.getInt(1);
 			String titolo_evento = rs.getString(8);
-			Calendar data_ora_termine_ultimo_iscrizione = Calendar.getInstance(); data_ora_termine_ultimo_iscrizione.setTimeInMillis(rs.getTimestamp(4).getTime());
-			Calendar data_ora_inizio_evento = Calendar.getInstance(); data_ora_inizio_evento.setTimeInMillis(rs.getTimestamp(5).getTime());
+			Calendar data_ora_termine_ultimo_iscrizione = 
+					Calendar.getInstance(); data_ora_termine_ultimo_iscrizione.setTimeInMillis(rs.getTimestamp(4).getTime());
+			Calendar data_ora_inizio_evento = 
+					Calendar.getInstance(); data_ora_inizio_evento.setTimeInMillis(rs.getTimestamp(5).getTime());
 			Calendar data_ora_termine_evento = Calendar.getInstance(); 
 				if (rs.getTimestamp(11) != null) data_ora_termine_evento.setTimeInMillis(rs.getTimestamp(11).getTime()); 
 				else data_ora_termine_evento=null;
@@ -785,7 +787,10 @@ public class DataBase
 	public void updateEtaMinUtente(String nome_utente, int eta_min) throws SQLException
 	{
 		String sql = "UPDATE utente SET eta_min = ? WHERE nome = ?";
-		PreparedStatement ps = con.prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);//				db.segnalaChiusuraEvento(evento);
+//		evento.setStato(StatoEvento.CHIUSA);
+//		db.updateEvento(evento);
+//		logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
 		ps.setInt(1, eta_min);
 		ps.setString(2, nome_utente);
 		ps.executeUpdate();
@@ -822,7 +827,7 @@ public class DataBase
 	{
 		for(int i=0; i < tabelle_db_eventi.length; i++)
 		{				
-			String sql = "DELETE FROM " + tabelle_db_eventi[i][0] + " WHERE nome_utente_creatore = ?" ;
+			String sql = "DELETE FROM " + tabelle_db_eventi[i][0] + " WHERE nome_utente_creatore = ?";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setString(1, utente.getNome());
 			ps.executeUpdate();
@@ -843,8 +848,9 @@ public class DataBase
 
 	public void deleteNotifica(int id_notifica) throws SQLException
 	{
-		String sql = "DELETE FROM notifica WHERE id = " + id_notifica;
+		String sql = "DELETE FROM notifica WHERE id = ?";
 		PreparedStatement ps = con.prepareStatement(sql);
+		ps.setInt(1, id_notifica);
 		ps.executeUpdate();
 	}
 	

@@ -326,7 +326,10 @@ class FunctionalRequirmentsTest
 	
 		String titolo = String.format(Messaggi.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampi.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
-		String messaggio = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampi.TITOLO), sdf.format(((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime()),evento.getContenutoCampo(NomeCampi.COSTO));
+		String messaggio = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, 
+				evento.getContenutoCampo(NomeCampi.TITOLO), 
+				sdf.format(((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime()),
+				evento.getContenutoCampo(NomeCampi.COSTO));
 		Notifica notifica = new Notifica(titolo, messaggio);
 		boolean presente = false;
 		for(Notifica n : sessione.getUtente_corrente().getNotifiche())
