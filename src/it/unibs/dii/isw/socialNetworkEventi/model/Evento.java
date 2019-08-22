@@ -1,21 +1,21 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 import java.util.*;
 
 @SuppressWarnings("rawtypes")
 public abstract class Evento 
 {
-	private CategorieEvento nome_categoria = CategorieEvento.DEFAULT;
+	private CategoriaEvento nome_categoria = CategoriaEvento.DEFAULT;
 	
 	private int id_evento;
 	private Utente utente_creatore;
 	private StatoEvento stato = StatoEvento.VALIDA;
 	
-	private HashMap<NomeCampi, Campo> campi;
-	private HashMap<Utente,HashMap<NomeCampi,Boolean>> partecipanti_campiOpt;
+	private HashMap<NomeCampo, Campo> campi;
+	private HashMap<Utente,HashMap<NomeCampo,Boolean>> partecipanti_campiOpt;
 	
 	/**
 	 * Costruttore con parametri obbligatori
@@ -30,7 +30,7 @@ public abstract class Evento
 			) throws IllegalArgumentException {
 		//controlli sui campi obbligatori 
 		campi = new HashMap<>();
-		partecipanti_campiOpt = new HashMap<Utente,HashMap<NomeCampi,Boolean>>();
+		partecipanti_campiOpt = new HashMap<Utente,HashMap<NomeCampo,Boolean>>();
 		
 		if(luogo == null) 																				throw new IllegalArgumentException("Necessario inserire un luogo");
 		if(data_ora_termine_ultimo_iscrizione == null) 													throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni");
@@ -41,11 +41,11 @@ public abstract class Evento
 		if(creatore == null) 																			throw new IllegalArgumentException("Necessario inserire un utente creatore");
 //		if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
-		aggiungiCampo(luogo, true, NomeCampi.LUOGO, "Locazione evento");
-		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampi.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
-		aggiungiCampo(data_ora_inizio_evento, true, NomeCampi.D_O_INIZIO_EVENTO, "Inizio evento");
-		aggiungiCampo(partecipanti, true, NomeCampi.PARTECIPANTI, "Numero partecipanti");
-		aggiungiCampo(costo, true, NomeCampi.COSTO, "Costo unitario");
+		aggiungiCampo(luogo, true, NomeCampo.LUOGO, "Locazione evento");
+		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampo.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
+		aggiungiCampo(data_ora_inizio_evento, true, NomeCampo.D_O_INIZIO_EVENTO, "Inizio evento");
+		aggiungiCampo(partecipanti, true, NomeCampo.PARTECIPANTI, "Numero partecipanti");
+		aggiungiCampo(costo, true, NomeCampo.COSTO, "Costo unitario");
 		this.setUtenteCreatore(creatore);
 //		partecipanti_campiOpt.add(creatore);
 	}
@@ -69,21 +69,21 @@ public abstract class Evento
 		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo);
 
 		if(titolo != null) 
-			aggiungiCampo(titolo, false, NomeCampi.TITOLO, "Titolo evento");
+			aggiungiCampo(titolo, false, NomeCampo.TITOLO, "Titolo evento");
 		else
-			aggiungiCampo("Evento Anonimo", false, NomeCampi.TITOLO, "Titolo evento");			
-		if(note != null) aggiungiCampo(note, false, NomeCampi.NOTE, "Note aggiuntive ");			
-		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampi.BENEFICI_QUOTA, "Servizi compresi");
-		if(tolleranza != null && tolleranza>=0) aggiungiCampo(tolleranza, false, NomeCampi.TOLLERANZA_MAX, "Iscrizioni in esubero");
+			aggiungiCampo("Evento Anonimo", false, NomeCampo.TITOLO, "Titolo evento");			
+		if(note != null) aggiungiCampo(note, false, NomeCampo.NOTE, "Note aggiuntive ");			
+		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampo.BENEFICI_QUOTA, "Servizi compresi");
+		if(tolleranza != null && tolleranza>=0) aggiungiCampo(tolleranza, false, NomeCampo.TOLLERANZA_MAX, "Iscrizioni in esubero");
 		if(data_ora_termine_evento != null)	{
 			if(data1PrecedenteData2(data_ora_termine_evento, data_ora_inizio_evento)) throw new IllegalArgumentException("Necessario inserire una data di termine evento nel futuro e posteriore alla data di inizio evento");
-				aggiungiCampo(data_ora_termine_evento, false, NomeCampi.D_O_TERMINE_EVENTO, "Fine evento");						
+				aggiungiCampo(data_ora_termine_evento, false, NomeCampo.D_O_TERMINE_EVENTO, "Fine evento");						
 		}	
 		if(data_ora_termine_ritiro_iscrizione != null) {
 			if(data1PrecedenteData2(data_ora_termine_ultimo_iscrizione, data_ora_termine_ritiro_iscrizione)) throw new IllegalArgumentException("Necessario inserire una data di termine di ritiro delle iscrizioni nel futuro e anteriore alla data di termine delle iscrizioni");
-				aggiungiCampo(data_ora_termine_ritiro_iscrizione, false, NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE, "Termine ritiro iscrizioni");						
+				aggiungiCampo(data_ora_termine_ritiro_iscrizione, false, NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE, "Termine ritiro iscrizioni");						
 		}
-		else aggiungiCampo(data_ora_termine_ultimo_iscrizione, false, NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE, "Termine ritiro iscrizioni");
+		else aggiungiCampo(data_ora_termine_ultimo_iscrizione, false, NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE, "Termine ritiro iscrizioni");
 	}
 
 	/*
@@ -112,7 +112,7 @@ public abstract class Evento
 	}
 	
 	
-	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampi titolo, String descrizione)
+	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampo titolo, String descrizione)
 	{
 		campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));
 	}
@@ -131,7 +131,7 @@ public abstract class Evento
 	 
 	 public boolean aggiungiFruitore(Utente utente)
 	 {
-		 if((Integer)getCampo(NomeCampi.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
+		 if((Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
 			 {partecipanti_campiOpt.put(utente,null); return true;}
 		 else return false;
 	 }
@@ -146,29 +146,34 @@ public abstract class Evento
  * Getter and Setters
  */
 
-	public <T>void setCampo(NomeCampi nome_campo, Campo campo) throws IllegalArgumentException
+	public <T>void setCampo(NomeCampo nome_campo, Campo campo) throws IllegalArgumentException
 	{
 		 if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
 		 if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
 		 campi.put(nome_campo, campo);
 	} 
 	 
-	public HashMap<NomeCampi, Campo> getCampi()	{return campi;}
-	public Campo getCampo(NomeCampi nomeCampo)	{return campi.get(nomeCampo);}
+	public HashMap<NomeCampo, Campo> getCampi()	{return campi;}
+	public Campo getCampo(NomeCampo nomeCampo)	{return campi.get(nomeCampo);}
+	
+	public Object getContenutoCampo(NomeCampo nomeCampo)	
+	{
+		return campi.get(nomeCampo).getContenuto();
+	}
 	
 	public int getNumeroPartecipanti() {return partecipanti_campiOpt.keySet().size();}
 	
 	public Utente getUtenteCreatore() { return utente_creatore; }
 	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
 	
-	public void setPartecipanti_campiOpt(HashMap<Utente,HashMap<NomeCampi,Boolean>> partecipanti_campiOpt) {this.partecipanti_campiOpt = partecipanti_campiOpt;}
-	public HashMap<Utente,HashMap<NomeCampi,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt; }
+	public void setPartecipanti_campiOpt(HashMap<Utente,HashMap<NomeCampo,Boolean>> partecipanti_campiOpt) {this.partecipanti_campiOpt = partecipanti_campiOpt;}
+	public HashMap<Utente,HashMap<NomeCampo,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt; }
 
-	public void setCampoOptPerUtente(Utente utente, NomeCampi nome_campo, Boolean bool)
+	public void setCampoOptPerUtente(Utente utente, NomeCampo nome_campo, Boolean bool)
 	{		
 		if(partecipanti_campiOpt.get(utente) == null)
 		{
-			HashMap<NomeCampi,Boolean> campi_opt = new HashMap<NomeCampi,Boolean>();
+			HashMap<NomeCampo,Boolean> campi_opt = new HashMap<NomeCampo,Boolean>();
 			campi_opt.put(nome_campo, bool);
 			partecipanti_campiOpt.put(utente, campi_opt);
 		}
@@ -178,12 +183,12 @@ public abstract class Evento
 		}
 	}
 	
-	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampi,Boolean> campi_opt)
+	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampo,Boolean> campi_opt)
 	{
 		partecipanti_campiOpt.put(utente, campi_opt);
 	}
 	
-	public Boolean getCampoOptDiUtente(Utente utente, NomeCampi nome_campi)
+	public Boolean getCampoOptDiUtente(Utente utente, NomeCampo nome_campi)
 	{
 //		if(partecipanti_campiOpt.containsKey(utente))
 //			return partecipanti_campiOpt.get(utente).get(nome_campi);
@@ -195,7 +200,7 @@ public abstract class Evento
 		return null;
 	}
 	
-	public HashMap<NomeCampi,Boolean> getCampiOptDiUtente(Utente utente)
+	public HashMap<NomeCampo,Boolean> getCampiOptDiUtente(Utente utente)
 	{
 		for(Utente u : partecipanti_campiOpt.keySet())
 			if(u.equals(utente))
@@ -217,8 +222,8 @@ public abstract class Evento
 	public StatoEvento getStato() {return stato;}
 	public void setStato(StatoEvento stato) {this.stato = stato;}	
 	
-	public CategorieEvento getNomeCategoria() {return nome_categoria;}
-	public  void setNomeCategoria(CategorieEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
+	public CategoriaEvento getNomeCategoria() {return nome_categoria;}
+	public  void setNomeCategoria(CategoriaEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
 
 	@Override
 	public String toString() 
@@ -238,5 +243,11 @@ public abstract class Evento
 
 		}
 		return stringa.toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		return this.toString().equals(obj.toString());
 	}
 }

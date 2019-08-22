@@ -41,14 +41,25 @@ public class Notifica implements Serializable
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Notifica \ntitolo : ");
-		builder.append(titolo);
-		builder.append("\ncontenuto: ");
-		builder.append(contenuto);
-		builder.append("\ndata : ");
+		builder.append("Notifica " /*+ this.id_notifica + "\n"*/);
+		builder.append("\nData \n");
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
 		builder.append(sdf.format(data.getTime()) + "\n");
+		builder.append("\nTitolo\n");
+		builder.append(titolo + "\n");
+		builder.append("\nContenuto\n");
+		builder.append(contenuto + "\n");
+
 		return builder.toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+//		return this.toString().equals(obj.toString());
+		Notifica notifica = (Notifica)obj;
+		boolean equals = titolo.equals(notifica.getTitolo()) && contenuto.equals(notifica.getContenuto());
+		return equals;
 	}
 
 	public String getTitolo() {return titolo;}

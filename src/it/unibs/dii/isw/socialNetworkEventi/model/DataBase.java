@@ -13,57 +13,73 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import java.util.ArrayList;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Messaggi;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class DataBase 
 {	
 //	WARNING : modificare questa matrice solo in corrispondenza di variazioni di nomi di tabelle a livello DB
-	private static final String tabelle_db_eventi[][] 		= {{CategorieEvento.PARTITA_CALCIO.getString(),	"relazione_utente_" + CategorieEvento.PARTITA_CALCIO.getString()},
-															   {CategorieEvento.SCII.getString(),			"relazione_utente_" + CategorieEvento.SCII.getString()}};
-	
+	private static final String tabelle_db_eventi[][] 		= {{CategoriaEvento.PARTITA_CALCIO.getString(),	"relazione_utente_" + CategoriaEvento.PARTITA_CALCIO.getString()},
+															   {CategoriaEvento.SCII.getString(),			"relazione_utente_" + CategoriaEvento.SCII.getString()}};
+	private static DataBase db;
 	private Connection con;
-	private HashMap<CategorieEvento,ArrayList<Evento>> eventi;
+	private HashMap<CategoriaEvento,ArrayList<Evento>> eventi;
 	private ArrayList<Utente> utenti;
-	public HashMap<CategorieEvento,ArrayList<Evento>> getEventi() {return eventi;}
+	public HashMap<CategoriaEvento,ArrayList<Evento>> getEventi() {return eventi;}
 	public ArrayList<Utente> getUtenti() {return utenti;}
 	
-//	Connessione a mysql creata tramite pattern Singleton
-	public Connection getConnection() throws SQLException
+	public static DataBase getInstance() throws SQLException
 	{
-		if(con == null)
+		ReentrantLock lock = new ReentrantLock();
+		
+		if(db == null)
 		{
-			MysqlDataSource dataSource = new MysqlDataSource();
-//			specifica dei dettagli necessari alla connessione
-			dataSource.setDatabaseName("social_network_db");
-			dataSource.setPortNumber(3306);
-			dataSource.setServerName("localhost");
-			dataSource.setUser("admin_social");
-			dataSource.setPassword("StefanoLoveLinux");
-			
-			try {con = dataSource.getConnection();}
-			catch (SQLException e) {
-				e.printStackTrace();
-				Font f = new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
-				UIManager.put("OptionPane.messageFont", f);
-				UIManager.put("OptionPane.buttonFont", f);
-				UIManager.put("Button.background", Color.white);
-				UIManager.put("Button.select", new Color(240,255,245));
-				JOptionPane.showMessageDialog(null, "Impossibile connettersi alla base di dati", "Errore di connessione", JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
-			}
-			
-			eventi = new HashMap<CategorieEvento,ArrayList<Evento>>();
-			utenti = new ArrayList<>();
+			lock.lock();
+			db = new DataBase();
+			lock.unlock();
 		}
-		return con;
+		return db;	
+	}
+
+	private DataBase() throws SQLException
+	{
+		MysqlDataSource dataSource = new MysqlDataSource();
+		//	specifica dei dettagli necessari alla connessione
+		dataSource.setDatabaseName("social_network_db");
+		dataSource.setPortNumber(3306);
+		dataSource.setServerName("localhost");
+		dataSource.setUser("admin_social");
+		dataSource.setPassword("StefanoLoveLinux");
+
+		try {con = dataSource.getConnection();}
+		//	try
+		//	{
+		////	 Class.forName("com.mysql.cj.jdbc.Driver");
+		//	     con = DriverManager.getConnection("jdbc:mysql://localhost:3306/social_network_db",
+		//	     "admin_social", "StefanoLoveLinux");
+		//	}
+		catch (SQLException e) {
+			e.printStackTrace();
+			Font f = new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
+			UIManager.put("OptionPane.messageFont", f);
+			UIManager.put("OptionPane.buttonFont", f);
+			UIManager.put("Button.background", Color.white);
+			UIManager.put("Button.select", new Color(240,255,245));
+			JOptionPane.showMessageDialog(null, "Impossibile connettersi alla base di dati", "Errore di connessione", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
+
+		eventi = new HashMap<CategoriaEvento,ArrayList<Evento>>();
+		utenti = new ArrayList<>();
 	}
 	
 
@@ -96,18 +112,18 @@ public class DataBase
 //		Estrazione campi dall'oggetto evento(comuni a tutte le categorie)
 //		Campi obbligatori
 		String nome_utente_creatore						= evento.getUtenteCreatore().getNome();
-		String luogo 									= (String) evento.getCampo(NomeCampi.LUOGO).getContenuto();
-		Calendar data_ora_termine_ultimo_iscrizione		= (Calendar) evento.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto();
-		Calendar data_ora_inizio_evento 				= (Calendar) evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto();
-		int partecipanti								= (Integer) evento.getCampo(NomeCampi.PARTECIPANTI).getContenuto();
-		int costo										= (Integer) evento.getCampo(NomeCampi.COSTO).getContenuto();
+		String luogo 									= (String) evento.getCampo(NomeCampo.LUOGO).getContenuto();
+		Calendar data_ora_termine_ultimo_iscrizione		= (Calendar) evento.getCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI).getContenuto();
+		Calendar data_ora_inizio_evento 				= (Calendar) evento.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto();
+		int partecipanti								= (Integer) evento.getCampo(NomeCampo.PARTECIPANTI).getContenuto();
+		int costo										= (Integer) evento.getCampo(NomeCampo.COSTO).getContenuto();
 //		Campi opzionali		
-		String titolo									= (String)( evento.getCampo(NomeCampi.TITOLO) != null ? evento.getCampo(NomeCampi.TITOLO).getContenuto() : null);
-		String note										= (String)( evento.getCampo(NomeCampi.NOTE) != null ? evento.getCampo(NomeCampi.NOTE).getContenuto() : null);
-		String benefici_quota							= (String)( evento.getCampo(NomeCampi.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto() : null);
-		Calendar data_ora_termine_evento				= evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto() : null;
-		Calendar data_ora_termine_ritiro_iscrizione		= evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE) != null ? (Calendar) evento.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto() : null;
-		int tolleranza_max								= evento.getCampo(NomeCampi.TOLLERANZA_MAX) != null ? (Integer)(evento.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto()) : 0;
+		String titolo									= (String)( evento.getCampo(NomeCampo.TITOLO) != null ? evento.getCampo(NomeCampo.TITOLO).getContenuto() : null);
+		String note										= (String)( evento.getCampo(NomeCampo.NOTE) != null ? evento.getCampo(NomeCampo.NOTE).getContenuto() : null);
+		String benefici_quota							= (String)( evento.getCampo(NomeCampo.BENEFICI_QUOTA) != null ? evento.getCampo(NomeCampo.BENEFICI_QUOTA).getContenuto() : null);
+		Calendar data_ora_termine_evento				= evento.getCampo(NomeCampo.D_O_TERMINE_EVENTO) != null ? (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto() : null;
+		Calendar data_ora_termine_ritiro_iscrizione		= evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE) != null ? (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto() : null;
+		int tolleranza_max								= evento.getCampo(NomeCampo.TOLLERANZA_MAX) != null ? (Integer)(evento.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto()) : 0;
 
 		PreparedStatement ps;
 		String sql;
@@ -117,9 +133,9 @@ public class DataBase
 		case PARTITA_CALCIO : 
 			{
 
-				int eta_minima									= (Integer) evento.getCampo(NomeCampi.ETA_MINIMA).getContenuto();
-			    int eta_massima									= (Integer) evento.getCampo(NomeCampi.ETA_MASSIMA).getContenuto();
-			    String genere									= (String) evento.getCampo(NomeCampi.GENERE).getContenuto();
+				int eta_minima									= (Integer) evento.getCampo(NomeCampo.ETA_MINIMA).getContenuto();
+			    int eta_massima									= (Integer) evento.getCampo(NomeCampo.ETA_MASSIMA).getContenuto();
+			    String genere									= (String) evento.getCampo(NomeCampo.GENERE).getContenuto();
 			    
 //				Stringa contenente script sql per inserire la partita di calcio
 				sql = "INSERT INTO " + tabelle_db_eventi[0][0] 
@@ -127,7 +143,7 @@ public class DataBase
 						+ "benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max, stato, eta_minima, eta_massima, genere)"
 						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				
-				ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);				
+				ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);				
 				ps.setInt		(14, eta_minima);
 				ps.setInt		(15, eta_massima);
 				ps.setString	(16, (String)genere);
@@ -135,9 +151,9 @@ public class DataBase
 			}
 		case SCII : 
 			{
-				int biglietto_bus							= (Integer) evento.getCampo(NomeCampi.BIGLIETTO_BUS).getContenuto();
-			    int pranzo									= (Integer) evento.getCampo(NomeCampi.PRANZO).getContenuto();
-			    int affitto_scii							= (Integer) evento.getCampo(NomeCampi.AFFITTO_SCII).getContenuto();
+				int biglietto_bus							= (Integer) evento.getCampo(NomeCampo.BIGLIETTO_BUS).getContenuto();
+			    int pranzo									= (Integer) evento.getCampo(NomeCampo.PRANZO).getContenuto();
+			    int affitto_scii							= (Integer) evento.getCampo(NomeCampo.AFFITTO_SCII).getContenuto();
 			    
 //				Stringa contenente script sql per inserire la partita di calcio
 				sql = "INSERT INTO " + tabelle_db_eventi[1][0]
@@ -146,7 +162,7 @@ public class DataBase
 						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				
 //				script contenente la stringa sql precedentemente specificata inviato al DB, con prevenzione SQL Injection	
-				ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 				ps.setInt		(14, biglietto_bus);
 				ps.setInt		(15, pranzo);
 				ps.setInt		(16, affitto_scii);
@@ -177,17 +193,16 @@ public class DataBase
 		rs.next();
 		evento.setId(rs.getInt(1));
 		
-		eventi = selectEventiAll(); 
+		eventi.get(evento.getNomeCategoria()).add(evento);
 
 		return evento;
-
 	}
 
 	public void insertUtente(Utente utente) throws SQLException
 	{
 		String sql = "INSERT INTO utente (nome, password, eta_min, eta_max) VALUES (?,?,?,?)";
 		
-		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, utente.getNome());
 		ps.setString(2, utente.getPassword());		
 		ps.setInt(3, utente.getEtaMin());	
@@ -206,7 +221,7 @@ public class DataBase
 	    
 		String sql = "INSERT INTO notifica (titolo,contenuto,data) VALUES (?,?,?)";
 		
-		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, titolo);
 		ps.setString(2, contenuto);		
 		ps.setTimestamp(3, this.creaTimestamp(data));
@@ -222,7 +237,7 @@ public class DataBase
 	public void collegaUtenteNotifica(String nome_utente, int id_notifica) throws SQLException
 	{	    
 		String sql = "INSERT INTO relazione_utente_notifica (nome_utente, id_notifica) VALUES (?,?)";
-		PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, nome_utente);
 		ps.setInt(2, id_notifica);		
 		ps.executeUpdate();
@@ -237,7 +252,7 @@ public class DataBase
 		case PARTITA_CALCIO :
 			{
 				sql = "INSERT INTO " + tabelle_db_eventi[0][1] + " (nome_utente, id_evento) VALUES (?,?)";	
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setString(1, utente.getNome());
 				ps.setInt(2, evento.getId());
 				
@@ -248,29 +263,40 @@ public class DataBase
 			{
 				sql = "INSERT INTO " + tabelle_db_eventi[1][1] + " (nome_utente, id_evento, biglietto_bus, pranzo, affitto_scii) VALUES (?,?,?,?,?)";	
 
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setString(1, utente.getNome());
 				ps.setInt(2, evento.getId());
-				if(evento.getPartecipanti_campiOpt().get(utente) != null)
+				boolean utente_con_campi_opt_settati = false;
+				for(Utente u : evento.getPartecipanti_campiOpt().keySet())
 				{
-					ps.setBoolean(3,(Boolean)evento.getPartecipanti_campiOpt().get(utente).get(NomeCampi.BIGLIETTO_BUS));
-					ps.setBoolean(4,(Boolean)evento.getPartecipanti_campiOpt().get(utente).get(NomeCampi.PRANZO));
-					ps.setBoolean(5,(Boolean)evento.getPartecipanti_campiOpt().get(utente).get(NomeCampi.AFFITTO_SCII));
+				if(u.equals(utente))
+					{
+						utente_con_campi_opt_settati = true; 
+						utente=u; 
+						break;
+					}
+				}
+				if(utente_con_campi_opt_settati)
+				{
+					ps.setBoolean(3,(Boolean)evento.getPartecipanti_campiOpt().get(utente).get(NomeCampo.BIGLIETTO_BUS));
+					ps.setBoolean(4,(Boolean)evento.getPartecipanti_campiOpt().get(utente).get(NomeCampo.PRANZO));
+					ps.setBoolean(5,(Boolean)evento.getPartecipanti_campiOpt().get(utente).get(NomeCampo.AFFITTO_SCII));
 				}
 				else
-					throw new Exception("Necessario inserire le scelte dell'utente rigurado i campi opzionali");
+					throw new Exception("Necessario inserire le scelte dell'utente riguardo i campi opzionali");
 				ps.executeUpdate();			
 				break;
 			}
 		default: return;
 		}
+		this.refreshDatiRAM();
 	}
 	
 	
-	public void collegaUtenteCategoria(Utente utente, CategorieEvento nome_categoria) throws SQLException
+	public void collegaUtenteCategoria(Utente utente, CategoriaEvento nome_categoria) throws SQLException
 	{	    
 		String sql = "INSERT INTO relazione_utente_categoria (nome_utente, nome_categoria) VALUES (?,?)";
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, utente.getNome());
 		ps.setString(2, nome_categoria.toString().toLowerCase());		
 		ps.executeUpdate();
@@ -279,13 +305,13 @@ public class DataBase
 
 	public void segnalaFallimentoEvento(Evento evento) throws SQLException 
 	{
-		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
+		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
 		String titolo = String.format(Messaggi.TITOLO_FALLIMENTO_EVENTO, titolo_evento);
 		String contenuto = String.format(Messaggi.NOTIFICA_FALLIMENTO_EVENTO,titolo_evento);	
 		Notifica notifica = new Notifica(titolo, contenuto);
 		notifica = insertNotifica(notifica);
 		
-		HashMap<Utente,HashMap<NomeCampi,Boolean>> list_utenti = selectUtentiDiEvento(evento);
+		HashMap<Utente,HashMap<NomeCampo,Boolean>> list_utenti = selectUtentiDiEvento(evento);
 		for(Utente utente : list_utenti.keySet())
 		{
 			collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
@@ -297,11 +323,11 @@ public class DataBase
 	public void segnalaChiusuraEvento(Evento evento) throws SQLException 
 	{
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
-		Date data_inizio_evento = ((Calendar)evento.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime();
-		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
+		Date data_inizio_evento = ((Calendar)evento.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto()).getTime();
+		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
 		String titolo = String.format(Messaggi.TITOLO_CHIUSURA_EVENTO,titolo_evento);		
 		
-		HashMap<Utente,HashMap<NomeCampi,Boolean>> list_utenti = selectUtentiDiEvento(evento);	
+		HashMap<Utente,HashMap<NomeCampo,Boolean>> list_utenti = selectUtentiDiEvento(evento);	
 		for(Utente utente : list_utenti.keySet())
 		{
 			String contenuto = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, titolo_evento, sdf.format(data_inizio_evento), getCostoEventoPerUtente(evento, utente));
@@ -313,12 +339,12 @@ public class DataBase
 	
 	
 	public void segnalaConclusioneEvento(Evento evento) throws SQLException {
-		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
+		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
 		String titolo = String.format(Messaggi.TITOLO_CONCLUSIONE_EVENTO, titolo_evento);
 		String contenuto = String.format(Messaggi.NOTIFICA_CONCLUSIONE_EVENTO, titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
 		
-		HashMap<Utente,HashMap<NomeCampi,Boolean>> list_utenti = selectUtentiDiEvento(evento);		
+		HashMap<Utente,HashMap<NomeCampo,Boolean>> list_utenti = selectUtentiDiEvento(evento);		
 		for(Utente utente : list_utenti.keySet())
 			collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
 	}
@@ -326,12 +352,12 @@ public class DataBase
 	
 	public void segnalaRitiroEvento(Evento evento) throws SQLException
 	{
-		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
+		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
 		String titolo = String.format(Messaggi.TITOLO_RITIRO_EVENTO, titolo_evento);
 		String contenuto = String.format(Messaggi.NOTIFICA_RITIRO_EVENTO, titolo_evento);		
 		Notifica notifica = insertNotifica(new Notifica(titolo, contenuto));
 
-		HashMap<Utente,HashMap<NomeCampi,Boolean>> list_utenti = selectUtentiDiEvento(evento);		
+		HashMap<Utente,HashMap<NomeCampo,Boolean>> list_utenti = selectUtentiDiEvento(evento);		
 		for(Utente utente : list_utenti.keySet())
 		{
 			collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
@@ -342,7 +368,7 @@ public class DataBase
 	
 	public void segnalaNuovoEventoAgliInteressati(Evento evento) throws SQLException
 	{
-		String titolo_evento = (evento.getCampo(NomeCampi.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampi.TITOLO).getContenuto() : "" ;
+		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
 		String nome_categoria = evento.getNomeCategoria().getString().replaceAll("_", " di ");
 		String titolo = String.format(Messaggi.TITOLO_NUOVO_EVENTO, nome_categoria);
 		String contenuto = String.format(Messaggi.NOTIFICA_NUOVO_EVENTO, nome_categoria, titolo_evento);	
@@ -361,7 +387,7 @@ public class DataBase
 	{
 		String nome_categoria = evento.getNomeCategoria().getString().replaceAll("_", " di ");
 		String titolo = String.format(Messaggi.TITOLO_INVITO_EVENTO, nome_categoria);
-		String contenuto = String.format(Messaggi.NOTIFICA_PER_INVITO_UTENTE, utente_mittente.getNome(), evento.getCampo(NomeCampi.TITOLO).getContenuto());
+		String contenuto = String.format(Messaggi.NOTIFICA_PER_INVITO_UTENTE, utente_mittente.getNome(), evento.getCampo(NomeCampo.TITOLO).getContenuto());
 		Notifica notifica = new Notifica(titolo, contenuto);
 		
 		notifica = insertNotifica(notifica);
@@ -372,26 +398,26 @@ public class DataBase
  * READ : OPERAZIONI DI SELECT
  */
 	
-	public HashMap<CategorieEvento,ArrayList<Evento>> selectEventiAll() throws SQLException
+	public HashMap<CategoriaEvento,ArrayList<Evento>> selectEventiAll() throws SQLException
 	{
-		HashMap<CategorieEvento,ArrayList<Evento>> eventi = new HashMap<CategorieEvento,ArrayList<Evento>>();
+		HashMap<CategoriaEvento,ArrayList<Evento>> eventi = new HashMap<CategoriaEvento,ArrayList<Evento>>();
 		
-		eventi.put(CategorieEvento.PARTITA_CALCIO, selectParititeCalcioAll());
-		eventi.put(CategorieEvento.SCII, selectEventiSciiAll());
+		eventi.put(CategoriaEvento.PARTITA_CALCIO, selectPartiteCalcioAll());
+		eventi.put(CategoriaEvento.SCII, selectEventiSciiAll());
 		
 		return eventi;
 	}
 
 	
-	private ArrayList<Evento> selectParititeCalcioAll() throws SQLException
+	private ArrayList<Evento> selectPartiteCalcioAll() throws SQLException
 	{
 		ArrayList<Evento> partite = new ArrayList<Evento>();
 	
 		String sql = "SELECT id, nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti,"
 				+ " costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione,"
 				+ " tolleranza_max, stato, eta_minima, eta_massima, genere FROM " + tabelle_db_eventi[0][0];
-		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+
+		PreparedStatement ps = con.prepareStatement(sql);
 		ResultSet rs = ps.executeQuery();
 		rs.beforeFirst();
 		while(rs.next())
@@ -443,7 +469,7 @@ public class DataBase
 				+ " costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione,"
 				+ " tolleranza_max, stato, biglietto_bus, pranzo, affitto_scii FROM " + tabelle_db_eventi[1][0];
 		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ResultSet rs = ps.executeQuery();
 		rs.beforeFirst();
 		while(rs.next())
@@ -492,7 +518,7 @@ public class DataBase
 	{
 		if(eventi == null)
 			return null;
-		for(CategorieEvento categoria : eventi.keySet())
+		for(CategoriaEvento categoria : eventi.keySet())
 			for(Evento evento : eventi.get(categoria))
 				if(evento.getId() == id_evento)
 					return evento;
@@ -504,7 +530,7 @@ public class DataBase
 	{
 		ArrayList<Utente> utenti = new ArrayList<>();
 		String sql = "SELECT nome, password, eta_min, eta_max FROM utente";		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		
 		ResultSet rs = ps.executeQuery();	
 		if(rs == null)
@@ -532,7 +558,7 @@ public class DataBase
 	public Notifica selectNotifica(int id_notifica) throws SQLException
 	{		
 		String sql = "SELECT titolo, contenuto, data FROM notifica WHERE id=?";		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setInt(1, id_notifica);		
 		ResultSet rs = ps.executeQuery();
 
@@ -552,7 +578,7 @@ public class DataBase
 	{
 		LinkedList<Notifica> notifiche = new LinkedList<>();
 		String sql = "SELECT id_notifica FROM relazione_utente_notifica WHERE nome_utente=?";		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, nome_utente);
 		
 		ResultSet rs = ps.executeQuery();	
@@ -566,9 +592,9 @@ public class DataBase
 	}
 	
 	
-	public HashMap<CategorieEvento,LinkedList<Evento>> selectEventiDiUtente(String nome_utente) throws SQLException
+	public HashMap<CategoriaEvento,LinkedList<Evento>> selectEventiDiUtente(String nome_utente) throws SQLException
 	{
-		HashMap<CategorieEvento,LinkedList<Evento>> hashmap = new HashMap<CategorieEvento,LinkedList<Evento>>();
+		HashMap<CategoriaEvento,LinkedList<Evento>> hashmap = new HashMap<CategoriaEvento,LinkedList<Evento>>();
 		if(eventi == null)
 		{
 			String sql;
@@ -577,7 +603,7 @@ public class DataBase
 				String nome_tabella_relazione = tabelle_db_eventi[i][1];
 				sql = "SELECT id_evento FROM " + nome_tabella_relazione + " WHERE nome_utente=?";	
 				LinkedList<Evento> eventi_di_categoria = new LinkedList<>();
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setString(1, nome_utente);
 		
 				ResultSet rs = ps.executeQuery();		
@@ -586,12 +612,12 @@ public class DataBase
 				{
 					eventi_di_categoria.add(selectEvento(rs.getInt(1)));
 				}	
-				CategorieEvento nome_categoria = CategorieEvento.convertiStringInCategoria(tabelle_db_eventi[i][0]);
+				CategoriaEvento nome_categoria = CategoriaEvento.convertiStringInCategoria(tabelle_db_eventi[i][0]);
 				hashmap.put(nome_categoria, eventi_di_categoria);
 			}
 			return hashmap;
 		}
-		for(CategorieEvento categoria : eventi.keySet())
+		for(CategoriaEvento categoria : eventi.keySet())
 		{
 			LinkedList<Evento> list = new LinkedList<>();
 			for(Evento evento : eventi.get(categoria))
@@ -604,17 +630,17 @@ public class DataBase
 	}
 	
 	
-	public HashMap<Utente,HashMap<NomeCampi,Boolean>> selectUtentiDiEvento(Evento evento) throws SQLException
+	public HashMap<Utente,HashMap<NomeCampo,Boolean>> selectUtentiDiEvento(Evento evento) throws SQLException
 	{
 		String sql = null;
-		HashMap<Utente,HashMap<NomeCampi,Boolean>> utenti_campiOpt = new HashMap<Utente,HashMap<NomeCampi,Boolean>>();
+		HashMap<Utente,HashMap<NomeCampo,Boolean>> utenti_campiOpt = new HashMap<Utente,HashMap<NomeCampo,Boolean>>();
 
 		switch(evento.getNomeCategoria())
 		{
 		case PARTITA_CALCIO :
 			{
 				sql = "SELECT nome_utente FROM " + tabelle_db_eventi[0][1] + " WHERE id_evento=?";
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setInt(1, evento.getId());
 				
 				ResultSet rs = ps.executeQuery();		
@@ -629,7 +655,7 @@ public class DataBase
 		case SCII :
 			{
 				sql = "SELECT nome_utente, biglietto_bus, pranzo, affitto_scii FROM " + tabelle_db_eventi[1][1] + " WHERE id_evento=?";
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setInt(1, evento.getId());
 				
 				ResultSet rs = ps.executeQuery();		
@@ -637,10 +663,10 @@ public class DataBase
 				while(rs.next())	
 				{
 					Utente utente = selectUtente(rs.getString(1));
-					HashMap<NomeCampi,Boolean> campi_opt = new HashMap<NomeCampi,Boolean>();
-					campi_opt.put(NomeCampi.BIGLIETTO_BUS, rs.getBoolean(2));
-					campi_opt.put(NomeCampi.PRANZO, rs.getBoolean(3));
-					campi_opt.put(NomeCampi.AFFITTO_SCII, rs.getBoolean(4));
+					HashMap<NomeCampo,Boolean> campi_opt = new HashMap<NomeCampo,Boolean>();
+					campi_opt.put(NomeCampo.BIGLIETTO_BUS, rs.getBoolean(2));
+					campi_opt.put(NomeCampo.PRANZO, rs.getBoolean(3));
+					campi_opt.put(NomeCampo.AFFITTO_SCII, rs.getBoolean(4));
 					utenti_campiOpt.put(utente, campi_opt);
 				}				
 				break;
@@ -650,12 +676,12 @@ public class DataBase
 		return utenti_campiOpt;
 	}
 	
-	private LinkedList<CategorieEvento> selectCategorieDiUtente(String nome_utente) throws SQLException
+	private LinkedList<CategoriaEvento> selectCategorieDiUtente(String nome_utente) throws SQLException
 	{
-		LinkedList<CategorieEvento> categorie = new LinkedList<>();
+		LinkedList<CategoriaEvento> categorie = new LinkedList<>();
 		
 		String sql = "SELECT nome_categoria FROM relazione_utente_categoria WHERE nome_utente=?";	
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, nome_utente);
 		
 		ResultSet rs = ps.executeQuery();
@@ -663,16 +689,16 @@ public class DataBase
 		while(rs.next())
 		{
 			String nome_categoria = rs.getString(1);
-			categorie.add(CategorieEvento.convertiStringInCategoria(nome_categoria));
+			categorie.add(CategoriaEvento.convertiStringInCategoria(nome_categoria));
 		}	
 		return categorie;
 	}
 	
-	public LinkedList<Utente> selectUtentiInteressatiACategoria(CategorieEvento nome_categoria) throws SQLException
+	public LinkedList<Utente> selectUtentiInteressatiACategoria(CategoriaEvento nome_categoria) throws SQLException
 	{
 		LinkedList<Utente> utenti = new LinkedList<>();
 		String sql = "SELECT nome_utente FROM relazione_utente_categoria WHERE nome_categoria=?";	
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, nome_categoria.toString());
 		
 		ResultSet rs = ps.executeQuery();
@@ -683,9 +709,9 @@ public class DataBase
 	}
 	
 
-	public HashMap<CategorieEvento,LinkedList<Utente>> selectUtentiDaEventiPassati(String nome_utente_creatore) throws SQLException 
+	public HashMap<CategoriaEvento,LinkedList<Utente>> selectUtentiDaEventiPassati(String nome_utente_creatore) throws SQLException 
 	{
-		HashMap<CategorieEvento,LinkedList<Utente>> hash_map= new HashMap<>();
+		HashMap<CategoriaEvento,LinkedList<Utente>> hash_map= new HashMap<>();
 		String sql1 = "SELECT id FROM %s WHERE nome_utente_creatore=?";
 		String tabella, sql_con_nome_tabella, sql2, nome_tabella_relazione, sql_con_nome_relazione;
 		LinkedList<Utente> utenti;
@@ -694,7 +720,7 @@ public class DataBase
 			tabella = tabelle_db_eventi[i][0];
 			sql_con_nome_tabella = String.format(sql1, tabella);
 			
-			PreparedStatement ps1 = getConnection().prepareStatement(sql_con_nome_tabella);
+			PreparedStatement ps1 = con.prepareStatement(sql_con_nome_tabella);
 			ps1.setString(1, nome_utente_creatore);
 			ResultSet rs1 = ps1.executeQuery();
 			
@@ -704,7 +730,7 @@ public class DataBase
 				nome_tabella_relazione = tabelle_db_eventi[i][1];
 				sql_con_nome_relazione = String.format(sql2, nome_tabella_relazione);
 				
-				PreparedStatement ps2 = getConnection().prepareStatement(sql_con_nome_relazione);
+				PreparedStatement ps2 = con.prepareStatement(sql_con_nome_relazione);
 				ps2.setInt(1, rs1.getInt(1));
 				ps2.setString(2, nome_utente_creatore);
 				ResultSet rs2 = ps2.executeQuery();
@@ -716,7 +742,7 @@ public class DataBase
 							{utenti.add(utente); System.out.println(utente.getNome());}
 				}
 			}
-			hash_map.put(CategorieEvento.convertiStringInCategoria(tabella), utenti);
+			hash_map.put(CategoriaEvento.convertiStringInCategoria(tabella), utenti);
 		}		
 		return hash_map;
 	}
@@ -734,7 +760,7 @@ public class DataBase
 			if(evento.getNomeCategoria().getString().equals(tabelle_db_eventi[i][0]))
 			{				
 				String sql = "UPDATE " + tabelle_db_eventi[i][0] + " SET stato = ? WHERE id = ?";
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setString(1, evento.getStato().getString());
 				ps.setInt(2, evento.getId());
 				ps.executeUpdate();
@@ -746,7 +772,7 @@ public class DataBase
 	public void updateEtaMinUtente(String nome_utente, int eta_min) throws SQLException
 	{
 		String sql = "UPDATE utente SET eta_min = ? WHERE nome = ?";
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setInt(1, eta_min);
 		ps.setString(2, nome_utente);
 		ps.executeUpdate();
@@ -754,7 +780,7 @@ public class DataBase
 	
 	public void updateEtaMaxtente(String nome_utente, int eta_max) throws SQLException {
 		String sql = "UPDATE utente SET eta_max = ? WHERE nome = ?";
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setInt(1, eta_max);
 		ps.setString(2, nome_utente);
 		ps.executeUpdate();
@@ -771,7 +797,7 @@ public class DataBase
 			if(evento.getNomeCategoria().getString().equals(tabelle_db_eventi[i][0]))
 			{				
 				String sql = "DELETE FROM " + tabelle_db_eventi[i][0] + " WHERE id = ?" ;
-				PreparedStatement ps = getConnection().prepareStatement(sql);
+				PreparedStatement ps = con.prepareStatement(sql);
 				ps.setInt(1, evento.getId());
 				ps.executeUpdate();
 				refreshDatiRAM();
@@ -783,7 +809,7 @@ public class DataBase
 	public void deleteUtente(String nome_utente) throws SQLException
 	{
 		String sql = "DELETE FROM utente WHERE id = ?";
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, nome_utente);
 		ps.executeUpdate();
 		refreshDatiRAM();
@@ -793,7 +819,7 @@ public class DataBase
 	public void deleteNotifica(int id_notifica) throws SQLException
 	{
 		String sql = "DELETE FROM notifica WHERE id = " + id_notifica;
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.executeUpdate();
 	}
 	
@@ -803,13 +829,13 @@ public class DataBase
 //		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
 		String sql = "DELETE FROM relazione_utente_notifica WHERE nome_utente=? AND id_notifica=?" ;
 		
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, utente.getNome());
 		ps.setInt(2, notifica.getIdNotifica());
 		ps.executeUpdate();
 //		Controllo per verificare che la notifica da cui è stato tolto il collegamento abbia almeno ancora un utente che la referenzi, in caso non ci siano utenti la elimino
 		String sql2 = "SELECT nome_utente data FROM relazione_utente_notifica WHERE id_notifica=?";
-		PreparedStatement ps2 = getConnection().prepareStatement(sql2);
+		PreparedStatement ps2 = con.prepareStatement(sql2);
 		ps2.setInt(1, notifica.getIdNotifica());	
 		
 		ResultSet rs = ps2.executeQuery();
@@ -834,20 +860,34 @@ public class DataBase
 				break;
 			}
 		}
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, nome_utente);
 		ps.setInt(2, evento.getId());
 		ps.executeUpdate();
+		
+		this.refreshDatiRAM();
 	}
 
 	
-	public void deleteCollegamentoCategoriaUtente(String nome_utente, CategorieEvento nome_categoria) throws SQLException {
+	public void deleteCollegamentoCategoriaUtente(String nome_utente, CategoriaEvento nome_categoria) throws SQLException {
 //		Eliminazione collegamento tra notifica e utente nella tabella relazione_utente_notifica contenente le realzioni ManyToMany tra utenti e notifiche
 		String sql = "DELETE FROM relazione_utente_categoria WHERE nome_utente=? AND nome_categoria=?" ;
-		PreparedStatement ps = getConnection().prepareStatement(sql);
+		PreparedStatement ps = con.prepareStatement(sql);
 		ps.setString(1, nome_utente);
 		ps.setString(2, nome_categoria.toString().toLowerCase());
 		ps.executeUpdate();
+	}
+	
+	public void deleteEventiDiUtente(Utente utente) throws SQLException
+	{
+		for(int i=0; i < tabelle_db_eventi.length; i++)
+		{				
+			String sql = "DELETE FROM " + tabelle_db_eventi[i][0] + " WHERE nome_utente_creatore = ?";
+			PreparedStatement ps = con.prepareStatement(sql);
+			ps.setString(1, utente.getNome());
+			ps.executeUpdate();
+			refreshDatiRAM();
+		}
 	}
 	
 	
@@ -866,7 +906,11 @@ public class DataBase
 
 	public boolean existUtenteInEvento(Utente utente, Evento evento) throws SQLException 
 	{
-		LinkedList<Evento> eventi = selectEventiDiUtente(utente.getNome()).get(evento.getNomeCategoria());
+		LinkedList<Evento> eventi;
+		if (selectEventiDiUtente(utente.getNome()) != null)
+			eventi = selectEventiDiUtente(utente.getNome()).get(evento.getNomeCategoria());
+		else
+			return false;
 		if(eventi == null)
 			return false;
 		for(Evento elemento : eventi) 
@@ -881,11 +925,11 @@ public class DataBase
 	{
 		if(existUtenteInEvento(utente, evento) == false)
 			return 0;
-		int costo = (Integer)evento.getCampo(NomeCampi.COSTO).getContenuto();
-		HashMap<NomeCampi, Boolean> campi_opt = evento.getCampiOptDiUtente(utente);
+		int costo = (Integer)evento.getCampo(NomeCampo.COSTO).getContenuto();
+		HashMap<NomeCampo, Boolean> campi_opt = evento.getCampiOptDiUtente(utente);
 		if(campi_opt != null)
 		{
-			for(NomeCampi nome_campo : campi_opt.keySet())
+			for(NomeCampo nome_campo : campi_opt.keySet())
 			{
 				if(campi_opt.get(nome_campo) == true)
 					costo+=(Integer)evento.getCampo(nome_campo).getContenuto();

@@ -1,6 +1,6 @@
 package it.unibs.dii.isw.socialNetworkEventi.utility;
 
-public enum CategorieEvento 
+public enum CategoriaEvento 
 {
 
 	DEFAULT("Default"),
@@ -9,7 +9,7 @@ public enum CategorieEvento
 	
 	private String codCategorieEventi;
 	
-	private CategorieEvento(String codCategorieEventi)
+	private CategoriaEvento(String codCategorieEventi)
 	{
 		this.codCategorieEventi = codCategorieEventi;
 	}
@@ -19,13 +19,13 @@ public enum CategorieEvento
 		return codCategorieEventi;
 	}
 	
-	public static  CategorieEvento convertiStringInCategoria(String string_categoria)
+	public static  CategoriaEvento convertiStringInCategoria(String string_categoria)
 	{
 		switch(string_categoria)
 		{
-		case "partita_calcio" : return CategorieEvento.PARTITA_CALCIO;
-		case "scii" : return CategorieEvento.SCII;
-		case "Default" : return CategorieEvento.DEFAULT;
+		case "partita_calcio" : return CategoriaEvento.PARTITA_CALCIO;
+		case "scii" : return CategoriaEvento.SCII;
+		case "Default" : return CategoriaEvento.DEFAULT;
 		default : return null;
 		}
 	}

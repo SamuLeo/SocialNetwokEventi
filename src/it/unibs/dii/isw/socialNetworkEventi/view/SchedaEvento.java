@@ -16,7 +16,7 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class SchedaEvento extends JPanel {
@@ -41,14 +41,14 @@ public class SchedaEvento extends JPanel {
 		setLayout(null);
 		setBackground(Grafica.coloreSfondo);
 		//Inizializzazione dati comuni ed obbligatori
-		titolo = new JLabel((String)e.getCampi().get(NomeCampi.TITOLO).getContenuto());
+		titolo = new JLabel((String)e.getCampi().get(NomeCampo.TITOLO).getContenuto());
 		titolo.setFont(testoBottoni.deriveFont(testoBottoni.getSize()*2F));
 		titolo.setHorizontalAlignment(SwingConstants.CENTER);
 		add(titolo);
 		
-		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
-				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
-				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampi.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampi.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto());
+		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
+				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
+				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampo.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampo.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampo.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto());
 		Utente uCorrente = Grafica.getIstance().chiediUtenteCorrente();
 		if (e.getUtenteCreatore().equals(uCorrente) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
@@ -66,12 +66,12 @@ public class SchedaEvento extends JPanel {
 			add(iscriviti);
 		}
 		obbligatori[0]= new JLabel ("Utente creatore: "); valObbligatori[0] = new JLabel(e.getUtenteCreatore().getNome());
-		obbligatori[1]= new JLabel ("Numero minimo partecipanti: "); valObbligatori[1] = new JLabel(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto().toString());
-		obbligatori[2]= new JLabel ("Ulteriori partecipanti ammessi: "); valObbligatori[2] = new JLabel(e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto().toString());
-		obbligatori[3]= new JLabel ("Luogo: "); valObbligatori[3] = new JLabel(e.getCampo(NomeCampi.LUOGO).getContenuto().toString());
-		obbligatori[4]= new JLabel ("Quota di adesione: "); valObbligatori[4] = new JLabel(e.getCampo(NomeCampi.COSTO).getContenuto().toString() + " €");
-		obbligatori[5]= new JLabel ("Inizio: "); valObbligatori[5] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto()).getTime()));
-		obbligatori[6]= new JLabel ("Termine iscrizioni: "); valObbligatori[6] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_CHIUSURA_ISCRIZIONI).getContenuto()).getTime()));
+		obbligatori[1]= new JLabel ("Numero minimo partecipanti: "); valObbligatori[1] = new JLabel(e.getCampo(NomeCampo.PARTECIPANTI).getContenuto().toString());
+		obbligatori[2]= new JLabel ("Ulteriori partecipanti ammessi: "); valObbligatori[2] = new JLabel(e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto().toString());
+		obbligatori[3]= new JLabel ("Luogo: "); valObbligatori[3] = new JLabel(e.getCampo(NomeCampo.LUOGO).getContenuto().toString());
+		obbligatori[4]= new JLabel ("Quota di adesione: "); valObbligatori[4] = new JLabel(e.getCampo(NomeCampo.COSTO).getContenuto().toString() + " €");
+		obbligatori[5]= new JLabel ("Inizio: "); valObbligatori[5] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto()).getTime()));
+		obbligatori[6]= new JLabel ("Termine iscrizioni: "); valObbligatori[6] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI).getContenuto()).getTime()));
 		for (int i=0; i<7; i++) {
 			obbligatori[i].setFont(testo);
 			valObbligatori[i].setFont(testo);
@@ -79,20 +79,20 @@ public class SchedaEvento extends JPanel {
 			add(obbligatori[i]);
 		}
 		
-		int partecipanti = (int)(e.getCampo(NomeCampi.PARTECIPANTI).getContenuto());
-		if (e.getCampo(NomeCampi.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
+		int partecipanti = (int)(e.getCampo(NomeCampo.PARTECIPANTI).getContenuto());
+		if (e.getCampo(NomeCampo.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
 		anello = new AnelloNumerico(larghezza/3, partecipanti, e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
 		add(anello);
 		
 		//Inizializzazione dati comuni non obbligatori
-		if (e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE) != null) {
-			opzionali[0] = new JLabel("Iscrizione ritirabile fino a: "); valOpzionali[0] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()).getTime()));}
-		if (e.getCampo(NomeCampi.D_O_TERMINE_EVENTO) != null) {
-			opzionali[1] = new JLabel("Fine evento: "); valOpzionali[1] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampi.D_O_TERMINE_EVENTO).getContenuto()).getTime()));}
-		if (e.getCampo(NomeCampi.NOTE) != null) {
-			opzionali[2] = new JLabel("Note: "); valOpzionali[2] = new JLabel(e.getCampo(NomeCampi.NOTE).getContenuto().toString());}
-		if (e.getCampo(NomeCampi.BENEFICI_QUOTA) != null) {
-			opzionali[3] = new JLabel("Incluso nella quota: "); valOpzionali[3] = new JLabel(e.getCampo(NomeCampi.BENEFICI_QUOTA).getContenuto().toString());}
+		if (e.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE) != null) {
+			opzionali[0] = new JLabel("Iscrizione ritirabile fino a: "); valOpzionali[0] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()).getTime()));}
+		if (e.getCampo(NomeCampo.D_O_TERMINE_EVENTO) != null) {
+			opzionali[1] = new JLabel("Fine evento: "); valOpzionali[1] = new JLabel(formattaDate.format(((Calendar)e.getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto()).getTime()));}
+		if (e.getCampo(NomeCampo.NOTE) != null) {
+			opzionali[2] = new JLabel("Note: "); valOpzionali[2] = new JLabel(e.getCampo(NomeCampo.NOTE).getContenuto().toString());}
+		if (e.getCampo(NomeCampo.BENEFICI_QUOTA) != null) {
+			opzionali[3] = new JLabel("Incluso nella quota: "); valOpzionali[3] = new JLabel(e.getCampo(NomeCampo.BENEFICI_QUOTA).getContenuto().toString());}
 		for (int i=0; i<4; i++) {
 			if (opzionali[i] == null) continue;
 			opzionali[i].setFont(testo);
@@ -109,8 +109,8 @@ public class SchedaEvento extends JPanel {
 	private void configura(PartitaCalcio p) {
 		dipendenti[0] = new JLabel("Fascia di età: ");
 		dipendenti[1] = new JLabel("Sesso: ");
-		valDipendenti[0] = new JLabel(p.getCampo(NomeCampi.ETA_MINIMA).getContenuto() + " - " + p.getCampo(NomeCampi.ETA_MASSIMA).getContenuto());
-		valDipendenti[1] = new JLabel(p.getCampo(NomeCampi.GENERE).getContenuto().toString());
+		valDipendenti[0] = new JLabel(p.getCampo(NomeCampo.ETA_MINIMA).getContenuto() + " - " + p.getCampo(NomeCampo.ETA_MASSIMA).getContenuto());
+		valDipendenti[1] = new JLabel(p.getCampo(NomeCampo.GENERE).getContenuto().toString());
 		dipendenti[0].setFont(testo); dipendenti[1].setFont(testo);
 		valDipendenti[0].setFont(testo); valDipendenti[1].setFont(testo);
 		add(dipendenti[0]); add(dipendenti[1]);
@@ -118,9 +118,9 @@ public class SchedaEvento extends JPanel {
 	}
 	
 	private void configura(Scii s) {
-		dipendenti[0] = new JLabel("Prezzo del trasporto: "); valDipendenti[0] = new JLabel(s.getCampo(NomeCampi.BIGLIETTO_BUS).getContenuto() + " €");
-		dipendenti[1] = new JLabel("Prezzo del pasto: "); valDipendenti[1] = new JLabel(s.getCampo(NomeCampi.PRANZO).getContenuto() + " €");
-		dipendenti[2] = new JLabel("Prezzo del noleggio: "); valDipendenti[2] = new JLabel(s.getCampo(NomeCampi.AFFITTO_SCII).getContenuto() + " €");
+		dipendenti[0] = new JLabel("Prezzo del trasporto: "); valDipendenti[0] = new JLabel(s.getCampo(NomeCampo.BIGLIETTO_BUS).getContenuto() + " €");
+		dipendenti[1] = new JLabel("Prezzo del pasto: "); valDipendenti[1] = new JLabel(s.getCampo(NomeCampo.PRANZO).getContenuto() + " €");
+		dipendenti[2] = new JLabel("Prezzo del noleggio: "); valDipendenti[2] = new JLabel(s.getCampo(NomeCampo.AFFITTO_SCII).getContenuto() + " €");
 		dipendenti[0].setFont(testo); dipendenti[1].setFont(testo); dipendenti[2].setFont(testo);
 		valDipendenti[0].setFont(testo); valDipendenti[1].setFont(testo); valDipendenti[2].setFont(testo);
 		add(dipendenti[0]); add(dipendenti[1]); add(dipendenti[2]);

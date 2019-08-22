@@ -2,8 +2,8 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.util.Calendar;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class Scii extends Evento
@@ -34,11 +34,11 @@ public class Scii extends Evento
 		if(biglietto_bus < 0) throw new IllegalArgumentException("Necessario inserire costo biglietto bus superiore o uguale a 0");
 		if(pranzo < 0) throw new IllegalArgumentException("Necessario inserire costo pranzo superiore o uguale a 0");	
 		if(affitto_scii < 0) throw new IllegalArgumentException("Necessario inserire costo affitto sci superiore o uguale a 0");
-		aggiungiCampo(biglietto_bus, false, NomeCampi.BIGLIETTO_BUS, "Costo biglietto bus");
-		aggiungiCampo(pranzo, false, NomeCampi.PRANZO, "Costo pranzo");
-		aggiungiCampo(affitto_scii, false, NomeCampi.AFFITTO_SCII, "Costo affitto sci");
+		aggiungiCampo(biglietto_bus, false, NomeCampo.BIGLIETTO_BUS, "Costo biglietto bus");
+		aggiungiCampo(pranzo, false, NomeCampo.PRANZO, "Costo pranzo");
+		aggiungiCampo(affitto_scii, false, NomeCampo.AFFITTO_SCII, "Costo affitto sci");
 		
-		setNomeCategoria(CategorieEvento.SCII);
+		setNomeCategoria(CategoriaEvento.SCII);
 	}
 	
 	

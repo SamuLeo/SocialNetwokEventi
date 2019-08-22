@@ -2,8 +2,8 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.util.Calendar;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class PartitaCalcio extends Evento 
@@ -33,11 +33,11 @@ public class PartitaCalcio extends Evento
 		
 		if(eta_minima==null || eta_massima==null || eta_minima <= 0 || eta_massima <= 0 ||  eta_minima>eta_massima)     throw new IllegalArgumentException("Necessario inserire un età minima, massima dei partecipanti superiore a 0");
 		if(genere == null || !(genere.equalsIgnoreCase("maschi") || genere.equalsIgnoreCase("femmine") || genere.equalsIgnoreCase("qualsiasi")))throw new IllegalArgumentException("Necessario inserire il genere dei partecipanti");		
-		aggiungiCampo(eta_minima, true, NomeCampi.ETA_MINIMA, "Età minima");
-		aggiungiCampo(eta_massima, true, NomeCampi.ETA_MASSIMA, "Età massima");
-		aggiungiCampo(genere, true, NomeCampi.GENERE, "Genere richiesto");
+		aggiungiCampo(eta_minima, true, NomeCampo.ETA_MINIMA, "Età minima");
+		aggiungiCampo(eta_massima, true, NomeCampo.ETA_MASSIMA, "Età massima");
+		aggiungiCampo(genere, true, NomeCampo.GENERE, "Genere richiesto");
 		
-		setNomeCategoria(CategorieEvento.PARTITA_CALCIO);
+		setNomeCategoria(CategoriaEvento.PARTITA_CALCIO);
 	}
 	
 	

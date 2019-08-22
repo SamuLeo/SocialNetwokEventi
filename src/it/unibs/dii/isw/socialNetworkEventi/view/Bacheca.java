@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 
@@ -88,7 +88,7 @@ public class Bacheca extends JPanel {
 			g.setColor(Color.black);
 			//Titolo dell'evento
 			if (titolo == null) {
-				String titoloEvento = (e.getCampo(NomeCampi.TITOLO)) != null ? (String)(e.getCampo(NomeCampi.TITOLO).getContenuto()) : "Evento senza nome";
+				String titoloEvento = (e.getCampo(NomeCampo.TITOLO)) != null ? (String)(e.getCampo(NomeCampo.TITOLO).getContenuto()) : "Evento senza nome";
 				titolo = new JLabel(titoloEvento);
 				this.add(titolo);
 			}
@@ -96,7 +96,7 @@ public class Bacheca extends JPanel {
 			titolo.setFont(testoBottoni);
 			titolo.setBounds(w/10, 15, (int)(w*0.8), altezzaStringhe/5*6);
 			//Data ed ora dell'evento
-			Calendar dataOra = (Calendar)(e.getCampo(NomeCampi.D_O_INIZIO_EVENTO).getContenuto());
+			Calendar dataOra = (Calendar)(e.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto());
 			if (data==null) {data = new JLabel("Data: " + dataOra.getTime().getDate() + '/'+ (dataOra.getTime().getMonth()+1) + '/' + (dataOra.getTime().getYear()+1900)); this.add(data);}
 			data.setFont(testo);
 			data.setBounds(w/9, 30+titolo.getHeight(), (int)(w*0.6), altezzaStringhe);
@@ -104,19 +104,19 @@ public class Bacheca extends JPanel {
 			ora.setFont(testo);
 			ora.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
 			//Sesso dei partecipanti alla partita
-			if (e.getCampi().get(NomeCampi.GENERE) != null) 
+			if (e.getCampi().get(NomeCampo.GENERE) != null) 
 				if (catDip==null) 
-					{catDip = new JLabel("Sesso: " + e.getCampi().get(NomeCampi.GENERE).getContenuto()); this.add(catDip);}
-			if (e.getCampi().get(NomeCampi.AFFITTO_SCII) != null)
+					{catDip = new JLabel("Sesso: " + e.getCampi().get(NomeCampo.GENERE).getContenuto()); this.add(catDip);}
+			if (e.getCampi().get(NomeCampo.AFFITTO_SCII) != null)
 				if (catDip==null) 
-				{catDip = new JLabel("Luogo: " + e.getCampi().get(NomeCampi.LUOGO).getContenuto()); this.add(catDip);}
+				{catDip = new JLabel("Luogo: " + e.getCampi().get(NomeCampo.LUOGO).getContenuto()); this.add(catDip);}
 			catDip.setFont(testo);
 			catDip.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
 			//Anello di visualizzazione degli iscritti
 			int latoAnello = 40+altezzaStringhe*3;
 			if (anello==null) {
-				int partecipanti=(int) e.getCampi().get(NomeCampi.PARTECIPANTI).getContenuto();
-				if (e.getCampo(NomeCampi.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampi.TOLLERANZA_MAX).getContenuto();
+				int partecipanti=(int) e.getCampi().get(NomeCampo.PARTECIPANTI).getContenuto();
+				if (e.getCampo(NomeCampo.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
 				int iscritti=(int)(e.getNumeroPartecipanti());
 				anello=new AnelloNumerico(latoAnello,partecipanti,iscritti,testo,altezzaStringhe, sfondoCard);
 				//anello.addMouseListener();

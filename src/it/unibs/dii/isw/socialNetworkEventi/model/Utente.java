@@ -2,7 +2,7 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategorieEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 
 public class Utente  
 {
@@ -10,9 +10,9 @@ public class Utente
 	private String password;
 	private int eta_min;
 	private int eta_max;
-	private LinkedList<CategorieEvento> categorie_di_interesse = new LinkedList<>();
+	private LinkedList<CategoriaEvento> categorie_di_interesse = new LinkedList<>();
 	
-	private HashMap<CategorieEvento,LinkedList<Evento>> eventi;
+	private HashMap<CategoriaEvento,LinkedList<Evento>> eventi;
 	private LinkedList<Notifica> notifiche;
 
 	
@@ -34,13 +34,6 @@ public class Utente
 		this.eta_max = eta_max;
 	}
 	
-		
-	 @Override
-	public boolean equals(Object utente) 
-	 {
-		return this.nome.equals(((Utente)utente).getNome());
-	}
-
 	public void aggiungiNotifica(Notifica notifica) {notifiche.add(notifica);}
 	 
 	 public boolean rimuoviNotifica(Notifica notifica) {
@@ -49,11 +42,11 @@ public class Utente
 		 else return false;
 	 }
 	 
-	public void rimuoviInteresse(CategorieEvento interesse) {
+	public void rimuoviInteresse(CategoriaEvento interesse) {
 		categorie_di_interesse.remove(interesse);
 	}
 	
-	public void aggiungiInteresse(CategorieEvento interesse) {
+	public void aggiungiInteresse(CategoriaEvento interesse) {
 		if (!categorie_di_interesse.contains(interesse)) categorie_di_interesse.add(interesse);
 	}
 	 
@@ -68,15 +61,16 @@ public class Utente
 	public int getEtaMax() {return eta_max;}
 	public void setEtaMax(int etaMax) {this.eta_max = etaMax;}
 	
-	public HashMap<CategorieEvento,LinkedList<Evento>> getEventi() {return eventi;}
-	public void setEventi(HashMap<CategorieEvento,LinkedList<Evento>> eventi) {this.eventi = eventi;}
+	public HashMap<CategoriaEvento,LinkedList<Evento>> getEventi() {return eventi;}
+	public void setEventi(HashMap<CategoriaEvento,LinkedList<Evento>> eventi) {this.eventi = eventi;}
 
 	public LinkedList<Notifica> getNotifiche() {return notifiche;}
 	public void setNotifiche(LinkedList<Notifica> notifiche) {this.notifiche = notifiche;}
 	
-	public LinkedList<CategorieEvento> getCategorieInteressi() {return categorie_di_interesse;}
-	public void setCategorieInteressi(LinkedList<CategorieEvento> interessi) {this.categorie_di_interesse = interessi;}
+	public LinkedList<CategoriaEvento> getCategorieInteressi() {return categorie_di_interesse;}
+	public void setCategorieInteressi(LinkedList<CategoriaEvento> interessi) {this.categorie_di_interesse = interessi;}
 
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n nome=");
@@ -88,8 +82,14 @@ public class Utente
 		builder.append("\n fascia età inferiore=");
 		builder.append(eta_min + "\n");
 		builder.append("\n interessi=");
-		for(CategorieEvento cat : categorie_di_interesse)
+		for(CategoriaEvento cat : categorie_di_interesse)
 			builder.append(cat.getString() + "\n");
 		return builder.toString();
+	}
+	
+	 @Override
+	public boolean equals(Object utente) 
+	 {
+		return this.nome.equals(((Utente)utente).getNome());
 	}
 }

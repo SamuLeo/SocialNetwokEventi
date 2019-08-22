@@ -1,6 +1,6 @@
 package it.unibs.dii.isw.socialNetworkEventi.utility;
 
-public enum NomeCampi
+public enum NomeCampo
 {
 //	Campi comuni a qualsiasi evento
 	LUOGO(0),
@@ -26,7 +26,7 @@ public enum NomeCampi
 	
 	private int codCampo;
 	
-	private NomeCampi(int codCampo)
+	private NomeCampo(int codCampo)
 	{
 		this.codCampo = codCampo;
 	}
