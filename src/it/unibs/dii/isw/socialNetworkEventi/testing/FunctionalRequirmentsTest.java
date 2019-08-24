@@ -7,10 +7,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.*;

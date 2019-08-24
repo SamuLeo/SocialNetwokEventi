@@ -8,8 +8,7 @@ public class MainClass
 	public static void main(String[] args) throws SQLException 
 	{	
 		Grafica.getIstance().crea();
-		Grafica.getIstance().mostraLogin();		
-		
+		Grafica.getIstance().mostraLogin();	
 		Sessione.getInstance();
 	}
 }

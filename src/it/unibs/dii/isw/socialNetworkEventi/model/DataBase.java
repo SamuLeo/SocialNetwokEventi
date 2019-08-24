@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Observable;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JOptionPane;
@@ -25,7 +26,9 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.Messaggi;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
-public class DataBase 
+
+public class DataBase extends Observable
+
 {	
 //	WARNING : modificare questa matrice solo in corrispondenza di variazioni di nomi di tabelle a livello DB
 	private static final String tabelle_db_eventi[][] 		= {{CategoriaEvento.PARTITA_CALCIO.getString(),	"relazione_utente_" + CategoriaEvento.PARTITA_CALCIO.getString()},
@@ -86,7 +89,9 @@ public class DataBase
 	public void refreshDatiRAM() throws SQLException
 	{
 		utenti = selectUtentiAll();
+		HashMap<CategoriaEvento,ArrayList<Evento>> eventiPrima = eventi;
 		eventi = selectEventiAll();
+		if (countObservers()>0 && !eventiPrima.equals(eventi)) setChanged();
 	}
 	
 	public void initializeDatiRAM() throws SQLException
@@ -949,5 +954,7 @@ public class DataBase
 		return dateTime;
 	}
 	
-	
+	public void setChangedForObservers() {
+		this.setChanged();
+	}
 }

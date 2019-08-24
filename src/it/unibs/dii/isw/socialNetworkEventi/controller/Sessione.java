@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
 import it.unibs.dii.isw.socialNetworkEventi.utility.*;
-import it.unibs.dii.isw.socialNetworkEventi.view.Grafica;
 
 public class Sessione 
 {
@@ -45,7 +45,7 @@ public class Sessione
 		connettiDB();
 		creaLogger();
 		
-		new Timer().schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 15000);
+		new Timer().schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 1000);
 
 	}
 	
@@ -101,35 +101,35 @@ public class Sessione
 	public Runnable aggiornatore = new Runnable() {
 		public void run()
 		{	
-		try 
-		{
-			db.refreshDatiRAM();
-			HashMap<CategoriaEvento, ArrayList<Evento>> eventi = db.getEventi();			
-//			primo for per ottenere tutte le chiavi, il secondo for per ottenere le LinkedList delle categorie di eventi
-			for(CategoriaEvento categoria : eventi.keySet())
+			try 
 			{
-				for(Evento evento : eventi.get(categoria))
+				db.refreshDatiRAM();
+				HashMap<CategoriaEvento, ArrayList<Evento>> eventi = db.getEventi();
+				for(CategoriaEvento categoria : eventi.keySet())
 				{
-					if(controllaStatoEvento(evento) == true)
-					{	//Stato cambiato
-						db.updateEvento(evento);
-						switch(evento.getStato())
-						{
-						case FALLITA : db.segnalaFallimentoEvento(evento); break;
-						case CHIUSA : db.segnalaChiusuraEvento(evento); break;
-						case CONCLUSA : db.segnalaConclusioneEvento(evento); break;
-						default : break;
-						}
-					}		
+					for(Evento evento : eventi.get(categoria))
+					{
+						if(controllaStatoEvento(evento) == true)
+						{	//Stato cambiato
+							db.updateEvento(evento);
+							switch(evento.getStato())
+							{
+							case FALLITA : db.segnalaFallimentoEvento(evento); break;
+							case CHIUSA : db.segnalaChiusuraEvento(evento); break;
+							case CONCLUSA : db.segnalaConclusioneEvento(evento); break;
+							default : break;
+							}
+						}		
+					}
 				}
-			}
-		} 
-		catch(SQLException e) 
-		{
-			error_logger.scriviLog(Messaggi.E_AGGIORNATORE);
-		}	
+				notificaOsservatori();
+			} 
+			catch(SQLException e) 
+			{
+				error_logger.scriviLog(Messaggi.E_AGGIORNATORE);
+			}	
 		}
-};
+	};
 	
 	/**
 	 * Questo metodo controlla e in caso sia cambiato aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
@@ -230,7 +230,7 @@ public class Sessione
 			evento = db.selectEvento(id_evento);
 			logger.scriviLog(String.format(Messaggi.VALIDO_APERTO, evento.getId()));
 			db.segnalaNuovoEventoAgliInteressati(evento);
-			
+			//notificaOsservatori();
 			return evento;
 		}
 		catch(Exception e) 
@@ -338,12 +338,14 @@ public class Sessione
 				db.segnalaChiusuraEvento(evento);
 				evento.setStato(StatoEvento.CHIUSA);
 				db.updateEvento(evento);
+				//notificaOsservatori();
 				logger.scriviLog(String.format(Messaggi.APERTO_CHIUSO, evento.getId()));
 			}
 //			else if (numero_iscritti_attuali < numero_massimo_iscritti_possibili || (!termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)) 
-			else if ((numero_iscritti_attuali < numero_massimo_iscritti_possibili && !chiusura_iscrizioni_superato)) 
-				db.collegaUtenteEvento(utente_corrente, evento);	
-			else return;
+			else if ((numero_iscritti_attuali < numero_massimo_iscritti_possibili && !chiusura_iscrizioni_superato)) {
+				db.collegaUtenteEvento(utente_corrente, evento);
+				//notificaOsservatori();
+			} else return;
 			utente_corrente = db.selectUtente(utente_corrente.getNome());
 		} 
 		 catch(Exception e) 
@@ -475,6 +477,7 @@ public class Sessione
 		{
 			if(!utenteIscrittoInEvento(evento)) throw new RuntimeException ("Utente non iscritto alla partita");	
 			db.deleteCollegamentoEventoUtente(utente_corrente.getNome(), evento);
+			//notificaOsservatori();
 		} 
 		catch(SQLException e) 
 		{
@@ -512,6 +515,7 @@ public class Sessione
 				evento.setStato(StatoEvento.RITIRATA);
 				db.updateEvento(evento); 
 				db.segnalaRitiroEvento(evento);
+				//notificaOsservatori();
 				logger.scriviLog(String.format(Messaggi.APERTO_RITIRATO, evento.getId()));
 			}
 		}
@@ -538,6 +542,7 @@ public class Sessione
 		try
 		{
 			db.deleteEventiDiUtente(utente_corrente);
+			//notificaOsservatori();
 			return true;
 		}
 		 catch(SQLException e) 
@@ -547,12 +552,19 @@ public class Sessione
 		 }
 	}
 	
-	public DataBase getDb() {
-		return db;
-	}
-	public void setDb(DataBase db) {
-		this.db = db;
+	public DataBase getDb() {return db;}
+	public void setDb(DataBase db) {this.db = db;}
+	
+	public void iniziaOsservazione (Observer obs) {
+		db.addObserver(obs);
 	}
 	
+	public void fermaOsservazione (Observer obs) {
+		db.deleteObserver(obs);
+	}
 	
+	public void notificaOsservatori() {
+		//getDb().setChangedForObservers();
+		getDb().notifyObservers(getEventi());
+	}
 }
