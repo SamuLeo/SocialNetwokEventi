@@ -2,8 +2,10 @@ package it.unibs.dii.isw.socialNetworkEventi.testing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Random;
 
 import org.junit.After;
@@ -12,13 +14,13 @@ import org.junit.jupiter.api.Test;
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Messaggi;
+import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 class FunctionalRequirmentsTest 
 {	
-	Sessione sessione =  Sessione.getInstance();
+	Sessione sessione =  new Sessione();
 	Utente admin = sessione.getDb().selectUtente("admin");
 	
 	@Test
@@ -255,9 +257,9 @@ class FunctionalRequirmentsTest
 		
 		sessione.aggiornatore.run();
 	
-		String titolo = String.format(Messaggi.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
+		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
-		String messaggio = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO), 
+		String messaggio = String.format(Stringhe.NOTIFICA_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO), 
 				sdf.format(((Calendar)evento.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto()).getTime()),evento.getContenutoCampo(NomeCampo.COSTO));
 		Notifica notifica = new Notifica(titolo, messaggio);
 		boolean presente = false;
@@ -315,9 +317,9 @@ class FunctionalRequirmentsTest
 		
 		sessione.aggiornatore.run();
 	
-		String titolo = String.format(Messaggi.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
+		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
-		String messaggio = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, 
+		String messaggio = String.format(Stringhe.NOTIFICA_CHIUSURA_EVENTO, 
 				evento.getContenutoCampo(NomeCampo.TITOLO), 
 				sdf.format(((Calendar)evento.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto()).getTime()),
 				evento.getContenutoCampo(NomeCampo.COSTO));
@@ -488,60 +490,73 @@ class FunctionalRequirmentsTest
 		assertTrue(check);
 	}
 	
-//	Bisogna selezionare l'opzione da grafica
-//	@Test
-//	void invitoAgliAderentiPassatiDiUnProprioEvento()
-//	{
-//		Utente utente_mittente = new Utente("admin","");
-//		sessione.accedi(utente_mittente);
-//		
-//		Calendar termineIscrizione = Calendar.getInstance();
-//		termineIscrizione.set(2030, 2, 1, 15, 00,0);
-//		Calendar dataInizioEvento = Calendar.getInstance();
-//		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
-//		Calendar dataRitiroIscrizioni = Calendar.getInstance();
-//		dataRitiroIscrizioni.add(Calendar.SECOND, 2);
-//	
-//		Evento evento = new PartitaCalcio(
-//				utente,
-//				"Mompiano",
-//				termineIscrizione,
-//				dataInizioEvento,
-//				2,
-//				5,
-//				"Parta",
-//				null,
-//				null,
-//				null,				
-//				dataRitiroIscrizioni,				
-//				0,
-//				18,
-//				25,
-//				"maschi"
-//				);
-//		evento = sessione.aggiungiEvento(evento);
-//		
-//		Utente utente_destinatario = new Utente("tester","");
-//		sessione.accedi(utente_destinatario);		
-//		sessione.iscrizioneUtenteInEvento(evento);
-//		
-//		evento = sessione.aggiungiEvento(evento);
-//		
-//		String titolo = String.format(Messaggi.TITOLO_INVITO_EVENTO, CategoriaEvento.PARTITA_CALCIO);
-//		String messaggio = String.format(Messaggi.NOTIFICA_PER_INVITO_UTENTE, utente_mittente.getNome(), evento.getCampo(NomeCampi.TITOLO).getContenuto());	
-//
-//		Notifica notifica = new Notifica(titolo, messaggio);
-//		boolean presente = false;
-//		for(Notifica n : sessione.getUtente_corrente().getNotifiche())
-//		{
-//			if(n.equals(notifica))
-//				{
-//					presente = true;
-//					break;
-//				}
-//		}
-//		assertTrue(presente);
-//	}
+	@Test
+	void invitoAgliAderentiPassatiDiUnProprioEvento()
+	{
+		Utente utente_mittente = new Utente("admin","");
+		sessione.accedi(utente_mittente);
+		
+		Calendar termineIscrizione = Calendar.getInstance();
+		termineIscrizione.set(2030, 2, 1, 15, 00,0);
+		Calendar dataInizioEvento = Calendar.getInstance();
+		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
+		Calendar dataRitiroIscrizioni = Calendar.getInstance();
+	
+		Evento evento = new PartitaCalcio(
+				utente_mittente,
+				"Mompiano",
+				termineIscrizione,
+				dataInizioEvento,
+				2,
+				5,
+				"Parta",
+				null,
+				null,
+				null,				
+				dataRitiroIscrizioni,				
+				0,
+				18,
+				25,
+				"maschi"
+				);
+		evento = sessione.aggiungiEvento(evento);
+		
+		Utente utente_destinatario = new Utente("tester","");
+		sessione.accedi(utente_destinatario);		
+		sessione.iscrizioneUtenteInEvento(evento);
+
+		sessione.accedi(utente_mittente);
+		evento = sessione.aggiungiEvento(evento);
+		try 
+		{
+			HashMap<CategoriaEvento,LinkedList<Utente>> hash_map= new HashMap<>();
+			hash_map = sessione.getDb().selectUtentiDaEventiPassati(utente_mittente.getNome());
+			if(hash_map != null && hash_map.get(CategoriaEvento.PARTITA_CALCIO).contains(utente_destinatario))
+				sessione.getMessagesFactory().segnalaEventoPerUtente(evento, utente_mittente, utente_destinatario);
+		} 
+		catch (SQLException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		sessione.accedi(utente_destinatario);
+		String nome_categoria = evento.getNomeCategoria().getString().replaceAll("_", " di ");
+		String titolo = String.format(Stringhe.TITOLO_INVITO_EVENTO, nome_categoria);
+		String messaggio = String.format(Stringhe.NOTIFICA_PER_INVITO_UTENTE, utente_mittente.getNome(), evento.getContenutoCampo(NomeCampo.TITOLO));	
+
+		Notifica notifica = new Notifica(titolo, messaggio);
+		
+		boolean presente = false;
+		for(Notifica n : sessione.getUtente_corrente().getNotifiche())
+		{
+			if(n.equals(notifica))
+				{
+					presente = true;
+					break;
+				}
+		}
+		assertTrue(presente);
+	}
 	
 	@Test
 	void iscrizioneSciiConScelte()
@@ -629,16 +644,15 @@ class FunctionalRequirmentsTest
 		
 		sessione.aggiornatore.run();
 		
-		String titolo = String.format(Messaggi.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
+		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
 		int costo = (Integer)evento.getContenutoCampo(NomeCampo.COSTO) + (Integer)evento.getContenutoCampo(NomeCampo.BIGLIETTO_BUS) +
 				(Integer)evento.getContenutoCampo(NomeCampo.PRANZO) + (Integer)evento.getContenutoCampo(NomeCampo.AFFITTO_SCII);
-		String messaggio = String.format(Messaggi.NOTIFICA_CHIUSURA_EVENTO, 
+		String messaggio = String.format(Stringhe.NOTIFICA_CHIUSURA_EVENTO, 
 				evento.getContenutoCampo(NomeCampo.TITOLO), 
 				sdf.format(((Calendar)evento.getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO)).getTime()),
 				costo);
 		Notifica notifica = new Notifica(titolo, messaggio);
-		System.out.print(notifica);
 		boolean presente = false;
 		for(Notifica n : sessione.getUtente_corrente().getNotifiche())
 		{

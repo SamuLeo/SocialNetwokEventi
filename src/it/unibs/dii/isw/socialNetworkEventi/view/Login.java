@@ -12,7 +12,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
-public class Login extends JPanel {
+public class Login extends JPanel 
+{
+	private Grafica grafica;
 	static final Color coloreBottoni = new Color(255,255,255);
 	static final Color coloreSfondo = new Color(250,250,250);
 	private static final long serialVersionUID = 1L;
@@ -20,11 +22,12 @@ public class Login extends JPanel {
 	private JTextField utente;
 	private JPasswordField password;
 	
-	private final ActionListener accediLambda = e -> Grafica.getIstance().accedi(utente.getText(), new String(password.getPassword()));
-	private final ActionListener creaUtLambda = e -> Grafica.getIstance().creaUtente(utente.getText(), new String(password.getPassword()));
+	private final ActionListener accediLambda = e -> grafica.accedi(utente.getText(), new String(password.getPassword()));
+	private final ActionListener creaUtLambda = e -> grafica.creaUtente(utente.getText(), new String(password.getPassword()));
 	
-	public Login (Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
+	public Login (Grafica grafica, Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
 	{
+		this.grafica = grafica;
 		JLabel img = new JLabel();
 		try { img = new JLabel(new ImageIcon(ImageIO.read(Grafica.percorsoIcona).getScaledInstance(Math.min(pswdWidth+fieldWidth,180), Math.min(pswdWidth+fieldWidth,180), Image.SCALE_SMOOTH)));}
 		catch (IOException e) {e.printStackTrace();}

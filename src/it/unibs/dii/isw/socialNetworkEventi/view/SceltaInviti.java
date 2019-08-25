@@ -12,7 +12,9 @@ import javax.swing.*;
 import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 
-public class SceltaInviti extends JPanel {
+public class SceltaInviti extends JPanel 
+{
+	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	int X, Y, nRighe=1;
 	Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
@@ -25,8 +27,9 @@ public class SceltaInviti extends JPanel {
 	Font font;
 	Evento evento;
 
-	public SceltaInviti(Evento e, LinkedList<Utente> invitabili, Font font, int larghezza, int altezzaStr) {
+	public SceltaInviti(Grafica grafica, Evento e, LinkedList<Utente> invitabili, Font font, int larghezza, int altezzaStr) {
 		super();
+		this.grafica = grafica;
 		evento = e;
 		this.invitabili=invitabili;
 		X = larghezza;
@@ -89,9 +92,9 @@ public class SceltaInviti extends JPanel {
 		if (utenti != null) {
 			for (int i=0; i<utenti.length; i++) {
 				if (utenti[i].isSelected()) 
-					Grafica.getIstance().invitaUtenteAdEvento(evento, invitabili.get(i));
+					grafica.invitaUtenteAdEvento(evento, invitabili.get(i));
 			}
 		}
-		Grafica.getIstance().visualizzaBacheca();
+		grafica.visualizzaBacheca();
 	};
 }

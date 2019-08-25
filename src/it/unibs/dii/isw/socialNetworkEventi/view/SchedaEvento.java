@@ -20,6 +20,7 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class SchedaEvento extends JPanel {
+	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private int Y=0, X;
 	private JLabel[] obbligatori = new JLabel[7],
@@ -35,8 +36,9 @@ public class SchedaEvento extends JPanel {
 	int altezzaRighe;
 	DateFormat formattaDate = DateFormat.getInstance();
 	
-	public SchedaEvento(Evento e, Font testo, Font testoBottoni, int altezzaRighe, int larghezza) {
+	public SchedaEvento(Grafica grafica, Evento e, Font testo, Font testoBottoni, int altezzaRighe, int larghezza) {
 		super();
+		this.grafica = grafica;
 		this.testo=testo; this.testoBottoni=testoBottoni; this.altezzaRighe=altezzaRighe; X=larghezza;
 		setLayout(null);
 		setBackground(Grafica.coloreSfondo);
@@ -49,16 +51,16 @@ public class SchedaEvento extends JPanel {
 		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
 				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
 				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampo.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampo.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampo.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto());
-		Utente uCorrente = Grafica.getIstance().chiediUtenteCorrente();
+		Utente uCorrente = grafica.chiediUtenteCorrente();
 		if (e.getUtenteCreatore().equals(uCorrente) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
-			iscriviti.addActionListener(click -> Grafica.getIstance().eliminaEvento(e));
+			iscriviti.addActionListener(click -> grafica.eliminaEvento(e));
 		} else if (!e.contieneUtente(uCorrente) && eventoHaSpazio && !termineIscrizioneScaduto) {
 			iscriviti = new JButton(" 🖋  Iscriviti");
 			iscriviti.addActionListener(click -> iscriviEvento(e));
 		} else if (!termine_ritiro_scaduto && e.contieneUtente(uCorrente)){
 			iscriviti = new JButton(" ✖  Annulla iscrizione");
-			iscriviti.addActionListener(click -> Grafica.getIstance().rimuoviIscrizioneEvento(e));
+			iscriviti.addActionListener(click -> grafica.rimuoviIscrizioneEvento(e));
 		}
 		if (iscriviti != null) {
 			iscriviti.setFont(testoBottoni);
@@ -162,8 +164,8 @@ public class SchedaEvento extends JPanel {
 	void ridimensiona(int larghezza) {X = larghezza;}
 	
 	void iscriviEvento(Evento e) {
-		if (e instanceof Scii) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), Grafica.getIstance().sceltePersonali());
-		if (e instanceof PartitaCalcio) e.setCampiOptPerUtente(Grafica.getIstance().chiediUtenteCorrente(), null);
-		Grafica.getIstance().iscriviEvento(e);
+		if (e instanceof Scii) e.setCampiOptPerUtente(grafica.chiediUtenteCorrente(), grafica.sceltePersonali());
+		if (e instanceof PartitaCalcio) e.setCampiOptPerUtente(grafica.chiediUtenteCorrente(), null);
+		grafica.iscriviEvento(e);
 	}
 }

@@ -12,6 +12,7 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 
 class PannelloUtente extends JPanel {
+	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private static final int xInizio = 20;
 	int Y, nRighe=1;
@@ -21,12 +22,12 @@ class PannelloUtente extends JPanel {
 	LinkedList<JCheckBox> categorie;
 	Font testo;
 	
-	PannelloUtente (Utente u, Font testo, Font testoBottoni, int altezzaStringhe, int larghezza) {
+	PannelloUtente (Grafica grafica, Utente u, Font testo, Font testoBottoni, int altezzaStringhe, int larghezza) {
 		super();
 		setLayout(null);
 		setBackground(Grafica.coloreSfondo);
-		this.testo=testo;
-		
+		this.testo = testo;
+		this.grafica = grafica;
 		int ampiezza = larghezza-2*xInizio;
 		
 		nomignolo = new JLabel(u.getNome());
@@ -126,7 +127,7 @@ class PannelloUtente extends JPanel {
 				elenco[i] = categorie.get(i).getText();
 				selezionata[i] = categorie.get(i).isSelected();
 			}
-			Grafica.getIstance().aggiornaDatiUtente(etm, etM, elenco, selezionata);
+			grafica.aggiornaDatiUtente(etm, etM, elenco, selezionata);
 		} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null, "Sono stati inseriti dati scorretti nei campi riguardanti l'età", "Errore di compilazione", JOptionPane.WARNING_MESSAGE);}
 	}
 }

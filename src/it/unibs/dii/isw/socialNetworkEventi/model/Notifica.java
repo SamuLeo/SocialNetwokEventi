@@ -1,22 +1,16 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.util.Calendar;
-
-import it.unibs.dii.isw.socialNetworkEventi.utility.TipoNotifica;
 
 public class Notifica implements Serializable
 {
-
 	private static final long serialVersionUID = 1L;
 
 	private int id_notifica;
-
 	private String titolo;
 	private String contenuto;
 	private Calendar data ;
-	private TipoNotifica tipo = TipoNotifica.GENERICA;
 	
 	public Notifica(String titolo, String contenuto) 
 	{
@@ -56,7 +50,7 @@ public class Notifica implements Serializable
 	@Override
 	public boolean equals(Object obj)
 	{
-//		return this.toString().equals(obj.toString());
+		//return this.toString().equals(obj.toString());
 		Notifica notifica = (Notifica)obj;
 		boolean equals = titolo.equals(notifica.getTitolo()) && contenuto.equals(notifica.getContenuto());
 		return equals;

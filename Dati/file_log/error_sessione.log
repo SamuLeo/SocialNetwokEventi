@@ -117,21 +117,19 @@
 22-08-2019 15:28  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@4686afc2 al database
 22-08-2019 15:31  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@fa36558 al database
 22-08-2019 15:32  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@791f145a al database
-23-08-2019 14:11  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@9d5509a al database
-23-08-2019 14:11  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@510f3d34 al database
-23-08-2019 14:11  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@5e5d171f al database
-23-08-2019 14:11  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@69453e37 al database
-23-08-2019 14:11  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@394df057 al database
-23-08-2019 14:13  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@6f03482 al database
-23-08-2019 14:13  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@6ad82709 al database
-23-08-2019 14:13  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@7770f470 al database
-23-08-2019 14:13  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@2002fc1d al database
-23-08-2019 14:13  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@71e9ddb4 al database
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 61 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 62 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 62 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 63 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 8 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 64 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 65 oppure l'utente era precedentemente già iscritto
-23-08-2019 14:13  :  ERROR  : Non è stato possibile collegare l'utente admin all'evento 66 oppure l'utente era precedentemente già iscritto
+24-08-2019 10:55  :  ERROR  : Non è stato possibile collegare l'utente tester all'evento 1569 oppure l'utente era precedentemente già iscritto
+24-08-2019 10:55  :  ERROR  : Non è stato possibile collegare l'utente tester all'evento 214 oppure l'utente era precedentemente già iscritto
+24-08-2019 10:55  :  ERROR  : Non è stato possibile collegare l'utente tester all'evento 1573 oppure l'utente era precedentemente già iscritto
+24-08-2019 15:52  :  ERROR : Creazione IMessagesFactory fallita
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@17f7cd29 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@5c90e579 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@6a2b953e al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@17a7f733 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@65b3f4a4 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@28975c28 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@5552768b al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@5f683daf al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@152aa092 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@5939a379 al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@482bce4f al database
+24-08-2019 15:52  :  ERROR  : Non è stato possibile aggiungere l'evento dal nome it.unibs.dii.isw.socialNetworkEventi.model.Campo@2abf4075 al database

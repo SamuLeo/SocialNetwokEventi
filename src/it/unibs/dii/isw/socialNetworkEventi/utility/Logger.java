@@ -13,17 +13,14 @@ public class Logger
 	File fileDiLog;
 	PrintWriter output;
 	
-	public Logger(String percorsoFile){
-		fileDiLog = new File(percorsoFile);
-		
-		try 
-		{
-			output = new PrintWriter(
-						new OutputStreamWriter(
-							new FileOutputStream(fileDiLog,true),"UTF-8"),true);  //il primo true serve per fare l'append su file, il secondo per fare l'autoFlush per println
-			output.flush();
-		} 
-		catch (FileNotFoundException | UnsupportedEncodingException e) {}
+	public Logger(String percorso_file) throws UnsupportedEncodingException, FileNotFoundException
+	{
+		fileDiLog = new File(percorso_file);
+
+		output = new PrintWriter(
+				new OutputStreamWriter(
+						new FileOutputStream(fileDiLog,true),"UTF-8"),true);  //il primo true serve per fare l'append su file, il secondo per fare l'autoFlush per println
+		output.flush();
 	}
 	
 	public void scriviLog(String messaggioDiLog)

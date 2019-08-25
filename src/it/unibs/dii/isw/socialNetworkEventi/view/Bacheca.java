@@ -18,16 +18,18 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 
 public class Bacheca extends JPanel {
+	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private static final Color sfondo = new Color(240,240,240);
 	private cardEvento[] cards;
 	@SuppressWarnings("unused")
 	private int X=0, Y=0;
 	
-	Bacheca(ArrayList<Evento> eventi, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
+	Bacheca(Grafica grafica, ArrayList<Evento> eventi, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
 	{
 		super();
 		setLayout(null);
+		this.grafica = grafica;
 		eventi=new ArrayList<> (eventi.stream().filter(evento -> evento.getStato().compareTo(StatoEvento.APERTA)==0).collect(Collectors.toList()));
 		cards = new cardEvento[eventi.size()];
 		
@@ -75,7 +77,7 @@ public class Bacheca extends JPanel {
 			this.testoBottoni=testoBottoni;
 			this.testo=testo;
 			this.altezzaStringhe = altezzaStringhe;
-			azione = event -> Grafica.getIstance().visualizzaEvento(e);
+			azione = event -> grafica.visualizzaEvento(e);
 		}
 		
 		@SuppressWarnings("deprecation")

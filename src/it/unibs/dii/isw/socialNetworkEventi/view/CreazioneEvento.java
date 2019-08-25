@@ -12,7 +12,9 @@ import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 
-public class CreazioneEvento extends JPanel {
+public class CreazioneEvento extends JPanel 
+{
+	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private static final String categoriaPartita = " ⚽ Partita di calcio", categoriaSciata = " ⛷ Scii";
 	private static final String[] nomeCampiComuni = {"Titolo", "Numero partecipanti *", "Partecipanti in esubero ammessi", "Luogo *", "Quota individuale *", "Compreso nella quota", "Note"};
@@ -51,7 +53,9 @@ public class CreazioneEvento extends JPanel {
 	 * @param frameWidth Larghezza della finestra (di conseguenza anche del pannello)
 	 * @param fontHeight Parametro che indica l'altezza di una stringa disegnata con il font prestabilito sullo schermo in uso (dpiende dai DPI)
 	 */
-	CreazioneEvento (Font testo, int frameWidth, int fontHeight, Color sfondo) {
+	CreazioneEvento (Grafica grafica, Font testo, int frameWidth, int fontHeight, Color sfondo) 
+	{
+		this.grafica = grafica;
 		this.testo=testo;
 		X=frameWidth;
 		this.setLayout(null);
@@ -73,7 +77,7 @@ public class CreazioneEvento extends JPanel {
 		this.add(lblCategorie);
 		Y=20+(int)(fontHeight*1.1)+(int)(fontHeight*1.1);
 		this.setPreferredSize(new Dimension(frameWidth,Y));
-		Grafica.getIstance().btnConfermaCreazioneEvento.addActionListener(e -> conferma());
+		grafica.btnConfermaCreazioneEvento.addActionListener(e -> conferma());
 		comboBox.setSelectedIndex(0);
 	}
 
@@ -109,7 +113,7 @@ public class CreazioneEvento extends JPanel {
 			campiComuniCALENDARIO[i].setBackground(new Color(230,230,230));
 			campiComuniCALENDARIO[i].setBounds(cordinataX, Y+20+(int)(fontHeight*1.1), (int)(fontHeight*1.5), (int)(fontHeight*1.1));
 			this.add(campiComuniCALENDARIO[i]);
-			campiComuniCALENDARIO[i].addActionListener(new RunnableCalendario(i, testo, frameWidth/3*2));
+			campiComuniCALENDARIO[i].addActionListener(new RunnableCalendario(grafica,i, testo, frameWidth/3*2));
 			Y+=20+(int)(fontHeight*1.1)*2;
 			for(int j = 0; j < 3; j++) {
 				testoCampiComuniData[i][j]= new JTextField();
@@ -288,7 +292,7 @@ public class CreazioneEvento extends JPanel {
 		public void focusGained(FocusEvent ev) {
 			try {
 				int ah = ((JComponent)(ev.getSource())).getY();
-				JScrollBar jscb = Grafica.getIstance().pannelloCentrale.getVerticalScrollBar();
+				JScrollBar jscb = grafica.pannelloCentrale.getVerticalScrollBar();
 				if (ah>(jscb.getValue()+jscb.getVisibleAmount())*0.9) {
 					for (int val = jscb.getValue(); val <= ah - jscb.getVisibleAmount()/2; val++)
 						jscb.setValue(val); //Thread.currentThread().sleep(10);
@@ -362,7 +366,7 @@ public class CreazioneEvento extends JPanel {
 			//Compilazione dipendente dalla categoria selezionata
 			if (comboBox.getSelectedItem().equals(categoriaPartita)){
 				e = new PartitaCalcio(
-						Grafica.getIstance().chiediUtenteCorrente(),
+						grafica.chiediUtenteCorrente(),
 /*Ob.	LUOGO*/			testoCampiComuni[3].getText(),
 /*Ob.	Data FINE ISCR*/termineIscrizione,
 /*Ob.	Data-ora iniz*/	dataInizioEvento,
@@ -378,10 +382,10 @@ public class CreazioneEvento extends JPanel {
 /*Ob.	ETA MAS*/		Integer.parseInt(testoCampiPartitaCalcio[1].getText()),
 /*Ob.	GENERE*/		(String)sesso.getSelectedItem());
 				
-				Grafica.getIstance().aggiungiEvento(e);
+				grafica.aggiungiEvento(e);
 			}
 			if (comboBox.getSelectedItem().equals(categoriaSciata)) {
-				Utente corrente = Grafica.getIstance().chiediUtenteCorrente();
+				Utente corrente = grafica.chiediUtenteCorrente();
 				e = new Scii (
 						corrente,
 /*Ob.	LUOGO*/			testoCampiComuni[3].getText(),
@@ -400,9 +404,9 @@ public class CreazioneEvento extends JPanel {
 /*Ob.	Costo noleggio*/Integer.parseInt(testoCampiSciata[2].getText()));
 				
 				//Scelte personali
-				e.setCampiOptPerUtente(corrente, Grafica.getIstance().sceltePersonali());
+				e.setCampiOptPerUtente(corrente, grafica.sceltePersonali());
 				
-				Grafica.getIstance().aggiungiEvento(e);
+				grafica.aggiungiEvento(e);
 			}
 		} 
 		catch(NumberFormatException e) {
@@ -415,34 +419,38 @@ public class CreazioneEvento extends JPanel {
 	}
 }
 
-class RunnableCalendario implements Runnable, ActionListener {
+class RunnableCalendario implements Runnable, ActionListener 
+{
+	Grafica grafica;
 	int i, lato;
 	Font testo;
 	
-	public RunnableCalendario(int i, Font testo, int lato) {
+	public RunnableCalendario(Grafica grafica, int i, Font testo, int lato) {
+		this.grafica=grafica;
 		this.i=i;
 		this.testo=testo;
 		this.lato=lato;
 	}
 	
 	public void run() {
-		new Calendario(testo, lato, new ConsumerCalendario(i));
+		new Calendario(testo, lato, new ConsumerCalendario(grafica,i));
 	}
 	public void actionPerformed(ActionEvent click) {
-		new Calendario(testo, lato, new ConsumerCalendario(i));
+		new Calendario(testo, lato, new ConsumerCalendario(grafica,i));
 	}
 }
 class ConsumerCalendario implements Consumer<Calendar> {
-	int i;
-	
-	public ConsumerCalendario (int i) {
+	Grafica grafica;
+	int i;	
+	public ConsumerCalendario (Grafica grafica,int i) {
+		this.grafica=grafica;
 		this.i=i;
 	}
 	
 	public void accept(Calendar data) {
 		//System.out.println("Box " + i + ": " + data.get(Calendar.DATE));
-		Grafica.getIstance().form.testoCampiComuniData[i][0].setText("" + data.get(Calendar.DATE));
-		Grafica.getIstance().form.testoCampiComuniData[i][1].setText("" + (data.get(Calendar.MONTH) +1));
-		Grafica.getIstance().form.testoCampiComuniData[i][2].setText("" + data.get(Calendar.YEAR));
+		grafica.form.testoCampiComuniData[i][0].setText("" + data.get(Calendar.DATE));
+		grafica.form.testoCampiComuniData[i][1].setText("" + (data.get(Calendar.MONTH) +1));
+		grafica.form.testoCampiComuniData[i][2].setText("" + data.get(Calendar.YEAR));
 	}	
 }

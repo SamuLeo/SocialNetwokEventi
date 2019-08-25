@@ -3,6 +3,11 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 @SuppressWarnings("rawtypes")
@@ -142,6 +147,19 @@ public abstract class Evento
 		 	partecipanti_campiOpt.remove(utente);
 	 }
 
+	 protected Timestamp creaTimestamp(Calendar c) 
+	 {	
+		 if (c==null) return null; else return new Timestamp (c.getTimeInMillis());
+	 }
+
+	 public abstract PreparedStatement getPSInsertEvento(Connection con) throws SQLException;
+	 public abstract PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws SQLException, Exception;
+	 public abstract PreparedStatement getPSSelectUtenti(Connection con) throws SQLException;
+	 public abstract PreparedStatement getPSUpdateStatoEvento(Connection con) throws SQLException;
+	 public abstract PreparedStatement getPSDeleteEvento(Connection con) throws SQLException;
+	 public abstract PreparedStatement getPSDeleteRelazioneEventoUtente(String nome_utente, Connection con) throws SQLException;
+
+
 /**
  * Getter and Setters
  */
@@ -248,6 +266,6 @@ public abstract class Evento
 	@Override
 	public boolean equals(Object obj)
 	{
-		return this.toString().equals(obj.toString());
+		return toString().equals(obj.toString());
 	}
 }

@@ -14,7 +14,9 @@ import javax.swing.JPanel;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Notifica;
 
-public class PannelloNotifiche extends JPanel {
+public class PannelloNotifiche extends JPanel 
+{
+	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private int X=0, Y=20, altezzaStringhe;
 	private static final Color sfondo = new Color(240,240,240);
@@ -22,8 +24,10 @@ public class PannelloNotifiche extends JPanel {
 	CardNotifica[] cards;
 	Graphics g;
 
-	public PannelloNotifiche(LinkedList<Notifica> notifiche, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) {
+	public PannelloNotifiche(Grafica grafica, LinkedList<Notifica> notifiche, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
+	{
 		super();
+		this.grafica = grafica;
 		setLayout(null);
 		this.altezzaStringhe=altezzaStringhe;
 		this.testo=testo; this.testoBottoni=testoBottoni;
@@ -53,7 +57,7 @@ public class PannelloNotifiche extends JPanel {
 	
 	void eliminaNotifica(Notifica notifica) {
 		//PROVARE AD ELIMINARE DIRETTAMENTE LA NOTIFICA E LA RELATIVA CARD, E POI RIDISEGNARE NON FUNZIONA! VIENE SEMPRE E COMUNQUE MANTENUTA DISEGNATA LA VECCHIA CARD ZOMBIE
-		Grafica.getIstance().eliminaNotifica(notifica);
+		grafica.eliminaNotifica(notifica);
 	}
 	
 	void ridimensiona(int larghezza) {
