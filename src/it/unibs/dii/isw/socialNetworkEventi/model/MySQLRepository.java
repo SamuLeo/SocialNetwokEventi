@@ -13,22 +13,21 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Observable;
-
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
-import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
 public class MySQLRepository extends Observable implements IPersistentStorageRepository
 {
 	private Connection con;
-	private HashMap<CategoriaEvento,ArrayList<Evento>> eventi;
-	private ArrayList<Utente> utenti;
+	private HashMap<CategoriaEvento,ArrayList<Evento>> eventi = new HashMap<>();
+	private ArrayList<Utente> utenti = new ArrayList<>();
 	public HashMap<CategoriaEvento,ArrayList<Evento>> getEventi() {return eventi;}
 	public ArrayList<Utente> getUtenti() {return utenti;}
 
@@ -53,11 +52,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 			JOptionPane.showMessageDialog(null, "Impossibile connettersi alla base di dati", "Errore di connessione", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
-
-		eventi = new HashMap<CategoriaEvento,ArrayList<Evento>>();
-		utenti = new ArrayList<>();
 	}
-	
 
 	public void refreshDatiRAM() throws SQLException
 	{
@@ -65,7 +60,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		HashMap<CategoriaEvento,ArrayList<Evento>> eventiPrima = eventi;
 		eventi = selectEventiAll();
 		if (countObservers()>0 && !eventiPrima.equals(eventi)) setChanged();
-
 	}
 	
 	public void initializeDatiRAM() throws SQLException
@@ -80,8 +74,8 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
  * OPERAZIONI C.R.U.D. SU DB MYSQL
  */
 	
-
-		
+	
+	
 /*
  * CREATE : OPERAZIONI DI INSERT	
  */
@@ -91,12 +85,9 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		PreparedStatement ps = evento.getPSInsertEvento(con);		
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();
-
 		rs.next();
 		evento.setId(rs.getInt(1));
-		
 		eventi.get(evento.getNomeCategoria()).add(evento);
-
 		return evento;
 	}
 
@@ -105,12 +96,10 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	{		
 		PreparedStatement ps = con.prepareStatement(Stringhe.INSERT_SQL_UTENTE, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, utente.getNome());
-		ps.setString(2, utente.getPassword());		
-		ps.setInt(3, utente.getEtaMin());	
-		ps.setInt(4, utente.getEtaMax());		
-
+		ps.setString(2, utente.getPassword());
+		ps.setInt(3, utente.getEtaMin());
+		ps.setInt(4, utente.getEtaMax());
 		ps.executeUpdate();
-		
 		utenti.add(utente);
 	}
 	
@@ -119,7 +108,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		String titolo = notifica.getTitolo();
 		String contenuto = notifica.getContenuto();
 		Calendar data = notifica.getData();
-	    		
+	    
 		PreparedStatement ps = con.prepareStatement(Stringhe.INSERT_SQL_NOTIFICA, Statement.RETURN_GENERATED_KEYS);
 		ps.setString(1, titolo);
 		ps.setString(2, contenuto);		
@@ -158,119 +147,23 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		ps.executeUpdate();
 	}
 
-	/*
- 
-
+/*
 * READ : OPERAZIONI DI SELECT
- */
+*/
 	
 	public HashMap<CategoriaEvento,ArrayList<Evento>> selectEventiAll() throws SQLException
 	{
+		SimpleFactoryEvento factory = new SimpleFactoryEvento(this);
 		HashMap<CategoriaEvento,ArrayList<Evento>> eventi = new HashMap<CategoriaEvento,ArrayList<Evento>>();
-		
-		eventi.put(CategoriaEvento.PARTITA_CALCIO, selectPartiteCalcioAll());
-		eventi.put(CategoriaEvento.SCII, selectEventiSciiAll());
+		//Toglie la categoria "default"
+		CategoriaEvento[] categorie = Arrays.copyOfRange(CategoriaEvento.values(), 1, CategoriaEvento.values().length);
+		for (CategoriaEvento cat: categorie) {
+			PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_EVENTO, cat));
+			eventi.put(cat, factory.crea(cat, ps.executeQuery()));
+		}
 		
 		return eventi;
 	}
-
-	
-	private ArrayList<Evento> selectPartiteCalcioAll() throws SQLException
-	{
-		ArrayList<Evento> partite = new ArrayList<Evento>();
-
-		PreparedStatement ps = con.prepareStatement(Stringhe.SELECT_SQL_PARTITE_CALCIO);
-		ResultSet rs = ps.executeQuery();
-		rs.beforeFirst();
-		while(rs.next())
-		{	//Lettura e configurazione dei campi
-			int id_partita = rs.getInt(1);
-			String titolo_evento = rs.getString(8);
-			Calendar data_ora_termine_ultimo_iscrizione = Calendar.getInstance(); data_ora_termine_ultimo_iscrizione.setTimeInMillis(rs.getTimestamp(4).getTime());
-			Calendar data_ora_inizio_evento = Calendar.getInstance(); data_ora_inizio_evento.setTimeInMillis(rs.getTimestamp(5).getTime());
-			Calendar data_ora_termine_evento = Calendar.getInstance(); 
-				if (rs.getTimestamp(11) != null) data_ora_termine_evento.setTimeInMillis(rs.getTimestamp(11).getTime()); 
-				else data_ora_termine_evento=null;
-			Calendar data_ora_termine_ritiro_iscrizione = Calendar.getInstance(); 
-				if (rs.getTimestamp(12) != null) data_ora_termine_ritiro_iscrizione.setTimeInMillis(rs.getTimestamp(12).getTime()); 
-				else data_ora_termine_ritiro_iscrizione=null;
-			
-			Utente creatore = selectUtente(rs.getString(2));
-			String string_stato = rs.getString(14);
-			
-			PartitaCalcio partita = new PartitaCalcio(
-					id_partita,
-					creatore,
-					rs.getString(3),
-					data_ora_termine_ultimo_iscrizione,
-					data_ora_inizio_evento,
-					(Integer)rs.getInt(6),
-					(Integer)rs.getInt(7), 
-					titolo_evento,
-					rs.getString(9),
-					rs.getString(10),
-					data_ora_termine_evento,
-					data_ora_termine_ritiro_iscrizione,
-					(Integer)rs.getInt(13),
-					StatoEvento.convertiStringInStato(string_stato),
-					(Integer)rs.getInt(15),
-					(Integer)rs.getInt(16),
-					(String)rs.getString(17));
-
-				partita.setPartecipanti_campiOpt(selectUtentiDiEvento(partita));
-				partite.add(partita);
-		}
-		return partite;
-	}
-	
-	private ArrayList<Evento> selectEventiSciiAll() throws SQLException
-	{
-		ArrayList<Evento> eventi_scii = new ArrayList<Evento>();
-		
-		PreparedStatement ps = con.prepareStatement(Stringhe.SELECT_SQL_SCII);
-		ResultSet rs = ps.executeQuery();
-		rs.beforeFirst();
-		while(rs.next())
-		{	//Lettura e configurazione dei campi
-			int id = rs.getInt(1);
-			String titolo_evento = rs.getString(8);
-			Calendar data_ora_termine_ultimo_iscrizione = Calendar.getInstance(); data_ora_termine_ultimo_iscrizione.setTimeInMillis(rs.getTimestamp(4).getTime());
-			Calendar data_ora_inizio_evento = Calendar.getInstance(); data_ora_inizio_evento.setTimeInMillis(rs.getTimestamp(5).getTime());
-			Calendar data_ora_termine_evento = Calendar.getInstance(); 
-				if (rs.getTimestamp(11) != null) data_ora_termine_evento.setTimeInMillis(rs.getTimestamp(11).getTime()); 
-				else data_ora_termine_evento=null;
-			Calendar data_ora_termine_ritiro_iscrizione = Calendar.getInstance(); 
-				if (rs.getTimestamp(12) != null) data_ora_termine_ritiro_iscrizione.setTimeInMillis(rs.getTimestamp(12).getTime()); 
-				else data_ora_termine_ritiro_iscrizione=null;
-			
-			Utente creatore = selectUtente(rs.getString(2));
-			String string_stato = rs.getString(14);
-			
-			Scii scii = new Scii(
-					id,
-					creatore,
-					rs.getString(3),
-					data_ora_termine_ultimo_iscrizione,
-					data_ora_inizio_evento,
-					(Integer)rs.getInt(6),
-					(Integer)rs.getInt(7), 
-					titolo_evento,
-					rs.getString(9),
-					rs.getString(10),
-					data_ora_termine_evento,
-					data_ora_termine_ritiro_iscrizione,
-					(Integer)rs.getInt(13),
-					StatoEvento.convertiStringInStato(string_stato),
-					(Integer)rs.getInt(15),
-					(Integer)rs.getInt(16),
-					(Integer)rs.getInt(17));
-
-				scii.setPartecipanti_campiOpt(selectUtentiDiEvento(scii));
-				eventi_scii.add(scii);
-		}
-		return eventi_scii;
-	}
-	
 	
 	public Evento selectEvento(int id_evento) 
 	{
@@ -282,16 +175,14 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 					return evento;
 		return null;
 	}
-
-
+	
+	
 	public ArrayList<Utente> selectUtentiAll() throws SQLException
 	{
 		ArrayList<Utente> utenti = new ArrayList<>();
 		PreparedStatement ps = con.prepareStatement(Stringhe.SELECT_SQL_UTENTI);
-		
 		ResultSet rs = ps.executeQuery();	
-		if(rs == null)
-			return null;
+		if(rs == null) return new ArrayList<>();
 		rs.beforeFirst();		
 		while(rs.next())
 		{		
@@ -318,7 +209,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		PreparedStatement ps = con.prepareStatement(Stringhe.SELECT_SQL_NOTIFICA);
 		ps.setInt(1, id_notifica);		
 		ResultSet rs = ps.executeQuery();
-
 		rs.beforeFirst();		
 		if(rs.next())
 		{
@@ -326,8 +216,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 			Notifica notifica = new Notifica(id_notifica,rs.getString(1), rs.getString(2), data);
 			return notifica;
 		}
-		else
-			return null;
+		else return null;
 	}
 	
 	
@@ -360,20 +249,17 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 				if(evento.getPartecipanti_campiOpt().keySet().contains(selectUtente(nome_utente)))
 					list.add(evento);
 			hashmap.put(categoria, list);
-		}		
+		}
 		return hashmap;
-
 	}
 	
 	
 	public HashMap<Utente,HashMap<NomeCampo,Boolean>> selectUtentiDiEvento(Evento evento) throws SQLException
 	{
 		HashMap<Utente,HashMap<NomeCampo,Boolean>> utenti_campiOpt = new HashMap<Utente,HashMap<NomeCampo,Boolean>>();
-
 		PreparedStatement ps = evento.getPSSelectUtenti(con);
 		ResultSet rs = ps.executeQuery();		
 		rs.beforeFirst();	
-
 		while(rs.next())	
 		{
 			Utente utente = selectUtente(rs.getString(1));
@@ -397,10 +283,8 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	public LinkedList<CategoriaEvento> selectCategorieDiUtente(String nome_utente) throws SQLException
 	{
 		LinkedList<CategoriaEvento> categorie = new LinkedList<>();
-		
 		PreparedStatement ps = con.prepareStatement(Stringhe.SELECT_SQL_CATEGORIE_UTENTE);
 		ps.setString(1, nome_utente);
-		
 		ResultSet rs = ps.executeQuery();
 		rs.beforeFirst();	
 		while(rs.next())
@@ -453,20 +337,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	{
 		PreparedStatement ps = null;
 		ResultSet rs;
-		switch(nome_categoria)
-		{
-		case PARTITA_CALCIO: 
-		{
-			ps = con.prepareStatement(Stringhe.SELECT_SQL_UTENTI_PASSATI_PARTITA_CALCIO);
-			break;
-		}
-		case SCII: 
-		{
-			ps = con.prepareStatement(Stringhe.SELECT_SQL_UTENTI_PASSATI_SCII);
-			break;
-		}
-		default: rs = null;
-		}
+		ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_UTENTI_PASSATI_EVENTO, nome_categoria));
 		ps.setString(1, nome_utente_creatore);
 		ps.setString(2, nome_utente_creatore);
 		rs = ps.executeQuery();
@@ -503,7 +374,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		ps.setString(2, nome_utente);
 		ps.executeUpdate();
 	}
-	
 	
 	
 	
@@ -586,20 +456,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	private void deleteEventiDiUtenteDiCategoria(Utente utente, CategoriaEvento nome_categoria) throws SQLException
 	{
 		PreparedStatement ps = null;
-		switch(nome_categoria)
-		{
-			case PARTITA_CALCIO:
-			{
-				ps = con.prepareStatement(Stringhe.DELETE_SQL_PARTITE_UTENTE);
-				break;
-			}
-			case SCII:
-			{
-				ps = con.prepareStatement(Stringhe.DELETE_SQL_SCIATE_UTENTE);
-				break;
-			}	
-			default: return;
-		}
+		ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.DELETE_SQL_EVENTI_UTENTE, nome_categoria));
 		ps.setString(1, utente.getNome());
 		ps.executeUpdate();
 	}
@@ -644,10 +501,8 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		if(campi_opt != null)
 		{
 			for(NomeCampo nome_campo : campi_opt.keySet())
-			{
 				if(campi_opt.get(nome_campo) == true)
 					costo+=(Integer)evento.getCampo(nome_campo).getContenuto();
-			}
 		}
 		return costo;
 	}

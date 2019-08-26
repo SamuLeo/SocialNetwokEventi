@@ -3,6 +3,7 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,7 +45,7 @@ public abstract class Evento
 		if(!data1PrecedenteData2(data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento))			throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di termine iscrizione");
 		if(partecipanti < 2) 																			throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
 		if(creatore == null) 																			throw new IllegalArgumentException("Necessario inserire un utente creatore");
-//		if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
+		//if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampo.LUOGO, "Locazione evento");
 		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampo.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
@@ -52,7 +53,7 @@ public abstract class Evento
 		aggiungiCampo(partecipanti, true, NomeCampo.PARTECIPANTI, "Numero partecipanti");
 		aggiungiCampo(costo, true, NomeCampo.COSTO, "Costo unitario");
 		this.setUtenteCreatore(creatore);
-//		partecipanti_campiOpt.add(creatore);
+		//partecipanti_campiOpt.add(creatore);
 	}
 	
 	/** Costruttore con parametri obbligatori e facoltativi */
@@ -116,48 +117,74 @@ public abstract class Evento
 		this.stato = stato;
 	}
 	
-	
 	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampo titolo, String descrizione)
 	{
 		campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));
 	}
 	
+	public boolean aggiungiFruitore(Utente utente)
+	{
+		if((Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
+			{partecipanti_campiOpt.put(utente,null); return true;}
+		else return false;
+	}
+	 
+	public void rimuoviFruitore(Utente utente)
+	{
+		if(getNumeroPartecipanti() == 0 /*|| fruitori.get(0).equals(utente)*/) return;
+			partecipanti_campiOpt.remove(utente);
+	}
+	
+	//Calendar
 	
 	public boolean dataNelFuturo(Calendar data) 
 	{
 		return Calendar.getInstance().compareTo(data) < 0; 
 	}
-		 
 
 	private boolean data1PrecedenteData2(Calendar data1, Calendar data2)
-	 {
-	  return data1.compareTo(data2) < 0;
-	 }
-	 
-	 public boolean aggiungiFruitore(Utente utente)
-	 {
-		 if((Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
-			 {partecipanti_campiOpt.put(utente,null); return true;}
-		 else return false;
-	 }
-	 
-	 public void rimuoviFruitore(Utente utente)
-	 {
-		 if(getNumeroPartecipanti() == 0 /*|| fruitori.get(0).equals(utente)*/) return;
-		 	partecipanti_campiOpt.remove(utente);
-	 }
+	{
+		return data1.compareTo(data2) < 0;
+	}
 
-	 protected Timestamp creaTimestamp(Calendar c) 
-	 {	
-		 if (c==null) return null; else return new Timestamp (c.getTimeInMillis());
-	 }
-
-	 public abstract PreparedStatement getPSInsertEvento(Connection con) throws SQLException;
-	 public abstract PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws SQLException, Exception;
-	 public abstract PreparedStatement getPSSelectUtenti(Connection con) throws SQLException;
-	 public abstract PreparedStatement getPSUpdateStatoEvento(Connection con) throws SQLException;
-	 public abstract PreparedStatement getPSDeleteEvento(Connection con) throws SQLException;
-	 public abstract PreparedStatement getPSDeleteRelazioneEventoUtente(String nome_utente, Connection con) throws SQLException;
+	protected Timestamp creaTimestamp(Calendar c) 
+	{	
+		if (c==null) return null; else return new Timestamp (c.getTimeInMillis());
+	}
+	 
+	//Polymorphism
+	 
+	public abstract PreparedStatement getPSInsertEvento(Connection con) throws SQLException;
+	public abstract PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws SQLException, Exception;
+	
+	
+	//Template
+	
+	public final PreparedStatement getPSSelectUtenti(Connection con) throws SQLException {
+		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_ISCRITTI_EVENTO, getNomeCategoria()));
+		ps.setInt(1, this.getId());
+		return ps;
+	}
+	
+	public final PreparedStatement getPSUpdateStatoEvento(Connection con) throws SQLException {
+		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.UPDATE_SQL_STATO_EVENTO, getNomeCategoria()));
+		ps.setString(1, this.getStato().getString());
+		ps.setInt(2, this.getId());		
+		return ps;
+	};
+	
+	public final PreparedStatement getPSDeleteEvento(Connection con) throws SQLException {
+		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.DELETE_SQL_EVENTO, getNomeCategoria()));
+		ps.setInt(1, this.getId());
+		return ps;
+	};
+	
+	public final PreparedStatement getPSDeleteRelazioneEventoUtente(String nome_utente, Connection con) throws SQLException {
+		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.DELETE_SQL_RELAZIONE_UTENTE_EVENTO, getNomeCategoria()));
+		ps.setString(1, nome_utente);
+		ps.setInt(2, this.getId());
+		return ps;
+	};
 
 
 /**
@@ -166,26 +193,20 @@ public abstract class Evento
 
 	public <T>void setCampo(NomeCampo nome_campo, Campo campo) throws IllegalArgumentException
 	{
-		 if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
-		 if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
-		 campi.put(nome_campo, campo);
+		if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
+		if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
+		campi.put(nome_campo, campo);
 	} 
 	 
 	public HashMap<NomeCampo, Campo> getCampi()	{return campi;}
 	public Campo getCampo(NomeCampo nomeCampo)	{return campi.get(nomeCampo);}
-	
-	public Object getContenutoCampo(NomeCampo nomeCampo)	
-	{
-		return campi.get(nomeCampo).getContenuto();
-	}
-	
+	public Object getContenutoCampo(NomeCampo nomeCampo) {return campi.get(nomeCampo).getContenuto();}
 	public int getNumeroPartecipanti() {return partecipanti_campiOpt.keySet().size();}
-	
 	public Utente getUtenteCreatore() { return utente_creatore; }
 	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
-	
 	public void setPartecipanti_campiOpt(HashMap<Utente,HashMap<NomeCampo,Boolean>> partecipanti_campiOpt) {this.partecipanti_campiOpt = partecipanti_campiOpt;}
-	public HashMap<Utente,HashMap<NomeCampo,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt; }
+	public HashMap<Utente,HashMap<NomeCampo,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt;}
+	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampo,Boolean> campi_opt){partecipanti_campiOpt.put(utente, campi_opt);}
 
 	public void setCampoOptPerUtente(Utente utente, NomeCampo nome_campo, Boolean bool)
 	{		
@@ -195,23 +216,11 @@ public abstract class Evento
 			campi_opt.put(nome_campo, bool);
 			partecipanti_campiOpt.put(utente, campi_opt);
 		}
-		else
-		{
-			partecipanti_campiOpt.get(utente).put(nome_campo, bool);
-		}
-	}
-	
-	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampo,Boolean> campi_opt)
-	{
-		partecipanti_campiOpt.put(utente, campi_opt);
+		else partecipanti_campiOpt.get(utente).put(nome_campo, bool);
 	}
 	
 	public Boolean getCampoOptDiUtente(Utente utente, NomeCampo nome_campi)
 	{
-//		if(partecipanti_campiOpt.containsKey(utente))
-//			return partecipanti_campiOpt.get(utente).get(nome_campi);
-//		else
-//			return null;
 		for(Utente u : partecipanti_campiOpt.keySet())
 			if(u.equals(utente))
 				return partecipanti_campiOpt.get(u).get(nome_campi);
@@ -242,8 +251,61 @@ public abstract class Evento
 	
 	public CategoriaEvento getNomeCategoria() {return nome_categoria;}
 	public  void setNomeCategoria(CategoriaEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
+	
+	/**
+	 * Questo metodo controlla e in caso sia cambiato aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
+	 * se l'evento ha raggiunto la sua conclusione oppure se è concluso
+	 * 
+	 * Prima questa responsabilità era relegata al controller. Ora, per Expert, è stata relegata ad evento.
+	 * 
+	 * @return true se lo stato cambia
+	 * @throws SQLException 
+	 */
+	public final boolean controllaStatoEvento() 
+	{
+		Calendar oggi = Calendar.getInstance();
+		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI));
+		boolean termine_ritiro_scaduto = oggi.after((Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE));
+		boolean DataFineEventoNelFuturo;		
+		if (getCampo(NomeCampo.D_O_TERMINE_EVENTO)==null) 
+		{
+			Calendar giorno_dopo_inizio_evento = ((Calendar)getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
+			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
+			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);		
+		}
+		else 
+			DataFineEventoNelFuturo = oggi.before((Calendar)getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
+		int numero_iscritti_attuali = getNumeroPartecipanti();
+		int numero_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
+		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
+		
+		StatoEvento statoEvento = getStato();
 
-	@Override
+		if(statoEvento.getString().equals("Aperta") && DataChiusuraIscrizioniNelFuturo == false)
+		{
+			if(numero_iscritti_attuali < numero_minimo_iscritti)
+			{
+				setStato(StatoEvento.FALLITA);
+				//logger.scriviLog(String.format(Stringhe.APERTO_FALLITO, evento.getId()));
+				return true;
+			}
+			else if(((numero_iscritti_attuali > numero_minimo_iscritti) ||
+					(termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)))
+			{
+				setStato(StatoEvento.CHIUSA);
+				//logger.scriviLog(String.format(Stringhe.APERTO_CHIUSO, evento.getId()));
+				return true;
+			}
+		}
+		else if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
+		{
+			setStato(StatoEvento.CONCLUSA);
+			//logger.scriviLog(String.format(Stringhe.CHIUSO_CONCLUSO, evento.getId()));
+			return true;
+		}
+		return false;
+	}
+	
 	public String toString() 
 	{
 		StringBuffer stringa = new StringBuffer();
@@ -254,16 +316,12 @@ public abstract class Evento
 				{
 					java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
 					stringa.append(c.getDescrizione_campo() + " : " + sdf.format(((Calendar) c.getContenuto()).getTime()) + "\n");
-
 				}
-			else	
-				stringa.append(c.getDescrizione_campo() + " : " + c.getContenuto() + "\n");
-
+			else stringa.append(c.getDescrizione_campo() + " : " + c.getContenuto() + "\n");
 		}
 		return stringa.toString();
 	}
 	
-	@Override
 	public boolean equals(Object obj)
 	{
 		return toString().equals(obj.toString());

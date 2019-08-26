@@ -2,9 +2,6 @@ package it.unibs.dii.isw.socialNetworkEventi.utility;
 
 public class Stringhe 
 {
-//	public static final String  = ;	
-
-	
 //	PASSAGGI DI STATO DEGLI EVENTI
 	public static final String APERTO_FALLITO 		= "Stato dell'evento con id : %d passato da APERTO a FALLITO";
 	public static final String APERTO_CHIUSO 		= "Stato dell'evento con id : %d passato da APERTO a CHIUSO";
@@ -73,69 +70,87 @@ public class Stringhe
 	public static final String PERCORSO_FILE_CONFIG_WIN 	= "Dati\\file_config\\SocialNetwork.properties";
 
 //	NOMI TABELLE DB
-	public static String NOME_TABELLA_NOTIFICA = System.getProperty("nome_tabella_notifica");
-	public static String NOME_TABELLA_PARTITA_CALCIO = System.getProperty("nome_tabella_partita_calcio");
-	public static String NOME_TABELLA_RELAZIONE_UTENTE_NOME_CATEGORIA = System.getProperty("nome_tabella_relazione_utente_nome_categoria");
-	public static String NOME_TABELLA_RELAZIONE_UTENTE_NOTIFICA = System.getProperty("nome_tabella_relazione_utente_notifica");
-	public static String NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO = System.getProperty("nome_tabella_relazione_utente_partita_calcio");
-	public static String NOME_TABELLA_RELAZIONE_UTENTE_SCII = System.getProperty("nome_tabella_reazione_utente_scii");
-	public static String NOME_TABELLA_SCII = System.getProperty("nome_tabella_scii");
-	public static String NOME_TABELLA_UTENTE = System.getProperty("nome_tabella_utente");
+	public static final String NOME_TABELLA_NOTIFICA = System.getProperty("nome_tabella_notifica");
+	public static final String NOME_TABELLA_PARTITA_CALCIO = System.getProperty("nome_tabella_partita_calcio");
+	public static final String NOME_TABELLA_RELAZIONE_UTENTE_NOME_CATEGORIA = System.getProperty("nome_tabella_relazione_utente_nome_categoria");
+	public static final String NOME_TABELLA_RELAZIONE_UTENTE_NOTIFICA = System.getProperty("nome_tabella_relazione_utente_notifica");
+	public static final String NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO = System.getProperty("nome_tabella_relazione_utente_partita_calcio");
+	public static final String NOME_TABELLA_RELAZIONE_UTENTE_SCII = System.getProperty("nome_tabella_reazione_utente_scii");
+	public static final String NOME_TABELLA_SCII = System.getProperty("nome_tabella_scii");
+	public static final String NOME_TABELLA_UTENTE = System.getProperty("nome_tabella_utente");
 	
 //	STRINGHE SQL
 	
 //	Insert
-	public static final String INSERT_SQL_PARTITA_CALCIO = "INSERT INTO " + NOME_TABELLA_PARTITA_CALCIO 
+	public static final String[][] INSERT_SQL_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(),"INSERT INTO " + NOME_TABELLA_PARTITA_CALCIO 
 			+ " (nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note,"
 			+ "benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max, stato, eta_minima, eta_massima, genere)"
-			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	public static final String INSERT_SQL_SCII = "INSERT INTO " + NOME_TABELLA_SCII
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"},
+		new String[] {CategoriaEvento.SCII.toString(),"INSERT INTO " + NOME_TABELLA_SCII
 			+ " (nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note,"
 			+ "benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max, stato, biglietto_bus, pranzo, affitto_scii)"
-			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"}
+	};
 	public static final String INSERT_SQL_UTENTE = "INSERT INTO " + NOME_TABELLA_UTENTE + " (nome, password, eta_min, eta_max) VALUES (?,?,?,?)";
 	public static final String INSERT_SQL_NOTIFICA = "INSERT INTO " + NOME_TABELLA_NOTIFICA + " (titolo,contenuto,data) VALUES (?,?,?)";
 	public static final String INSERT_SQL_UTENTE_NOTIFICA ="INSERT INTO " + NOME_TABELLA_RELAZIONE_UTENTE_NOTIFICA + " (nome_utente, id_notifica) VALUES (?,?)";
-	public static final String INSERT_SQL_UTENTE_PARTITA_CALCIO = "INSERT INTO " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " (nome_utente, id_evento) VALUES (?,?)";	
-	public static final String INSERT_SQL_UTENTE_SCII =	"INSERT INTO " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " (nome_utente, id_evento, biglietto_bus, pranzo, affitto_scii) VALUES (?,?,?,?,?)";	
+	public static final String[][] INSERT_SQL_ISCRIZIONE_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(),"INSERT INTO " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " (nome_utente, id_evento) VALUES (?,?)"},
+		new String[] {CategoriaEvento.SCII.toString(),"INSERT INTO " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " (nome_utente, id_evento, biglietto_bus, pranzo, affitto_scii) VALUES (?,?,?,?,?)"}
+	};
 	public static final String INSERT_SQL_UTENTE_CATEGORIA = "INSERT INTO " +  NOME_TABELLA_RELAZIONE_UTENTE_NOME_CATEGORIA + " (nome_utente, nome_categoria) VALUES (?,?)";
 
 //	Select
-	public static final String SELECT_SQL_PARTITE_CALCIO = "SELECT id, nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti,"
+	public static final String[][] SELECT_SQL_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(),"SELECT id, nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti,"
 			+ " costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max, stato, eta_minima, eta_massima, genere "
-			+ "FROM " + NOME_TABELLA_PARTITA_CALCIO;
-	public static final String SELECT_SQL_SCII = "SELECT id, nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti,"
+			+ "FROM " + NOME_TABELLA_PARTITA_CALCIO},
+		new String[] {CategoriaEvento.SCII.toString(),"SELECT id, nome_utente_creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti,"
 			+ " costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione,"
-			+ " tolleranza_max, stato, biglietto_bus, pranzo, affitto_scii FROM " + NOME_TABELLA_SCII;
+			+ " tolleranza_max, stato, biglietto_bus, pranzo, affitto_scii FROM " + NOME_TABELLA_SCII}
+	};
 	public static final String SELECT_SQL_UTENTI = "SELECT nome, password, eta_min, eta_max FROM " + NOME_TABELLA_UTENTE;
 	public static final String SELECT_SQL_NOTIFICA = "SELECT titolo, contenuto, data FROM "+ NOME_TABELLA_NOTIFICA +" WHERE id=?";
 	public static final String SELECT_SQL_NOTIFICHE_UTENTE = "SELECT id_notifica FROM " + NOME_TABELLA_RELAZIONE_UTENTE_NOTIFICA + " WHERE nome_utente=?";
-	public static final String SELECT_SQL_UTENTI_PARTITA_CALCIO = "SELECT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE id_evento=?";
-	public static final String SELECT_SQL_UTENTI_SCII = "SELECT nome_utente, biglietto_bus, pranzo, affitto_scii FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE id_evento=?";
+	public static final String[][] SELECT_SQL_ISCRITTI_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(),"SELECT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE id_evento=?"},
+		new String[] {CategoriaEvento.SCII.toString(),"SELECT nome_utente, biglietto_bus, pranzo, affitto_scii FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE id_evento=?"}
+	};
 	public static final String SELECT_SQL_CATEGORIE_UTENTE = "SELECT nome_categoria FROM " + NOME_TABELLA_RELAZIONE_UTENTE_NOME_CATEGORIA + " WHERE nome_utente=?";
 	public static final String SELECT_SQL_UTENTI_CATEGORIA = "SELECT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_NOME_CATEGORIA + " WHERE nome_categoria=?";
-	public static final String SELECT_SQL_UTENTI_PASSATI_PARTITA_CALCIO= "SELECT DISTINCT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE nome_utente!=? AND id_evento in (SELECT id FROM " + NOME_TABELLA_PARTITA_CALCIO + " WHERE nome_utente_creatore=?)";
-	public static final String SELECT_SQL_UTENTI_PASSATI_SCII = "SELECT DISTINCT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE nome_utente!=? AND id_evento in (SELECT id FROM " + NOME_TABELLA_SCII + " WHERE nome_utente_creatore=?)";
+	public static final String[][] SELECT_SQL_UTENTI_PASSATI_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(),"SELECT DISTINCT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE nome_utente!=? AND id_evento in (SELECT id FROM " + NOME_TABELLA_PARTITA_CALCIO + " WHERE nome_utente_creatore=?)"},
+		new String[] {CategoriaEvento.SCII.toString(),"SELECT DISTINCT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE nome_utente!=? AND id_evento in (SELECT id FROM " + NOME_TABELLA_SCII + " WHERE nome_utente_creatore=?)"}
+	};
 	public static final String SELECT_SQL_UTENTI_DI_NOTIFICA = "SELECT nome_utente FROM " + NOME_TABELLA_RELAZIONE_UTENTE_NOTIFICA + " WHERE id_notifica=?";
 	
 //	Update
-	public static final String UPDATE_SQL_STATO_PARTITA_CALCIO = "UPDATE " + NOME_TABELLA_PARTITA_CALCIO + " SET stato = ? WHERE id = ?";
-	public static final String UPDATE_SQL_STATO_SCII = "UPDATE " + NOME_TABELLA_SCII + " SET stato = ? WHERE id = ?";
+	public static final String[][] UPDATE_SQL_STATO_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(), "UPDATE " + NOME_TABELLA_PARTITA_CALCIO + " SET stato = ? WHERE id = ?"},
+		new String[] {CategoriaEvento.SCII.toString(), "UPDATE " + NOME_TABELLA_SCII + " SET stato = ? WHERE id = ?"}
+	};
 	public static final String UPDATE_SQL_ETA_MIN_UTENTE= "UPDATE " + NOME_TABELLA_UTENTE + " SET eta_min = ? WHERE nome = ?";
 	public static final String UPDATE_SQL_ETA_MAX_UTENTE= "UPDATE " + NOME_TABELLA_UTENTE + " SET eta_max = ? WHERE nome = ?";
 	
 //	Delete
-	public static final String DELETE_SQL_PARTITA_CALCIO = "DELETE FROM " + NOME_TABELLA_PARTITA_CALCIO + " WHERE id = ?";
-	public static final String DELETE_SQL_SCII = "DELETE FROM " + NOME_TABELLA_SCII + " WHERE id = ?";
+	public static final String[][] DELETE_SQL_RELAZIONE_UTENTE_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(), "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE nome_utente=? AND id_evento=?"},
+		new String[] {CategoriaEvento.SCII.toString(), "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE nome_utente=? AND id_evento=?"}};
+	public static final String[][] DELETE_SQL_EVENTO = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(), "DELETE FROM " + NOME_TABELLA_PARTITA_CALCIO + " WHERE id = ?"},
+		new String[] {CategoriaEvento.SCII.toString(), "DELETE FROM " + NOME_TABELLA_SCII + " WHERE id = ?"}};
+	public static final String[][] DELETE_SQL_EVENTI_UTENTE = new String[][] {
+		new String[] {CategoriaEvento.PARTITA_CALCIO.toString(), "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE nome_utente_creatore = ?"},
+		new String[] {CategoriaEvento.SCII.toString(), "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE nome_utente_creatore = ?"}};
 	public static final String DELETE_SQL_UTENTE = "DELETE FROM " + NOME_TABELLA_UTENTE + " WHERE id = ?";
 	public static final String DELETE_SQL_NOTIFICA = "DELETE FROM " + NOME_TABELLA_NOTIFICA + " WHERE id = ?";
 	public static final String DELETE_SQL_RELAZIONE_UTENTE_NOTIFICA = "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_NOTIFICA + " WHERE nome_utente=? AND id_notifica=?";
-	public static final String DELETE_SQL_RELAZIONE_UTENTE_PARTITA_CALCIO = "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE nome_utente=? AND id_evento=?";
-	public static final String DELETE_SQL_RELAZIONE_UTENTE_SCII = "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE nome_utente=? AND id_evento=?";
 	public static final String DELETE_SQL_RELAZIONE_UTENTE_CATEGORIA = "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_NOME_CATEGORIA + " WHERE nome_utente=? AND nome_categoria=?";
-	public static final String DELETE_SQL_PARTITE_UTENTE = "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_PARTITA_CALCIO + " WHERE nome_utente_creatore = ?";
-	public static final String DELETE_SQL_SCIATE_UTENTE = "DELETE FROM " + NOME_TABELLA_RELAZIONE_UTENTE_SCII + " WHERE nome_utente_creatore = ?";
 
-	//	public static final String _SQL_= ;
-
+	public static final String ottieniStringaDesiderata(String[][] fonte, CategoriaEvento categoria) {
+		for (String [] query : fonte)
+			if (query[0] == categoria.toString()) return query[1];
+		return null;
+	}
 }

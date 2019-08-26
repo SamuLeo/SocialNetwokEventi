@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
 
-public class MessagesFactory implements IMessagesFactory
+public class PureFabricationNotifiche implements IPureFabricationNotifiche
 {
 	IPersistentStorageRepository db;
 	
@@ -109,5 +109,4 @@ public class MessagesFactory implements IMessagesFactory
 
 		db.collegaUtenteNotifica(utente_destinatario.getNome(), notifica.getIdNotifica());
 	}
-	
 }

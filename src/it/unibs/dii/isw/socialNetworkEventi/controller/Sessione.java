@@ -21,28 +21,13 @@ public class Sessione implements IController
 {
 	private Utente utente_corrente;
 	private IPersistentStorageRepository db;
-	private IMessagesFactory messagesFactory;
-	
+	private IPureFabricationNotifiche messagesFactory;
 	private Logger logger;
 	private String percorso_file_log_sessione ;
 	private Logger error_logger;
 	private String percorso_file_error_sessione;
 	
 	private static String operatingSystem = System.getProperty("os.name").toLowerCase();
-
-//	private  static Sessione sessione;
-//	public static Sessione getInstance()
-//	{
-//		ReentrantLock lock = new ReentrantLock();
-//		
-//		if(sessione == null)
-//		{
-//			lock.lock();
-//			sessione = new Sessione();
-//			lock.unlock();
-//		}
-//		return sessione;	
-//	}
 	
 	public Sessione()
 	{
@@ -53,7 +38,7 @@ public class Sessione implements IController
 		
 		creaLogger();
 		connettiDB();
-		initIMessagesFactory();
+		initIPureFabricationNotifiche();
 		
 		new Timer().schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 1000);
 	}
@@ -104,12 +89,12 @@ public class Sessione implements IController
 		}
 	}
 	
-	private void initIMessagesFactory()
+	private void initIPureFabricationNotifiche()
 	{
 		try 
 		{
 			String className = System.getProperty("social_network.messages_factory.class.name");
-			messagesFactory = (IMessagesFactory)Class.forName(className).newInstance();
+			messagesFactory = (IPureFabricationNotifiche)Class.forName(className).newInstance();
 			messagesFactory.setDB(db);
 		} 
 		catch(InstantiationException | IllegalAccessException | ClassNotFoundException e) 
@@ -140,93 +125,38 @@ public class Sessione implements IController
 	
 	public Runnable aggiornatore = new Runnable() {
 		public void run()
-		{	
-		try 
-		{
-			db.refreshDatiRAM();
-			HashMap<CategoriaEvento, ArrayList<Evento>> eventi = db.getEventi();			
-//			primo for per ottenere tutte le chiavi, il secondo for per ottenere le LinkedList delle categorie di eventi
-			for(CategoriaEvento categoria : eventi.keySet())
+			{	
+			try 
 			{
-				for(Evento evento : eventi.get(categoria))
+				db.refreshDatiRAM();
+				HashMap<CategoriaEvento, ArrayList<Evento>> eventi = db.getEventi();			
+				for(CategoriaEvento categoria : eventi.keySet())
 				{
-					if(controllaStatoEvento(evento) == true)
-					{	//Stato cambiato
-						db.updateEvento(evento);
-						switch(evento.getStato())
-						{
-						case FALLITA : messagesFactory.segnalaFallimentoEvento(evento); break;
-						case CHIUSA : messagesFactory.segnalaChiusuraEvento(evento); break;
-						case CONCLUSA : messagesFactory.segnalaConclusioneEvento(evento); break;
-						default : break;
-						}
-					}		
+					for(Evento evento : eventi.get(categoria))
+					{
+						if(evento.controllaStatoEvento() == true)
+						{	//Stato cambiato
+							db.updateEvento(evento);
+							switch(evento.getStato())
+							{
+								case FALLITA : messagesFactory.segnalaFallimentoEvento(evento); break;
+								case CHIUSA : messagesFactory.segnalaChiusuraEvento(evento); break;
+								case CONCLUSA : messagesFactory.segnalaConclusioneEvento(evento); break;
+								default : break;
+							}
+						}		
+					}
 				}
-			}
-			notificaOsservatori();
-		} 
-		catch(SQLException e) 
-		{
-			error_logger.scriviLog(Stringhe.E_AGGIORNATORE);
-		}	
-		}
-};
-
-	public void aggiorna()
-	{
-		aggiornatore.run();
-	}
-	
-	/**
-	 * Questo metodo controlla e in caso sia cambiato aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
-	 * se l'evento ha raggiunto la sua conclusione oppure se è concluso
-	 * @return true se lo stato cambia
-	 * @throws SQLException 
-	 */
-	public boolean controllaStatoEvento(Evento evento) 
-	{
-		Calendar oggi = Calendar.getInstance();
-		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)evento.getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI));
-		boolean termine_ritiro_scaduto = oggi.after((Calendar) evento.getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE));
-		boolean DataFineEventoNelFuturo;		
-		if (evento.getCampo(NomeCampo.D_O_TERMINE_EVENTO)==null) 
-		{
-			Calendar giorno_dopo_inizio_evento = ((Calendar)evento.getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
-			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
-			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);		
-		}
-		else 
-			DataFineEventoNelFuturo = oggi.before((Calendar)evento.getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
-		int numero_iscritti_attuali = evento.getNumeroPartecipanti();
-		int numero_minimo_iscritti = (Integer)evento.getCampo(NomeCampo.PARTECIPANTI).getContenuto();
-		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)evento.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
-		
-		StatoEvento statoEvento = evento.getStato();
-
-		if(statoEvento.getString().equals("Aperta") && DataChiusuraIscrizioniNelFuturo == false)
-		{
-			if(numero_iscritti_attuali < numero_minimo_iscritti)
+				notificaOsservatori();
+			} 
+			catch(SQLException e) 
 			{
-				evento.setStato(StatoEvento.FALLITA);
-				logger.scriviLog(String.format(Stringhe.APERTO_FALLITO, evento.getId()));
-				return true;
-			}
-			else if(((numero_iscritti_attuali > numero_minimo_iscritti) ||
-					(termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)))
-			{
-				evento.setStato(StatoEvento.CHIUSA);
-				logger.scriviLog(String.format(Stringhe.APERTO_CHIUSO, evento.getId()));
-				return true;
-			}
+				error_logger.scriviLog(Stringhe.E_AGGIORNATORE);
+			}	
 		}
-		else if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
-		{
-			evento.setStato(StatoEvento.CONCLUSA);
-			logger.scriviLog(String.format(Stringhe.CHIUSO_CONCLUSO, evento.getId()));
-			return true;
-		}
-		return false;
-	}
+	};
+
+	public void aggiorna() {aggiornatore.run();}
 	
 	
 //	METODI SETTER
@@ -400,25 +330,24 @@ public class Sessione implements IController
 		try {
 			return db.selectUtentiDaEventiPassati(utente_corrente.getNome()).get(nome_categoria);
 		} 
-		 catch(SQLException e) 
-		 {
+		catch(SQLException e) 
+		{
 			 error_logger.scriviLog(String.format(Stringhe.E_GET_POSSIBILI_U_INTERESSATI_A_C, utente_corrente.getNome(), nome_categoria.getString() ));
 			 return new LinkedList<>();
-		 }	
-		}
+		}	
+	}
 
 	public  boolean utenteIscrittoInEvento(Evento evento)
 	{
-		if(utente_corrente == null)
-			return false;
+		if(utente_corrente == null) return false;
 		
 		try {
 			return db.existUtenteInEvento(utente_corrente, evento);
 		} 
-		 catch(SQLException e) 
-		 {
+		catch(SQLException e) 
+		{
 			 error_logger.scriviLog(String.format(Stringhe.E_GET_U_ISCRITTO_IN_E, utente_corrente.getNome(), evento.getId()));
-		 }
+		}
 		return false;
 	}
 	
@@ -427,11 +356,11 @@ public class Sessione implements IController
 		try {
 			return db.selectEventiDiUtente(utente_corrente.getNome());
 		} 
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_GET_E, utente_corrente.getNome()));
-				return null;
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_GET_E, utente_corrente.getNome()));
+			return null;
+		}
 	}
 	
 
@@ -448,18 +377,17 @@ public class Sessione implements IController
 			db.updateEtaMinUtente(utente_corrente.getNome(), eta_min);
 			db.refreshDatiRAM();
 		}
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_UPDATE_U, utente_corrente.getNome()));
-				return false;
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_UPDATE_U, utente_corrente.getNome()));
+			return false;
+		}
 		return true;
 	}
 	
 
 
 //	METODI DI ELIMINAZIONE
-	
 	
 	public  LinkedList<Notifica> eliminaNotificaUtente(Notifica notifica)
 	{
@@ -468,10 +396,10 @@ public class Sessione implements IController
 			db.deleteCollegamentoNotificaUtente(utente_corrente, notifica);
 			utente_corrente.rimuoviNotifica(notifica);
 		} 
-		 catch(SQLException e) 
-		 {
+		catch(SQLException e) 
+		{
 			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_N, notifica.getIdNotifica(), utente_corrente.getNome()));
-		 }
+		}
 		
 		return getNotificheUtente();
 	}
@@ -503,11 +431,11 @@ public class Sessione implements IController
 			} else
 				return true;
 		}
-		 catch(SQLException e) 
-		 {
+		catch(SQLException e) 
+		{
 			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_C_DA_U, utente_corrente.getNome(), nome_categoria.getString()));
 			 return false;
-		 }
+		}
 		return true;
 	}
 	
@@ -527,22 +455,18 @@ public class Sessione implements IController
 				logger.scriviLog(String.format(Stringhe.APERTO_RITIRATO, evento.getId()));
 			}
 		}
-		 catch(SQLException e) 
-		 {
+		catch(SQLException e) 
+		{
 			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_E, evento.getId()));
-		 }
 		}
+	}
 	
 	public boolean deleteNotificheUtenteAll()
 	{
 		for(Notifica notifica : utente_corrente.getNotifiche())
-		{
 			eliminaNotificaUtente(notifica);
-		}
-		if(utente_corrente.getNotifiche().isEmpty()) 
-			return true;
-		else
-			return false;
+		if(utente_corrente.getNotifiche().isEmpty()) return true;
+		else return false;
 	}
 	
 	public boolean deleteEventiDiUtente() throws RuntimeException
@@ -552,18 +476,16 @@ public class Sessione implements IController
 			db.deleteEventiDiUtente(utente_corrente);
 			return true;
 		}
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_E_ALL_U, utente_corrente.getNome()));
-			 return false;
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_DELETE_E_ALL_U, utente_corrente.getNome()));
+			return false;
+		}
 	}
 	
 	public IPersistentStorageRepository getDb() {return db;}
-
 	public  Utente getUtente_corrente() {return utente_corrente;}
-
-	public IMessagesFactory getMessagesFactory() {return messagesFactory;}
+	public IPureFabricationNotifiche getMessagesFactory() {return messagesFactory;}
 
 	public void iniziaOsservazione (Observer obs) {
 		((Observable)db).addObserver(obs);

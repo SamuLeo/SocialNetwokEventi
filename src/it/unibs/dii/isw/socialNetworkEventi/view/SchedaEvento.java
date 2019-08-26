@@ -1,6 +1,5 @@
 package it.unibs.dii.isw.socialNetworkEventi.view;
 
-
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -27,8 +26,8 @@ public class SchedaEvento extends JPanel {
 			valObbligatori = new JLabel[7],
 			opzionali = new JLabel[4],
 			valOpzionali = new JLabel[4],
-			dipendenti = new JLabel[3],
-			valDipendenti = new JLabel[3];
+			dipendenti,
+			valDipendenti;
 	JLabel titolo;
 	JButton iscriviti;
 	AnelloNumerico anello;
@@ -104,11 +103,19 @@ public class SchedaEvento extends JPanel {
 		}
 		
 		//Configurazione dati dipendenti dalla categoria
+		/*JLabel[][] configurazione = e.configuraCampiPresentazione();
+		dipendenti = configurazione[0];
+		valDipendenti = configurazione[1];
+		for (JLabel j : dipendenti) add(j);
+		for (JLabel j : valDipendenti) add(j);*/
+		
 		if (e instanceof PartitaCalcio) configura((PartitaCalcio)e);
 		if (e instanceof Scii) configura((Scii)e);
 	}
 	
 	private void configura(PartitaCalcio p) {
+		dipendenti = new JLabel[2];
+		valDipendenti = new JLabel[2];
 		dipendenti[0] = new JLabel("Fascia di età: ");
 		dipendenti[1] = new JLabel("Sesso: ");
 		valDipendenti[0] = new JLabel(p.getCampo(NomeCampo.ETA_MINIMA).getContenuto() + " - " + p.getCampo(NomeCampo.ETA_MASSIMA).getContenuto());
@@ -120,6 +127,8 @@ public class SchedaEvento extends JPanel {
 	}
 	
 	private void configura(Scii s) {
+		dipendenti = new JLabel[3];
+		valDipendenti = new JLabel[3];
 		dipendenti[0] = new JLabel("Prezzo del trasporto: "); valDipendenti[0] = new JLabel(s.getCampo(NomeCampo.BIGLIETTO_BUS).getContenuto() + " €");
 		dipendenti[1] = new JLabel("Prezzo del pasto: "); valDipendenti[1] = new JLabel(s.getCampo(NomeCampo.PRANZO).getContenuto() + " €");
 		dipendenti[2] = new JLabel("Prezzo del noleggio: "); valDipendenti[2] = new JLabel(s.getCampo(NomeCampo.AFFITTO_SCII).getContenuto() + " €");
@@ -149,7 +158,6 @@ public class SchedaEvento extends JPanel {
 			Y += altezzaRighe + 10;
 		}
 		for (int i=0; i<dipendenti.length; i++) {
-			if (dipendenti[i] == null) continue;
 			dipendenti[i].setBounds(20, Y, ldesc, altezzaRighe);
 			valDipendenti[i].setBounds(30+ldesc, Y, X-50-ldesc, altezzaRighe);
 			Y += altezzaRighe + 10;
