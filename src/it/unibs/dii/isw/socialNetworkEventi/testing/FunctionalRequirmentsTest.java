@@ -696,16 +696,3 @@ class FunctionalRequirmentsTest
 		sessione.deleteNotificheUtenteAll();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

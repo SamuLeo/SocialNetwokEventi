@@ -59,7 +59,21 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		utenti = selectUtentiAll();
 		HashMap<CategoriaEvento,ArrayList<Evento>> eventiPrima = eventi;
 		eventi = selectEventiAll();
-		if (countObservers()>0 && !eventiPrima.equals(eventi)) setChanged();
+		if (countObservers()>0) {
+			for (CategoriaEvento c : eventiPrima.keySet())
+				for (Evento e: eventiPrima.get(c))
+					if (!controllaSeEventoInLista(e, eventi.get(c))) {
+						setChanged();
+						return;
+					}
+		}
+	}
+	
+	private boolean controllaSeEventoInLista(Evento e, ArrayList<Evento> lista) {
+		for (Evento en: lista) {
+			if (e.equals(en)) return true;
+		}
+		return false;
 	}
 	
 	public void initializeDatiRAM() throws SQLException
@@ -380,8 +394,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 /*
  * DELETE : OPERAZIONI DI DELETE	
  */
-	
-	
 	
 	
 	public void deleteEvento(Evento evento) throws SQLException

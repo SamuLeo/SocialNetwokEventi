@@ -44,7 +44,6 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 			String contenuto = String.format(Stringhe.NOTIFICA_CHIUSURA_EVENTO, titolo_evento, sdf.format(data_inizio_evento), db.getCostoEventoPerUtente(evento, utente));
 			Notifica notifica = db.insertNotifica(new Notifica(titolo, contenuto));
 			db.collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
-			//deleteCollegamentoEventoUtente(utente.getNome(), evento);
 		}
 	}
 	

@@ -271,7 +271,8 @@ public abstract class Evento
 		{
 			Calendar giorno_dopo_inizio_evento = ((Calendar)getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
 			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
-			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);		
+			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);
+			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,-1);	//è incredibile, ma senza questa riga la vità è più difficile e infame
 		}
 		else 
 			DataFineEventoNelFuturo = oggi.before((Calendar)getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
@@ -319,6 +320,7 @@ public abstract class Evento
 				}
 			else stringa.append(c.getDescrizione_campo() + " : " + c.getContenuto() + "\n");
 		}
+		stringa.append("Numero iscritti attuali: " + getNumeroPartecipanti() + "\n");
 		return stringa.toString();
 	}
 	
