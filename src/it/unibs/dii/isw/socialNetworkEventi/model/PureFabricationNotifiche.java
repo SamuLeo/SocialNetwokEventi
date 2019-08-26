@@ -13,10 +13,7 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 {
 	IPersistentStorageRepository db;
 	
-	public void setDB(IPersistentStorageRepository db)
-	{
-		this.db=db;
-	}
+	public void setDB(IPersistentStorageRepository db) {this.db=db;}
 	
 	public void segnalaFallimentoEvento(Evento evento) throws SQLException 
 	{
@@ -33,7 +30,6 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 			db.deleteCollegamentoEventoUtente(utente.getNome(), evento);
 		}
 	}
-	
 	
 	public void segnalaChiusuraEvento(Evento evento) throws SQLException 
 	{
@@ -52,7 +48,6 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 		}
 	}
 	
-	
 	public void segnalaConclusioneEvento(Evento evento) throws SQLException {
 		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
 		String titolo = String.format(Stringhe.TITOLO_CONCLUSIONE_EVENTO, titolo_evento);
@@ -63,7 +58,6 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 		for(Utente utente : list_utenti.keySet())
 			db.collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
 	}
-	
 	
 	public void segnalaRitiroEvento(Evento evento) throws SQLException
 	{
@@ -80,7 +74,6 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 		}
 	}
 	
-	
 	public void segnalaNuovoEventoAgliInteressati(Evento evento) throws SQLException
 	{
 		String titolo_evento = (evento.getCampo(NomeCampo.TITOLO).getContenuto() != null) ? (String)evento.getCampo(NomeCampo.TITOLO).getContenuto() : "" ;
@@ -96,7 +89,6 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 		for(Utente utente : list_utenti)
 			db.collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
 	}
-	
 		
 	public void segnalaEventoPerUtente(Evento evento, Utente utente_mittente, Utente utente_destinatario) throws SQLException
 	{

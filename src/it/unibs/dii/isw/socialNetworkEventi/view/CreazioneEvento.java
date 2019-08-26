@@ -110,6 +110,7 @@ public class CreazioneEvento extends JPanel
 			campiComuniCALENDARIO[i].setFont(testo.deriveFont(testo.getSize()*0.8F));
 			campiComuniCALENDARIO[i].setForeground(new Color(255,50,50));
 			campiComuniCALENDARIO[i].setBorderPainted(false);
+			campiComuniCALENDARIO[i].setBorder(null);
 			campiComuniCALENDARIO[i].setBackground(new Color(230,230,230));
 			campiComuniCALENDARIO[i].setBounds(cordinataX, Y+20+(int)(fontHeight*1.1), (int)(fontHeight*1.5), (int)(fontHeight*1.1));
 			this.add(campiComuniCALENDARIO[i]);

@@ -100,7 +100,8 @@ public class PannelloNotifiche extends JPanel
 			elimina.setFont(testoBottoni);
 			elimina.setBackground(sfondo);
 			elimina.setBorderPainted(false);
-			elimina.setBounds(w/5*4, 15, altezzaStringhe*9/5, altezzaStringhe*9/5);
+			elimina.setBorder(null);
+			elimina.setBounds(w/5*4, 15, altezzaStringhe*2, altezzaStringhe*2);
 		}
 		
 		private int calcolaY() {

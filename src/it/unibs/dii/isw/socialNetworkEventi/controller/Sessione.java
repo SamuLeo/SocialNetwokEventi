@@ -176,7 +176,7 @@ public class Sessione implements IController
 			return evento;
 		}
 		catch(Exception e) 
-		{error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO)));}
+		{error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO).getContenuto()));}
 		return null;
 	}
 	
