@@ -244,9 +244,6 @@ public class Sessione implements IController
 		try
 		{
 			if(utenteIscrittoInEvento(evento)) return;
-			/*gli iscritti attuali sono decrementati di 1 in caso la categoria sia scii perchè l'evento viene passato 
-			con l'utente già inserito nella lista al fine di passare i campi opzionali scelti
-			int numero_iscritti_attuali = evento.getNomeCategoria().getString().equals(CategoriaEvento.SCII.getString()) ? evento.getNumeroPartecipanti()-1 : evento.getNumeroPartecipanti();*/
 			int numero_iscritti_attuali = evento.getNumeroPartecipanti();
 			int tolleranza;
 			if (evento.getCampo(NomeCampo.TOLLERANZA_MAX) == null) tolleranza = 0; else tolleranza = (Integer)evento.getContenutoCampo(NomeCampo.TOLLERANZA_MAX);
@@ -265,8 +262,7 @@ public class Sessione implements IController
 				db.updateEvento(evento);
 				logger.scriviLog(String.format(Stringhe.APERTO_CHIUSO, evento.getId()));
 			}
-//			else if (numero_iscritti_attuali < numero_massimo_iscritti_possibili || (!termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)) 
-			else if ((numero_iscritti_attuali < numero_massimo_iscritti_possibili && !chiusura_iscrizioni_superato)) 
+			else if ((numero_iscritti_attuali <= numero_massimo_iscritti_possibili && !chiusura_iscrizioni_superato)) 
 				db.collegaUtenteEvento(utente_corrente, evento);	
 			else return;
 			utente_corrente = db.selectUtente(utente_corrente.getNome());

@@ -265,7 +265,10 @@ public abstract class Evento
 	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
 	public void setPartecipanti_campiOpt(HashMap<Utente,HashMap<NomeCampo,Boolean>> partecipanti_campiOpt) {this.partecipanti_campiOpt = partecipanti_campiOpt;}
 	public HashMap<Utente,HashMap<NomeCampo,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt;}
-	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampo,Boolean> campi_opt){partecipanti_campiOpt.put(utente, campi_opt);}
+	public void setCampiOptPerUtente(Utente utente, HashMap<NomeCampo,Boolean> campi_opt){
+		if (partecipanti_campiOpt.containsKey(utente)) partecipanti_campiOpt.remove(utente);
+		partecipanti_campiOpt.put(utente, campi_opt);
+	}
 
 	public void setCampoOptPerUtente(Utente utente, NomeCampo nome_campo, Boolean bool)
 	{		
