@@ -1,15 +1,14 @@
 package it.unibs.dii.isw.socialNetworkEventi.testing;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.After;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
-
-import org.junit.After;
-import org.junit.jupiter.api.Test;
 
 import it.unibs.dii.isw.socialNetworkEventi.controller.Sessione;
 import it.unibs.dii.isw.socialNetworkEventi.model.*;
@@ -255,7 +254,7 @@ class FunctionalRequirmentsTest
 			e.printStackTrace();
 		}
 		
-		sessione.aggiornatore.run();
+		sessione.aggiorna();
 	
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -315,7 +314,7 @@ class FunctionalRequirmentsTest
 //			e.printStackTrace();
 //		}
 		
-		sessione.aggiornatore.run();
+		sessione.aggiorna();
 	
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -408,7 +407,7 @@ class FunctionalRequirmentsTest
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		sessione.aggiornatore.run();
+		sessione.aggiorna();
 		
 		assertTrue(sessione.getDb().selectEvento(evento.getId()).getStato().equals(StatoEvento.FALLITA));			
 	}
@@ -459,8 +458,8 @@ class FunctionalRequirmentsTest
 		
 //		serve aggiornare 2 volte perchè l'evento passa da APERTO a CHIUSO a CONCLUSO
 //		(l'aggiornatore lo farebbe in automatico ma per ragioni di tempo viene forzato in modo da testare la logica)
-		sessione.aggiornatore.run();
-		sessione.aggiornatore.run();
+		sessione.aggiorna();
+		sessione.aggiorna();
 				
 		assertTrue(sessione.getDb().selectEvento(evento.getId()).getStato().equals(StatoEvento.CONCLUSA));	
 	}
@@ -642,7 +641,7 @@ class FunctionalRequirmentsTest
 		
 		sessione.iscrizioneUtenteInEvento(evento);
 		
-		sessione.aggiornatore.run();
+		sessione.aggiorna();
 		
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");

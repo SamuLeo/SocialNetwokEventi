@@ -47,9 +47,6 @@ public class Bacheca extends JPanel {
 		this.setPreferredSize(new Dimension(larghezza,Y));
 	}
 	
-	//public int getHeight() {return Y;}
-	//public int getWidth() {return X;}
-	
 	void ridimensiona(int larghezza) 
 	{
 		for (int i=0; i<cards.length; i++) 
@@ -106,18 +103,18 @@ public class Bacheca extends JPanel {
 			ora.setFont(testo);
 			ora.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.6), altezzaStringhe);
 			//Sesso dei partecipanti alla partita
-			if (e.getCampi().get(NomeCampo.GENERE) != null) 
+			if (e.getCampo(NomeCampo.GENERE) != null) 
 				if (catDip==null) 
-					{catDip = new JLabel("Sesso: " + e.getCampi().get(NomeCampo.GENERE).getContenuto()); this.add(catDip);}
-			if (e.getCampi().get(NomeCampo.AFFITTO_SCII) != null)
+					{catDip = new JLabel("Sesso: " + e.getCampo(NomeCampo.GENERE).getContenuto()); this.add(catDip);}
+			if (e.getCampo(NomeCampo.AFFITTO_SCII) != null)
 				if (catDip==null) 
-				{catDip = new JLabel("Luogo: " + e.getCampi().get(NomeCampo.LUOGO).getContenuto()); this.add(catDip);}
+				{catDip = new JLabel("Luogo: " + e.getCampo(NomeCampo.LUOGO).getContenuto()); this.add(catDip);}
 			catDip.setFont(testo);
 			catDip.setBounds(w/9, 50+titolo.getHeight()+data.getHeight()*2, (int)(w*0.6), altezzaStringhe);
 			//Anello di visualizzazione degli iscritti
 			int latoAnello = 40+altezzaStringhe*3;
 			if (anello==null) {
-				int partecipanti=(int) e.getCampi().get(NomeCampo.PARTECIPANTI).getContenuto();
+				int partecipanti=(int) e.getCampo(NomeCampo.PARTECIPANTI).getContenuto();
 				if (e.getCampo(NomeCampo.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
 				int iscritti=(int)(e.getNumeroPartecipanti());
 				anello=new AnelloNumerico(latoAnello,partecipanti,iscritti,testo,altezzaStringhe, sfondoCard);

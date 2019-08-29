@@ -1,11 +1,8 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 
-public class Notifica implements Serializable
-{
-	private static final long serialVersionUID = 1L;
+public class Notifica {
 
 	private int id_notifica;
 	private String titolo;
@@ -35,7 +32,7 @@ public class Notifica implements Serializable
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Notifica " /*+ this.id_notifica + "\n"*/);
+		builder.append("Notifica");
 		builder.append("\nData \n");
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
 		builder.append(sdf.format(data.getTime()) + "\n");
@@ -50,7 +47,7 @@ public class Notifica implements Serializable
 	@Override
 	public boolean equals(Object obj)
 	{
-		//return this.toString().equals(obj.toString());
+		if (!(obj instanceof Notifica)) return false;
 		Notifica notifica = (Notifica)obj;
 		boolean equals = titolo.equals(notifica.getTitolo()) && contenuto.equals(notifica.getContenuto());
 		return equals;

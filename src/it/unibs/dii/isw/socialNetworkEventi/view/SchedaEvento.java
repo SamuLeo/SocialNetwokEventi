@@ -42,14 +42,14 @@ public class SchedaEvento extends JPanel {
 		setLayout(null);
 		setBackground(Grafica.coloreSfondo);
 		//Inizializzazione dati comuni ed obbligatori
-		titolo = new JLabel((String)e.getCampi().get(NomeCampo.TITOLO).getContenuto());
+		titolo = new JLabel((String)e.getCampo(NomeCampo.TITOLO).getContenuto());
 		titolo.setFont(testoBottoni.deriveFont(testoBottoni.getSize()*2F));
 		titolo.setHorizontalAlignment(SwingConstants.CENTER);
 		add(titolo);
 		
-		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto()),
-				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI).getContenuto()),
-				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampo.TOLLERANZA_MAX)==null? (Integer)e.getCampo(NomeCampo.PARTECIPANTI).getContenuto() : (Integer)e.getCampo(NomeCampo.PARTECIPANTI).getContenuto() + (Integer)e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto());
+		boolean termine_ritiro_scaduto = Calendar.getInstance().after((Calendar) e.getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE)),
+				termineIscrizioneScaduto = Calendar.getInstance().after((Calendar) e.getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI)),
+				eventoHaSpazio = e.getNumeroPartecipanti() < (e.getCampo(NomeCampo.TOLLERANZA_MAX)==null? (Integer)e.getContenutoCampo(NomeCampo.PARTECIPANTI) : (Integer)e.getContenutoCampo(NomeCampo.PARTECIPANTI) + (Integer)e.getContenutoCampo(NomeCampo.TOLLERANZA_MAX));
 		Utente uCorrente = grafica.chiediUtenteCorrente();
 		if (e.getUtenteCreatore().equals(uCorrente) && !termine_ritiro_scaduto && e.getStato().compareTo(StatoEvento.APERTA)==0) {
 			iscriviti = new JButton(" 🗑  Elimina evento");
@@ -81,7 +81,7 @@ public class SchedaEvento extends JPanel {
 		}
 		
 		int partecipanti = (int)(e.getCampo(NomeCampo.PARTECIPANTI).getContenuto());
-		if (e.getCampo(NomeCampo.TOLLERANZA_MAX) != null) partecipanti += (int) e.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
+		if (e.getCampo(NomeCampo.TOLLERANZA_MAX) != null) partecipanti += (int) e.getContenutoCampo(NomeCampo.TOLLERANZA_MAX);
 		anello = new AnelloNumerico(larghezza/3, partecipanti, e.getNumeroPartecipanti(), testoBottoni, altezzaRighe, Grafica.coloreSfondo);
 		add(anello);
 		

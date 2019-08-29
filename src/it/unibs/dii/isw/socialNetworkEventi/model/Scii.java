@@ -119,7 +119,7 @@ public class Scii extends Evento
 	
 	
 	@Override
-	public PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con)throws Exception 
+	public PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws Exception
 	{
 		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.INSERT_SQL_ISCRIZIONE_EVENTO, CategoriaEvento.SCII));
 		ps.setString(1, utente.getNome());
@@ -127,7 +127,7 @@ public class Scii extends Evento
 		boolean utente_con_campi_opt_settati = false;
 		for(Utente u : this.getPartecipanti_campiOpt().keySet())
 		{
-		if(u.equals(utente))
+			if(u.equals(utente))
 			{
 				utente_con_campi_opt_settati = true; 
 				utente=u; 

@@ -14,13 +14,11 @@ import java.util.*;
 @SuppressWarnings("rawtypes")
 public abstract class Evento 
 {
-	private CategoriaEvento nome_categoria = CategoriaEvento.DEFAULT;
-	
 	private int id_evento;
 	private Utente utente_creatore;
 	private StatoEvento stato = StatoEvento.VALIDA;
-	
-	private HashMap<NomeCampo, Campo> campi;
+	private CategoriaEvento nome_categoria = CategoriaEvento.DEFAULT;
+	private final HashMap<NomeCampo, Campo> campi;
 	private HashMap<Utente,HashMap<NomeCampo,Boolean>> partecipanti_campiOpt;
 	
 	/**
@@ -81,6 +79,7 @@ public abstract class Evento
 		if(note != null) aggiungiCampo(note, false, NomeCampo.NOTE, "Note aggiuntive ");			
 		if(benefici_quota != null) aggiungiCampo(benefici_quota, false, NomeCampo.BENEFICI_QUOTA, "Servizi compresi");
 		if(tolleranza != null && tolleranza>=0) aggiungiCampo(tolleranza, false, NomeCampo.TOLLERANZA_MAX, "Iscrizioni in esubero");
+		if(tolleranza != null && tolleranza<0) throw new IllegalArgumentException("Il numero di partecipanti in esubero può essere solo positivo");
 		if(data_ora_termine_evento != null)	{
 			if(data1PrecedenteData2(data_ora_termine_evento, data_ora_inizio_evento)) throw new IllegalArgumentException("Necessario inserire una data di termine evento nel futuro e posteriore alla data di inizio evento");
 				aggiungiCampo(data_ora_termine_evento, false, NomeCampo.D_O_TERMINE_EVENTO, "Fine evento");						
@@ -117,49 +116,68 @@ public abstract class Evento
 		this.stato = stato;
 	}
 	
-	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampo titolo, String descrizione)
+	
+	/**
+	 * Questo metodo controlla e in caso sia cambiato aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
+	 * se l'evento ha raggiunto la sua conclusione oppure se è concluso
+	 * 
+	 * Prima questa responsabilità era relegata al controller. Ora, per Expert, è stata relegata ad evento.
+	 * 
+	 * @return true se lo stato cambia
+	 * @throws SQLException 
+	 */
+	public final boolean controllaStatoEvento() 
 	{
-		campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));
+		Calendar oggi = Calendar.getInstance();
+		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI));
+		boolean termine_ritiro_scaduto = oggi.after((Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE));
+		boolean DataFineEventoNelFuturo;		
+		if (getCampo(NomeCampo.D_O_TERMINE_EVENTO)==null) 
+		{
+			Calendar giorno_dopo_inizio_evento = ((Calendar)getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
+			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
+			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);
+			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,-1);	//è incredibile, ma senza questa riga la vità è più difficile e infame
+		}
+		else 
+			DataFineEventoNelFuturo = oggi.before((Calendar)getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
+		int numero_iscritti_attuali = getNumeroPartecipanti();
+		int numero_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
+		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
+		
+		StatoEvento statoEvento = getStato();
+		//Ritirata, Fallita e Conclusa sono stati terminali. Gli unici con possibile evoluzione sono Aperta e Chiusa (e Valida)
+		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && numero_iscritti_attuali < numero_minimo_iscritti)
+		{
+			setStato(StatoEvento.FALLITA);
+			return true;
+		}
+		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && numero_iscritti_attuali >= numero_minimo_iscritti)
+		{
+			setStato(StatoEvento.CHIUSA);
+			return true;
+		}
+		if (statoEvento.getString().equals("Aperta") && termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)
+		{
+			setStato(StatoEvento.CHIUSA);
+			return true;
+		}
+		if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
+		{
+			setStato(StatoEvento.CONCLUSA);
+			return true;
+		}
+		return false;
 	}
 	
-	public boolean aggiungiFruitore(Utente utente)
-	{
-		if((Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto() > getNumeroPartecipanti())
-			{partecipanti_campiOpt.put(utente,null); return true;}
-		else return false;
-	}
-	 
-	public void rimuoviFruitore(Utente utente)
-	{
-		if(getNumeroPartecipanti() == 0 /*|| fruitori.get(0).equals(utente)*/) return;
-			partecipanti_campiOpt.remove(utente);
-	}
 	
-	//Calendar
-	
-	public boolean dataNelFuturo(Calendar data) 
-	{
-		return Calendar.getInstance().compareTo(data) < 0; 
-	}
-
-	private boolean data1PrecedenteData2(Calendar data1, Calendar data2)
-	{
-		return data1.compareTo(data2) < 0;
-	}
-
-	protected Timestamp creaTimestamp(Calendar c) 
-	{	
-		if (c==null) return null; else return new Timestamp (c.getTimeInMillis());
-	}
 	 
 	//Polymorphism
-	 
 	public abstract PreparedStatement getPSInsertEvento(Connection con) throws SQLException;
 	public abstract PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws SQLException, Exception;
 	
 	
 	//Template
-	
 	public final PreparedStatement getPSSelectUtenti(Connection con) throws SQLException {
 		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_ISCRITTI_EVENTO, getNomeCategoria()));
 		ps.setInt(1, this.getId());
@@ -187,22 +205,63 @@ public abstract class Evento
 	};
 
 
-/**
- * Getter and Setters
- */
-
+	/**
+	 * Getter and Setters
+	 */
+	
+	public int getId() {return id_evento;}
+	public void setId(int id) {this.id_evento = id;}
+	
+	public StatoEvento getStato() {return stato;}
+	public void setStato(StatoEvento stato) {this.stato = stato;}	
+	
+	public CategoriaEvento getNomeCategoria() {return nome_categoria;}
+	public  void setNomeCategoria(CategoriaEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
+	
 	public <T>void setCampo(NomeCampo nome_campo, Campo campo) throws IllegalArgumentException
 	{
 		if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
 		if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
 		campi.put(nome_campo, campo);
-	} 
-	 
-	public HashMap<NomeCampo, Campo> getCampi()	{return campi;}
+	}
+	
+	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampo titolo, String descrizione) {campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));}
 	public Campo getCampo(NomeCampo nomeCampo)	{return campi.get(nomeCampo);}
-	public Object getContenutoCampo(NomeCampo nomeCampo) {return campi.get(nomeCampo).getContenuto();}
-	public int getNumeroPartecipanti() {return partecipanti_campiOpt.keySet().size();}
-	public Utente getUtenteCreatore() { return utente_creatore; }
+	public Object getContenutoCampo(NomeCampo nomeCampo) {return getCampo(nomeCampo).getContenuto();}
+	
+	public boolean aggiungiFruitore(Utente utente)
+	{
+		Calendar adesso = Calendar.getInstance();
+		boolean termineIscrizioni = ((Calendar)(getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI))).before(adesso);
+		if((Integer)getContenutoCampo(NomeCampo.PARTECIPANTI) + (Integer)getContenutoCampo(NomeCampo.TOLLERANZA_MAX) > getNumeroPartecipanti() && !termineIscrizioni)
+		{
+			if (utente_creatore.equals(utente)) return false;
+			for (Utente u: partecipanti_campiOpt.keySet())
+				if (u.equals(utente)) return false;
+			partecipanti_campiOpt.put(utente,null);
+			return true;
+		}
+		else return false;
+	}
+	
+	public void rimuoviFruitore(Utente utente)
+	{
+		Calendar adesso = Calendar.getInstance();
+		boolean termineRitiroScaduto = ((Calendar)(getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE))).before(adesso);
+		if(getNumeroPartecipanti() == 0 || termineRitiroScaduto) return;
+			partecipanti_campiOpt.remove(utente);
+	}
+	
+	public int getNumeroPartecipanti() {
+		if (utente_creatore == null) return partecipanti_campiOpt.keySet().size();
+		boolean presente = false;
+		for (Utente u: partecipanti_campiOpt.keySet())
+			if (u.getNome().equals(utente_creatore.getNome())) {presente = true; break;}
+		if (presente) return partecipanti_campiOpt.keySet().size();
+		else return partecipanti_campiOpt.keySet().size() + 1;
+	}
+	
+	public Utente getUtenteCreatore() {return utente_creatore;}
 	public void setUtenteCreatore(Utente utente_creatore) {this.utente_creatore = utente_creatore;}
 	public void setPartecipanti_campiOpt(HashMap<Utente,HashMap<NomeCampo,Boolean>> partecipanti_campiOpt) {this.partecipanti_campiOpt = partecipanti_campiOpt;}
 	public HashMap<Utente,HashMap<NomeCampo,Boolean>> getPartecipanti_campiOpt() { return partecipanti_campiOpt;}
@@ -242,70 +301,8 @@ public abstract class Evento
 				return true;
 		return false;
 	}
-
-	public int getId() {return id_evento;}
-	public void setId(int id) {this.id_evento = id;}
 	
-	public StatoEvento getStato() {return stato;}
-	public void setStato(StatoEvento stato) {this.stato = stato;}	
-	
-	public CategoriaEvento getNomeCategoria() {return nome_categoria;}
-	public  void setNomeCategoria(CategoriaEvento nomeCategoria) {this.nome_categoria = nomeCategoria;}
-	
-	/**
-	 * Questo metodo controlla e in caso sia cambiato aggiorna lo stato dell'evento, verificando se la data di chiusura iscrizioni ha superato la data odierna,
-	 * se l'evento ha raggiunto la sua conclusione oppure se è concluso
-	 * 
-	 * Prima questa responsabilità era relegata al controller. Ora, per Expert, è stata relegata ad evento.
-	 * 
-	 * @return true se lo stato cambia
-	 * @throws SQLException 
-	 */
-	public final boolean controllaStatoEvento() 
-	{
-		Calendar oggi = Calendar.getInstance();
-		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI));
-		boolean termine_ritiro_scaduto = oggi.after((Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE));
-		boolean DataFineEventoNelFuturo;		
-		if (getCampo(NomeCampo.D_O_TERMINE_EVENTO)==null) 
-		{
-			Calendar giorno_dopo_inizio_evento = ((Calendar)getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
-			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
-			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);
-			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,-1);	//è incredibile, ma senza questa riga la vità è più difficile e infame
-		}
-		else 
-			DataFineEventoNelFuturo = oggi.before((Calendar)getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
-		int numero_iscritti_attuali = getNumeroPartecipanti();
-		int numero_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
-		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
-		
-		StatoEvento statoEvento = getStato();
-
-		if(statoEvento.getString().equals("Aperta") && DataChiusuraIscrizioniNelFuturo == false)
-		{
-			if(numero_iscritti_attuali < numero_minimo_iscritti)
-			{
-				setStato(StatoEvento.FALLITA);
-				//logger.scriviLog(String.format(Stringhe.APERTO_FALLITO, evento.getId()));
-				return true;
-			}
-			else if(((numero_iscritti_attuali > numero_minimo_iscritti) ||
-					(termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)))
-			{
-				setStato(StatoEvento.CHIUSA);
-				//logger.scriviLog(String.format(Stringhe.APERTO_CHIUSO, evento.getId()));
-				return true;
-			}
-		}
-		else if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
-		{
-			setStato(StatoEvento.CONCLUSA);
-			//logger.scriviLog(String.format(Stringhe.CHIUSO_CONCLUSO, evento.getId()));
-			return true;
-		}
-		return false;
-	}
+	//Metodi di confronto tra istanze
 	
 	public String toString() 
 	{
@@ -328,4 +325,8 @@ public abstract class Evento
 	{
 		return toString().equals(obj.toString());
 	}
+	
+	//Utili per manipolazione date
+	private boolean data1PrecedenteData2(Calendar data1, Calendar data2){return data1.compareTo(data2) < 0;}
+	protected Timestamp creaTimestamp(Calendar c) {if (c==null) return null; else return new Timestamp (c.getTimeInMillis());}
 }

@@ -36,7 +36,7 @@ public class PartitaCalcio extends Evento
 	{
 		super(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max);
 		
-		if(eta_minima==null || eta_massima==null || eta_minima <= 0 || eta_massima <= 0 ||  eta_minima>eta_massima)     throw new IllegalArgumentException("Necessario inserire un età minima, massima dei partecipanti superiore a 0");
+		if(eta_minima==null || eta_massima==null || eta_minima <= 0 || eta_massima <= 0 ||  eta_minima>eta_massima || eta_massima>140)     throw new IllegalArgumentException("Necessario inserire un età minima, massima dei partecipanti superiore a 0");
 		if(genere == null || !(genere.equalsIgnoreCase("maschi") || genere.equalsIgnoreCase("femmine") || genere.equalsIgnoreCase("qualsiasi")))throw new IllegalArgumentException("Necessario inserire il genere dei partecipanti");		
 		aggiungiCampo(eta_minima, true, NomeCampo.ETA_MINIMA, "Età minima");
 		aggiungiCampo(eta_massima, true, NomeCampo.ETA_MASSIMA, "Età massima");
@@ -106,7 +106,7 @@ public class PartitaCalcio extends Evento
 		ps.setString	(9, benefici_quota);
 		ps.setTimestamp	(10, this.creaTimestamp(data_ora_termine_evento));
 		ps.setTimestamp	(11, this.creaTimestamp(data_ora_termine_ritiro_iscrizione));
-		ps.setInt		(12, tolleranza_max);				
+		ps.setInt		(12, tolleranza_max);
 		ps.setString	(13, StatoEvento.APERTA.getString());
 		ps.setInt		(14, eta_minima);
 		ps.setInt		(15, eta_massima);

@@ -20,14 +20,18 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 public class Sessione implements IController
 {
 	private Utente utente_corrente;
+	public Utente getUtente_corrente() {return utente_corrente;}
+	
 	private IPersistentStorageRepository db;
+	public IPersistentStorageRepository getDb() {return db;}
+	
 	private IPureFabricationNotifiche messagesFactory;
+	public IPureFabricationNotifiche getMessagesFactory() {return messagesFactory;}
+	
 	private Logger logger;
 	private String percorso_file_log_sessione ;
 	private Logger error_logger;
 	private String percorso_file_error_sessione;
-	
-	private static String operatingSystem = System.getProperty("os.name").toLowerCase();
 	
 	public Sessione()
 	{
@@ -41,20 +45,6 @@ public class Sessione implements IController
 		initIPureFabricationNotifiche();
 		
 		new Timer().schedule(new TimerTask() {public void run() {aggiornatore.run();}}, 0, 1000);
-	}
-	
-
-//	METODI DI GESTIONE	
-
-	
-	private void creaLogger() 
-	{		
-		try {
-			logger = new Logger(percorso_file_log_sessione);
-			error_logger = new Logger(percorso_file_error_sessione);
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	
@@ -72,22 +62,6 @@ public class Sessione implements IController
 		}
 	}
 	
-	
-	private void configuraPercorsiFileLogger() throws FileNotFoundException, IOException
-	{
-		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) 
-		{
-			percorso_file_log_sessione = Stringhe.PERCORSO_FILE_LOG_LINUX;
-			percorso_file_error_sessione = Stringhe.PERCORSO_FILE__ERROR_LOG_LINUX;
-			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_LINUX));
-		}
-		else if(operatingSystem.indexOf("win") >= 0) 
-		{
-			percorso_file_log_sessione = Stringhe.PERCORSO_FILE_LOG_WIN;
-			percorso_file_error_sessione = Stringhe.PERCORSO_FILE_ERROR_LOG_WIN;
-			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_WIN));
-		}
-	}
 	
 	private void initIPureFabricationNotifiche()
 	{
@@ -123,7 +97,7 @@ public class Sessione implements IController
 		return false;
 	}
 	
-	public Runnable aggiornatore = new Runnable() {
+	private final Runnable aggiornatore = new Runnable() {
 		public void run()
 			{	
 			try 
@@ -139,9 +113,18 @@ public class Sessione implements IController
 							db.updateEvento(evento);
 							switch(evento.getStato())
 							{
-								case FALLITA : messagesFactory.segnalaFallimentoEvento(evento); break;
-								case CHIUSA : messagesFactory.segnalaChiusuraEvento(evento); break;
-								case CONCLUSA : messagesFactory.segnalaConclusioneEvento(evento); break;
+								case FALLITA : 
+									logger.scriviLog(String.format(Stringhe.APERTO_FALLITO, evento.getId()));
+									messagesFactory.segnalaFallimentoEvento(evento); 
+									break;
+								case CHIUSA : 
+									logger.scriviLog(String.format(Stringhe.APERTO_CHIUSO, evento.getId()));
+									messagesFactory.segnalaChiusuraEvento(evento);
+									break;
+								case CONCLUSA :
+									logger.scriviLog(String.format(Stringhe.CHIUSO_CONCLUSO, evento.getId()));
+									messagesFactory.segnalaConclusioneEvento(evento);
+									break;
 								default : break;
 							}
 						}		
@@ -201,26 +184,26 @@ public class Sessione implements IController
 		{
 			messagesFactory.segnalaEventoPerUtente(evento, utente_corrente, utente_destinatario);
 		} 
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_N_PER_E, utente_destinatario.getNome(), evento.getId()));
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_N_PER_E, utente_destinatario.getNome(), evento.getId()));
+		}
 	}
 	
 	public boolean insertUtente(Utente utente) 
 	{
-		try 
+		try
 		{
 			if(db.existUtente(utente) != null)
 				return false;
 			
 			db.insertUtente(utente);
 			utente_corrente = utente;
-		} 
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_INSERT_U, utente.getNome()));
-		 }
+		}
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_INSERT_U, utente.getNome()));
+		}
 		return true;
 	}
 	
@@ -232,11 +215,11 @@ public class Sessione implements IController
 				utente_corrente.aggiungiInteresse(nome_categoria);
 			}
 		}
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_C, utente_corrente.getNome(), nome_categoria.getString()));
-			 return false;
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_C, utente_corrente.getNome(), nome_categoria.getString()));
+			return false;
+		}
 		return true;
 	}
 	
@@ -248,11 +231,11 @@ public class Sessione implements IController
 			db.collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
 			return true;
 		}
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_INSERT_U, notifica.getTitolo()));
-			 return false;
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_INSERT_U, notifica.getTitolo()));
+			return false;
+		}
 	}
 	
 	public void iscrizioneUtenteInEvento(Evento evento)
@@ -260,20 +243,20 @@ public class Sessione implements IController
 		if(utente_corrente == null) return;
 		try
 		{
-			if(utenteIscrittoInEvento(evento))
-				return;
-//			gli iscritti attuali sono decrementati di 1 in caso la categoria sia scii perchè l'evento viene passato 
-//			con l'utente già inserito nella lista al fine di passare i campi opzionali scelti
-			int numero_iscritti_attuali = evento.getNomeCategoria().getString().equals(CategoriaEvento.SCII.getString()) ? evento.getNumeroPartecipanti()-1 : evento.getNumeroPartecipanti();
-			int numero_massimo_iscritti_possibili = ((Integer)evento.getCampo(NomeCampo.PARTECIPANTI).getContenuto() + 
-					(Integer)evento.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto());
+			if(utenteIscrittoInEvento(evento)) return;
+			/*gli iscritti attuali sono decrementati di 1 in caso la categoria sia scii perchè l'evento viene passato 
+			con l'utente già inserito nella lista al fine di passare i campi opzionali scelti
+			int numero_iscritti_attuali = evento.getNomeCategoria().getString().equals(CategoriaEvento.SCII.getString()) ? evento.getNumeroPartecipanti()-1 : evento.getNumeroPartecipanti();*/
+			int numero_iscritti_attuali = evento.getNumeroPartecipanti();
+			int tolleranza;
+			if (evento.getCampo(NomeCampo.TOLLERANZA_MAX) == null) tolleranza = 0; else tolleranza = (Integer)evento.getContenutoCampo(NomeCampo.TOLLERANZA_MAX);
+			int numero_massimo_iscritti_possibili = (Integer)evento.getContenutoCampo(NomeCampo.PARTECIPANTI) + tolleranza;
 			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();
 			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
 			Calendar chiusura_iscrizioni = (Calendar) evento.getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI);
 			boolean chiusura_iscrizioni_superato = Calendar.getInstance().compareTo(chiusura_iscrizioni)>0;
 			//se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-//			if(numero_iscritti_attuali == numero_massimo_iscritti_possibili && termine_ritiro_scaduto)
-			if(numero_iscritti_attuali == (numero_massimo_iscritti_possibili-1) && termine_ritiro_scaduto)
+			if(numero_iscritti_attuali == numero_massimo_iscritti_possibili && termine_ritiro_scaduto)
 			{
 				db.collegaUtenteEvento(utente_corrente, evento);
 				evento = db.selectEvento(evento.getId());
@@ -288,10 +271,11 @@ public class Sessione implements IController
 			else return;
 			utente_corrente = db.selectUtente(utente_corrente.getNome());
 		} 
-		 catch(Exception e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_E, utente_corrente.getNome(), evento.getId()));
-		 }
+		catch(Exception e) 
+		{
+			e.printStackTrace();
+			error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_E, utente_corrente.getNome(), evento.getId()));
+		}
 	}
 
 	
@@ -307,10 +291,10 @@ public class Sessione implements IController
 			notifiche = db.selectNotificheDiUtente(utente_corrente.getNome());
 			utente_corrente.setNotifiche(notifiche);
 		} 
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_GET_N, utente_corrente.getNome()));
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_GET_N, utente_corrente.getNome()));
+		}
 		return notifiche;
 	}
 	
@@ -319,10 +303,10 @@ public class Sessione implements IController
 		try {
 			return db.selectUtentiDaEventiPassati(utente.getNome());
 		} 
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_GET_POSSIBILI_U_INTERESSATI, utente.getNome()));
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_GET_POSSIBILI_U_INTERESSATI, utente.getNome()));
+		}
 		return null;
 	}
 	
@@ -340,13 +324,12 @@ public class Sessione implements IController
 	public  boolean utenteIscrittoInEvento(Evento evento)
 	{
 		if(utente_corrente == null) return false;
-		
 		try {
 			return db.existUtenteInEvento(utente_corrente, evento);
 		} 
 		catch(SQLException e) 
 		{
-			 error_logger.scriviLog(String.format(Stringhe.E_GET_U_ISCRITTO_IN_E, utente_corrente.getNome(), evento.getId()));
+			error_logger.scriviLog(String.format(Stringhe.E_GET_U_ISCRITTO_IN_E, utente_corrente.getNome(), evento.getId()));
 		}
 		return false;
 	}
@@ -398,9 +381,8 @@ public class Sessione implements IController
 		} 
 		catch(SQLException e) 
 		{
-			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_N, notifica.getIdNotifica(), utente_corrente.getNome()));
+			error_logger.scriviLog(String.format(Stringhe.E_DELETE_N, notifica.getIdNotifica(), utente_corrente.getNome()));
 		}
-		
 		return getNotificheUtente();
 	}
 	
@@ -409,8 +391,7 @@ public class Sessione implements IController
 
 		Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
 		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
-		if(termine_ritiro_scaduto)
-			throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
+		if(termine_ritiro_scaduto) throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
 		try 
 		{
 			if(!utenteIscrittoInEvento(evento)) throw new RuntimeException ("Utente non iscritto alla partita");	
@@ -433,8 +414,8 @@ public class Sessione implements IController
 		}
 		catch(SQLException e) 
 		{
-			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_C_DA_U, utente_corrente.getNome(), nome_categoria.getString()));
-			 return false;
+			error_logger.scriviLog(String.format(Stringhe.E_DELETE_C_DA_U, utente_corrente.getNome(), nome_categoria.getString()));
+			return false;
 		}
 		return true;
 	}
@@ -457,7 +438,7 @@ public class Sessione implements IController
 		}
 		catch(SQLException e) 
 		{
-			 error_logger.scriviLog(String.format(Stringhe.E_DELETE_E, evento.getId()));
+			error_logger.scriviLog(String.format(Stringhe.E_DELETE_E, evento.getId()));
 		}
 	}
 	
@@ -483,9 +464,6 @@ public class Sessione implements IController
 		}
 	}
 	
-	public IPersistentStorageRepository getDb() {return db;}
-	public  Utente getUtente_corrente() {return utente_corrente;}
-	public IPureFabricationNotifiche getMessagesFactory() {return messagesFactory;}
 
 	public void iniziaOsservazione (Observer obs) {
 		((Observable)db).addObserver(obs);
@@ -498,5 +476,35 @@ public class Sessione implements IController
 	public void notificaOsservatori() {
 		//getDb().setChangedForObservers();
 		((Observable)db).notifyObservers(getEventi());
+	}
+	
+	
+	//LOGGER	
+	
+	private void creaLogger() 
+	{		
+		try {
+			logger = new Logger(percorso_file_log_sessione);
+			error_logger = new Logger(percorso_file_error_sessione);
+		} catch (UnsupportedEncodingException | FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void configuraPercorsiFileLogger() throws FileNotFoundException, IOException
+	{
+		String operatingSystem = System.getProperty("os.name").toLowerCase();
+		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) 
+		{
+			percorso_file_log_sessione = Stringhe.PERCORSO_FILE_LOG_LINUX;
+			percorso_file_error_sessione = Stringhe.PERCORSO_FILE__ERROR_LOG_LINUX;
+			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_LINUX));
+		}
+		else if(operatingSystem.indexOf("win") >= 0) 
+		{
+			percorso_file_log_sessione = Stringhe.PERCORSO_FILE_LOG_WIN;
+			percorso_file_error_sessione = Stringhe.PERCORSO_FILE_ERROR_LOG_WIN;
+			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_WIN));
+		}
 	}
 }

@@ -18,7 +18,7 @@ public class MainClass
 	private static IView view = null;
 
 	public static void main(String[] args) throws SQLException 
-	{	
+	{
 		try 
 		{configuraFileDiConfigurazione();} 
 		catch (IOException e) 
@@ -31,13 +31,9 @@ public class MainClass
 	private static void configuraFileDiConfigurazione() throws FileNotFoundException, IOException
 	{
 		if(operatingSystem.indexOf("linux") >= 0 || operatingSystem.indexOf("mac") >= 0) 
-		{
 			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_LINUX));
-		}
 		else if(operatingSystem.indexOf("win") >= 0) 
-		{
 			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_WIN));
-		}
 	}
 	
 	private static void initSessione()

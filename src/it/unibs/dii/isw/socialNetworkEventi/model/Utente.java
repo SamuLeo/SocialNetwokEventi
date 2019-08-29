@@ -87,9 +87,10 @@ public class Utente
 		return builder.toString();
 	}
 	
-	 @Override
+	@Override
 	public boolean equals(Object utente) 
-	 {
-		return this.nome.equals(((Utente)utente).getNome());
+	{
+		if (!(utente instanceof Utente)) return false;
+		else return nome.equals(((Utente)utente).getNome());
 	}
 }
