@@ -56,7 +56,7 @@ public class Sessione implements IController
 			db = (IPersistentStorageRepository)Class.forName(className).newInstance();
 			db.initializeDatiRAM();
 		} 
-		catch(SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException e) 
+		catch(SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException e)
 		{
 			error_logger.scriviLog(Stringhe.E_DATABASE);
 		}
@@ -159,7 +159,7 @@ public class Sessione implements IController
 			return evento;
 		}
 		catch(Exception e) 
-		{error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO).getContenuto()));}
+			{error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO).getContenuto()));}
 		return null;
 	}
 	
@@ -171,11 +171,11 @@ public class Sessione implements IController
 			db.collegaUtenteNotifica(utente_corrente.getNome(), notifica.getIdNotifica());
 			return true;
 		}
-		 catch(SQLException e) 
-		 {
-			 error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_N, utente_corrente.getNome(), notifica.getIdNotifica()));
-			 return false;
-		 }
+		catch(SQLException e) 
+		{
+			error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_N, utente_corrente.getNome(), notifica.getIdNotifica()));
+			return false;
+		}
 	}
 	
 	public void notificaUtentePerEvento (Evento evento, Utente utente_destinatario) 

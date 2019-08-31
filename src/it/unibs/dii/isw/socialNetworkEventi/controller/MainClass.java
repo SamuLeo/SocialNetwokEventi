@@ -25,7 +25,7 @@ public class MainClass
 		{e.printStackTrace();}
 		
 		initSessione();
-		initGrafica();			
+		initGrafica();
 	}
 	
 	private static void configuraFileDiConfigurazione() throws FileNotFoundException, IOException
@@ -42,7 +42,7 @@ public class MainClass
 		{
 			String className = System.getProperty("social_network.controller.class.name");
 			controller = (IController)Class.forName(className).getDeclaredConstructor().newInstance();
-		} 
+		}
 		catch(InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) 
 		{
 			e.printStackTrace();

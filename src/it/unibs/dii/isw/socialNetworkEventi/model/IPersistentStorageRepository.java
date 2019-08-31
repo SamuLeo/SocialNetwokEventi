@@ -17,7 +17,7 @@ public abstract interface IPersistentStorageRepository
 	public abstract void collegaUtenteEvento(Utente utente, Evento evento) throws Exception;
 	public abstract void collegaUtenteCategoria(Utente utente, CategoriaEvento nome_categoria) throws SQLException;
 	public abstract void collegaUtenteNotifica(String nome_utente, int id_notifica) throws SQLException;	
-
+	
 //	SELECT
 	public abstract HashMap<CategoriaEvento,ArrayList<Evento>> selectEventiAll() throws SQLException;	
 	public abstract Evento selectEvento(int id_evento);
@@ -30,12 +30,12 @@ public abstract interface IPersistentStorageRepository
 	public abstract LinkedList<CategoriaEvento> selectCategorieDiUtente(String nome_utente) throws SQLException;
 	public abstract LinkedList<Utente> selectUtentiInteressatiACategoria(CategoriaEvento nome_categoria) throws SQLException;
 	public abstract HashMap<CategoriaEvento,LinkedList<Utente>> selectUtentiDaEventiPassati(String nome_utente_creatore) throws SQLException;	
-
+	
 //	UPDATE
 	public abstract void updateEvento(Evento evento) throws SQLException;	
 	public abstract void updateEtaMinUtente(String nome_utente, int eta_min) throws SQLException;	
 	public abstract void updateEtaMaxtente(String nome_utente, int eta_max) throws SQLException;
-
+	
 //	DELETE
 	public abstract void deleteEvento(Evento evento) throws SQLException;
 	public abstract void deleteUtente(String nome_utente) throws SQLException;

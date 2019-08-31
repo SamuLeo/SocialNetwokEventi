@@ -307,13 +307,6 @@ class FunctionalRequirmentsTest
 		sessione.accedi(tester);		
 		sessione.iscrizioneUtenteInEvento(evento);
 		
-//		try {
-//			Thread.sleep(2000,0);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 		sessione.aggiorna();
 	
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));

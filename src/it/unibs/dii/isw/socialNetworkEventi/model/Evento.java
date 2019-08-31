@@ -137,27 +137,27 @@ public abstract class Evento
 			Calendar giorno_dopo_inizio_evento = ((Calendar)getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
 			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
 			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);
-			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,-1);	//è incredibile, ma senza questa riga la vità è più difficile e infame
+			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,-1);	//Non togliere, altrimenti i dati diventano incoerenti (passaggio per referenza)
 		}
 		else 
 			DataFineEventoNelFuturo = oggi.before((Calendar)getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
-		int numero_iscritti_attuali = getNumeroPartecipanti();
-		int numero_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
-		int numero_massimo_iscritti_possibili = numero_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
+		int n_iscritti_attuali = getNumeroPartecipanti();
+		int n_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
+		int n_massimo_iscritti = n_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
 		
 		StatoEvento statoEvento = getStato();
 		//Ritirata, Fallita e Conclusa sono stati terminali. Gli unici con possibile evoluzione sono Aperta e Chiusa (e Valida)
-		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && numero_iscritti_attuali < numero_minimo_iscritti)
+		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && n_iscritti_attuali < n_minimo_iscritti)
 		{
 			setStato(StatoEvento.FALLITA);
 			return true;
 		}
-		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && numero_iscritti_attuali >= numero_minimo_iscritti)
+		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && n_iscritti_attuali >= n_minimo_iscritti)
 		{
 			setStato(StatoEvento.CHIUSA);
 			return true;
 		}
-		if (statoEvento.getString().equals("Aperta") && termine_ritiro_scaduto && numero_iscritti_attuali == numero_massimo_iscritti_possibili)
+		if (statoEvento.getString().equals("Aperta") && termine_ritiro_scaduto && n_iscritti_attuali == n_massimo_iscritti)
 		{
 			setStato(StatoEvento.CHIUSA);
 			return true;
@@ -171,13 +171,12 @@ public abstract class Evento
 	}
 	
 	
-	 
+	
 	//Polymorphism
 	public abstract PreparedStatement getPSInsertEvento(Connection con) throws SQLException;
 	public abstract PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws SQLException, Exception;
 	
 	
-	//Template
 	public final PreparedStatement getPSSelectUtenti(Connection con) throws SQLException {
 		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_ISCRITTI_EVENTO, getNomeCategoria()));
 		ps.setInt(1, this.getId());
@@ -221,11 +220,13 @@ public abstract class Evento
 	public <T>void setCampo(NomeCampo nome_campo, Campo campo) throws IllegalArgumentException
 	{
 		if(campi.get(nome_campo) == null) throw new IllegalArgumentException("Il campo desiderato non esiste");
-		if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass())) throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
+		if(campo.getContenuto().getClass().isInstance(campi.get(nome_campo).getContenuto().getClass()))
+			throw new IllegalArgumentException("La tipologia di campo che si desidera cambiare non corrisponde a quello specificato"); 
 		campi.put(nome_campo, campo);
 	}
 	
 	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampo titolo, String descrizione) {campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));}
+	//serve per fare controlli NullPointer
 	public Campo getCampo(NomeCampo nomeCampo)	{return campi.get(nomeCampo);}
 	public Object getContenutoCampo(NomeCampo nomeCampo) {return getCampo(nomeCampo).getContenuto();}
 	

@@ -70,9 +70,8 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	}
 	
 	private boolean controllaSeEventoInLista(Evento e, ArrayList<Evento> lista) {
-		for (Evento en: lista) {
+		for (Evento en: lista)
 			if (e.equals(en)) return true;
-		}
 		return false;
 	}
 	
@@ -276,6 +275,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		rs.beforeFirst();	
 		while(rs.next())	
 		{
+			//in caso l'evento non ha campi opzionali non bisogna aggiungere un caso all'if senza modificare il codice (OCP)
 			Utente utente = selectUtente(rs.getString(1));
 			if(rs.getMetaData().getColumnCount() == 1)
 				utenti_campiOpt.put(utente, null);
@@ -368,10 +368,8 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		PreparedStatement ps = evento.getPSUpdateStatoEvento(con);
 		ps.executeUpdate();
 		for(Evento e : eventi.get(evento.getNomeCategoria()))
-		{
 			if(e.equals(evento))
 				e.setStato(evento.getStato());
-		}
 	}
 	
 	public void updateEtaMinUtente(String nome_utente, int eta_min) throws SQLException
@@ -400,7 +398,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	{
 		PreparedStatement ps = evento.getPSDeleteEvento(con);
 		ps.executeUpdate();
-
 		eventi.get(evento.getNomeCategoria()).remove(evento);
 	}
 	
@@ -446,7 +443,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	{
 		PreparedStatement ps = evento.getPSDeleteRelazioneEventoUtente(nome_utente, con);
 		ps.executeUpdate();		
-		this.refreshDatiRAM();
+		refreshDatiRAM();
 	}
 
 	
@@ -461,7 +458,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	public void deleteEventiDiUtente(Utente utente) throws SQLException
 	{
 		for(CategoriaEvento nome_categoria : eventi.keySet())
-			this.deleteEventiDiUtenteDiCategoria(utente, nome_categoria);
+			deleteEventiDiUtenteDiCategoria(utente, nome_categoria);
 		refreshDatiRAM();		
 	}
 	
@@ -497,10 +494,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		if(eventi == null)
 			return false;
 		for(Evento elemento : eventi) 
-		{
-			if(elemento.getId() == evento.getId())
-				return true;
-		}
+			if(elemento.getId() == evento.getId()) return true;
 		return false;
 	}	
 	
@@ -528,9 +522,5 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		String dateTime = sdf.format(dt);
 		return dateTime;
-	}
-	
-	public void setChangedForObservers() {
-		setChanged();
 	}
 }

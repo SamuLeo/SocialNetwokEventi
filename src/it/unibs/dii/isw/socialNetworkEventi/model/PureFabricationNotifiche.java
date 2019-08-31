@@ -88,7 +88,7 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 		for(Utente utente : list_utenti)
 			db.collegaUtenteNotifica(utente.getNome(), notifica.getIdNotifica());
 	}
-		
+	
 	public void segnalaEventoPerUtente(Evento evento, Utente utente_mittente, Utente utente_destinatario) throws SQLException
 	{
 		String nome_categoria = evento.getNomeCategoria().getString().replaceAll("_", " di ");
@@ -97,7 +97,7 @@ public class PureFabricationNotifiche implements IPureFabricationNotifiche
 		Notifica notifica = new Notifica(titolo, contenuto);
 		
 		notifica = db.insertNotifica(notifica);
-
+		
 		db.collegaUtenteNotifica(utente_destinatario.getNome(), notifica.getIdNotifica());
 	}
 }
