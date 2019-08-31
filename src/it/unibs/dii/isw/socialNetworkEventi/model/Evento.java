@@ -1,12 +1,10 @@
 package it.unibs.dii.isw.socialNetworkEventi.model;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
-import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
+import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -176,6 +174,10 @@ public abstract class Evento
 	public abstract PreparedStatement getPSInsertEvento(Connection con) throws SQLException;
 	public abstract PreparedStatement getPSInsertIscrizioneUtenteInEvento(Utente utente, Connection con) throws SQLException, Exception;
 	
+	//Implementazione di default, eventualmente da fare override (se la categoria specifica prevede l'adesione a campi opzionali (es. Scii))
+	public HashMap<NomeCampo,Boolean> compilaCampiOptDaResultSet(ResultSet rs) throws SQLException {
+		return null;
+	};
 	
 	public final PreparedStatement getPSSelectUtenti(Connection con) throws SQLException {
 		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_ISCRITTI_EVENTO, getNomeCategoria()));

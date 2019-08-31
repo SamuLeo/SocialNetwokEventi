@@ -2,14 +2,13 @@ package it.unibs.dii.isw.socialNetworkEventi.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
+import java.util.HashMap;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
-import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
+import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 
 public class Scii extends Evento
 {
@@ -144,5 +143,14 @@ public class Scii extends Evento
 			throw new Exception("Necessario inserire le scelte dell'utente riguardo i campi opzionali");
 					
 		return ps;
+	}
+	
+	@Override
+	public HashMap<NomeCampo,Boolean> compilaCampiOptDaResultSet(ResultSet rs) throws SQLException {
+		HashMap<NomeCampo,Boolean> campi_opt = new HashMap<NomeCampo,Boolean>();
+		campi_opt.put(NomeCampo.BIGLIETTO_BUS, rs.getBoolean(2));
+		campi_opt.put(NomeCampo.PRANZO, rs.getBoolean(3));
+		campi_opt.put(NomeCampo.AFFITTO_SCII, rs.getBoolean(4));
+		return campi_opt;
 	}
 }

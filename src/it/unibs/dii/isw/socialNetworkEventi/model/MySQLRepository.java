@@ -275,21 +275,8 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		rs.beforeFirst();	
 		while(rs.next())	
 		{
-			//in caso l'evento non ha campi opzionali non bisogna aggiungere un caso all'if senza modificare il codice (OCP)
 			Utente utente = selectUtente(rs.getString(1));
-			if(rs.getMetaData().getColumnCount() == 1)
-				utenti_campiOpt.put(utente, null);
-			else
-			{
-				HashMap<NomeCampo,Boolean> campi_opt = new HashMap<NomeCampo,Boolean>();
-				if(evento.getNomeCategoria().equals(CategoriaEvento.SCII))
-				{
-					campi_opt.put(NomeCampo.BIGLIETTO_BUS, rs.getBoolean(2));
-					campi_opt.put(NomeCampo.PRANZO, rs.getBoolean(3));
-					campi_opt.put(NomeCampo.AFFITTO_SCII, rs.getBoolean(4));
-					utenti_campiOpt.put(utente, campi_opt);
-				}
-			}
+			utenti_campiOpt.put(utente, evento.compilaCampiOptDaResultSet(rs));
 		}				
 		return utenti_campiOpt;
 	}

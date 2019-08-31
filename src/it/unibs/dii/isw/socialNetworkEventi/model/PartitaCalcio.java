@@ -6,10 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
-import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
+import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 
 public class PartitaCalcio extends Evento 
 {		

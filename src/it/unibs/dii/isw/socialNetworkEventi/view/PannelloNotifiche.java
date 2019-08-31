@@ -98,7 +98,7 @@ public class PannelloNotifiche extends JPanel
 			contenuto.setBounds(w/9, 40+titolo.getHeight()+data.getHeight(), (int)(w*0.85), nRighe*altezzaStringhe);
 			if (elimina==null) {elimina=new JButton("❌"); this.add(elimina); elimina.addActionListener(e -> eliminaNotifica(n));}
 			elimina.setFont(testoBottoni);
-			elimina.setBackground(sfondo);
+			elimina.setBackground(sfondoCard);
 			elimina.setBorderPainted(false);
 			elimina.setBorder(null);
 			elimina.setBounds(w/5*4, 15, altezzaStringhe*2, altezzaStringhe*2);
