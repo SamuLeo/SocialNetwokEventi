@@ -6,6 +6,8 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
 
 public interface IView 
 {
+	void accedi(String utente, String password);
+	void creaUtente(String utente, String password);
 	public void mostraLogin();
 	public void visualizzaBacheca();
 	public void iniziaCreazioneEvento();

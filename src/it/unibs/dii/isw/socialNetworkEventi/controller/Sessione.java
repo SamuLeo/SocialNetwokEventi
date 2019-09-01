@@ -38,7 +38,10 @@ public class Sessione implements IController
 		try 
 		{configuraPercorsiFileLogger();} 
 		catch (IOException e) 
-		{e.printStackTrace();}
+		{
+			new MsgBox().messaggioErrore("Logger", "Impossibile configurare i file di logging");
+			e.printStackTrace();
+		}
 		
 		creaLogger();
 		connettiDB();
@@ -55,10 +58,13 @@ public class Sessione implements IController
 			String className = System.getProperty("social_network.db.class.name");
 			db = (IPersistentStorageRepository)Class.forName(className).newInstance();
 			db.initializeDatiRAM();
-		} 
-		catch(SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException e)
+		}
+		catch (SQLException | InstantiationException | IllegalAccessException | ClassNotFoundException e)
 		{
+			e.printStackTrace();
 			error_logger.scriviLog(Stringhe.E_DATABASE);
+			new MsgBox().messaggioErrore("Errore di connessione", "Impossibile connettersi alla base di dati");
+			System.exit(1);
 		}
 	}
 	
@@ -79,16 +85,16 @@ public class Sessione implements IController
 	
 	
 	public boolean accedi(Utente utente) {
-		 Utente u;
+		Utente u;
 		try 
 		{
 			u = db.existUtente(utente);
-			 if(u != null) {
-				 utente_corrente = u;
-				 logger.scriviLog("Effettuato accesso da parte di " + utente.getNome());
-				 return true;
-			 }
-			 else return false;
+			if(u != null) {
+				utente_corrente = u;
+				logger.scriviLog("Effettuato accesso da parte di " + utente.getNome());
+				return true;
+			}
+			else return false;
 		} 
 		catch (SQLException e) 
 		{
@@ -135,11 +141,13 @@ public class Sessione implements IController
 			catch(SQLException e) 
 			{
 				error_logger.scriviLog(Stringhe.E_AGGIORNATORE);
-			}	
+			}
 		}
 	};
 
 	public void aggiorna() {aggiornatore.run();}
+	
+	public void aggiornaUtenti() {try {utente_corrente=db.existUtente(utente_corrente);} catch (SQLException e) {e.printStackTrace();}}
 	
 	
 //	METODI SETTER
@@ -159,7 +167,10 @@ public class Sessione implements IController
 			return evento;
 		}
 		catch(Exception e) 
-			{error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO).getContenuto()));}
+		{
+			new MsgBox().messaggioErrore("Impossibile aggiungere Evento", "Non è stato possibile creare l'evento");
+			error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO).getContenuto()));
+		}
 		return null;
 	}
 	
@@ -213,6 +224,7 @@ public class Sessione implements IController
 			else {
 				db.collegaUtenteCategoria(getUtente_corrente(), nome_categoria);
 				utente_corrente.aggiungiInteresse(nome_categoria);
+				return true;
 			}
 		}
 		catch(SQLException e) 
@@ -220,7 +232,6 @@ public class Sessione implements IController
 			error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_C, utente_corrente.getNome(), nome_categoria.getString()));
 			return false;
 		}
-		return true;
 	}
 	
 	public boolean insertNotifica(Notifica notifica, Utente utente)
@@ -270,6 +281,7 @@ public class Sessione implements IController
 		catch(Exception e) 
 		{
 			e.printStackTrace();
+			new MsgBox().messaggioErrore("Errore iscrizione", "Non è stato possibile completare l'iscrizione all'evento");
 			error_logger.scriviLog(String.format(Stringhe.E_COLLEGAMENTO_U_E, utente_corrente.getNome(), evento.getId()));
 		}
 	}
@@ -416,7 +428,7 @@ public class Sessione implements IController
 		return true;
 	}
 	
-	public  void deleteEvento(Evento evento) throws RuntimeException
+	public void deleteEvento(Evento evento) throws RuntimeException
 	{
 		try
 		{
@@ -470,7 +482,6 @@ public class Sessione implements IController
 	}
 	
 	public void notificaOsservatori() {
-		//getDb().setChangedForObservers();
 		((Observable)db).notifyObservers(getEventi());
 	}
 	

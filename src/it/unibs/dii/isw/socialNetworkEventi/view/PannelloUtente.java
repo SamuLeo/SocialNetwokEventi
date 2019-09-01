@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
 import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
+import it.unibs.dii.isw.socialNetworkEventi.utility.MsgBox;
 
 class PannelloUtente extends JPanel {
 	private Grafica grafica;
@@ -128,6 +129,8 @@ class PannelloUtente extends JPanel {
 				selezionata[i] = categorie.get(i).isSelected();
 			}
 			grafica.aggiornaDatiUtente(etm, etM, elenco, selezionata);
-		} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null, "Sono stati inseriti dati scorretti nei campi riguardanti l'età", "Errore di compilazione", JOptionPane.WARNING_MESSAGE);}
+		} catch (NumberFormatException ex) {
+			new MsgBox().messaggioAvviso("Errore di compilazione", "Sono stati inseriti dati scorretti nei campi riguardanti l'età");
+		}
 	}
 }

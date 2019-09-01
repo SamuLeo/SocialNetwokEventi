@@ -1,6 +1,6 @@
 package it.unibs.dii.isw.socialNetworkEventi.utility;
 
-public class Stringhe 
+public final class Stringhe 
 {
 //	PASSAGGI DI STATO DEGLI EVENTI
 	public static final String APERTO_FALLITO 		= "Stato dell'evento con id : %d passato da APERTO a FALLITO";
@@ -8,7 +8,6 @@ public class Stringhe
 	public static final String CHIUSO_CONCLUSO 		= "Stato dell'evento con id : %d passato da CHIUSO a CONCLUSO";
 	public static final String VALIDO_APERTO 		= "Stato dell'evento con id : %d passato da VALIDO a APERTO";
 	public static final String APERTO_RITIRATO 		= "Stato dell'evento con id : %d passato da APERTO a RITIRATO";
-
 	
 //	ERRORI SESSIONE
 	
@@ -17,7 +16,7 @@ public class Stringhe
 	public static final String E_MSG_FACTORY = "ERROR : Creazione IMessagesFactory fallita";	
 	public static final String E_ACCEDI = "ERROR : Tentativo di accesso dell'utente %s fallito";	
 	public static final String E_AGGIORNATORE = "ERROR : Durante la segnalazione del cambiamento di stato di un evento nel metodo Aggiornatore";	
-	//	Metodi setter
+//	Metodi setter
 	public static final String E_INSERT_E = "ERROR  : Non è stato possibile aggiungere l'evento dal nome %s al database";	
 	public static final String E_INSERT_U = "ERROR  : Non è stato possibile aggiungere l'utente dal nome %s al database";	
 	public static final String E_INSERT_N = "ERROR  : Non è stato possibile aggiungere la notifica dal titolo %s al database";	

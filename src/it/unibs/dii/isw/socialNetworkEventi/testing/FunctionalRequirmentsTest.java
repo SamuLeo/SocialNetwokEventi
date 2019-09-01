@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
@@ -17,15 +18,15 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
-class FunctionalRequirmentsTest 
-{	
+class FunctionalRequirmentsTest
+{
 	Sessione sessione =  new Sessione();
 	Utente admin = sessione.getDb().selectUtente("admin");
 	
 	@Test
 	void accessoConInserimentoPartitaDiCalcioNelDB()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 15, 15, 00,0);
@@ -34,12 +35,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new PartitaCalcio(
 				admin,
-				"Mompiano",
+				"Giappone",
 				termineIscrizione,
 				dataInizioEvento,
 				10,
 				5,
-				"Parta",
+				"ProveISO",
 				null,
 				null,
 				null,				
@@ -66,7 +67,7 @@ class FunctionalRequirmentsTest
 	@Test
 	void accessoConTentativoInserimentoPartitaCalcioNonValida()
 	{
-		sessione.accedi(admin);		
+		assertTrue(sessione.accedi(admin));		
 		Calendar dataInizioEvento = Calendar.getInstance();
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 
@@ -74,12 +75,12 @@ class FunctionalRequirmentsTest
 		{
 			new PartitaCalcio(
 				admin,
-				"Mompiano",
+				"Tavoliere",
 				null,
 				dataInizioEvento,
 				10,
 				5,
-				"Parta",
+				"Puglia Calcio",
 				null,
 				null,
 				null,				
@@ -109,12 +110,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new PartitaCalcio(
 				utente,
-				"Mompiano",
+				"Stromboli",
 				termineIscrizione,
 				dataInizioEvento,
 				10,
 				5,
-				"Parta",
+				"Calcio scottante",
 				null,
 				null,
 				null,				
@@ -122,12 +123,12 @@ class FunctionalRequirmentsTest
 				2,
 				18,
 				25,
-				"maschi"
+				"qualsiasi"
 				);
 		evento = sessione.aggiungiEvento(evento);
 
 		utente = new Utente("tester","");
-		sessione.accedi(utente);		
+		sessione.accedi(utente);
 		sessione.iscrizioneUtenteInEvento(evento);
 
 		assertTrue(sessione.utenteIscrittoInEvento(evento));
@@ -146,12 +147,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new PartitaCalcio(
 				utente,
-				"Mompiano",
+				"Monte Etna",
 				termineIscrizione,
 				dataInizioEvento,
 				10,
 				5,
-				"Parta",
+				"Calcio bollente",
 				null,
 				null,
 				null,				
@@ -176,7 +177,7 @@ class FunctionalRequirmentsTest
 	@Test
 	void disiscrizioneEntroDataDiRitiro()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 15, 15, 00,0);
@@ -187,12 +188,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new PartitaCalcio(
 				admin,
-				"Mompiano",
+				"Reykjavik",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Calcio serio",
 				null,
 				null,
 				null,				
@@ -205,7 +206,7 @@ class FunctionalRequirmentsTest
 		evento = sessione.aggiungiEvento(evento);
 		
 		admin = new Utente("tester","");
-		sessione.accedi(admin);		
+		assertTrue(sessione.accedi(admin));		
 		sessione.iscrizioneUtenteInEvento(evento);
 		sessione.disiscrizioneUtenteEvento(evento);
 
@@ -217,21 +218,22 @@ class FunctionalRequirmentsTest
 	@Test
 	void confermaEventoInCasoDiAdesioniSufficientiRaggiunteAlTermineIscrizioni()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
+		termineIscrizione.setTime(new Date());
 		termineIscrizione.add(Calendar.SECOND, 1);
 		Calendar dataInizioEvento = Calendar.getInstance();
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 	
 		Evento evento = new PartitaCalcio(
 				admin,
-				"Mompiano",
+				"Vatnajokull",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Calcio Vatna",
 				null,
 				null,
 				null,				
@@ -239,22 +241,20 @@ class FunctionalRequirmentsTest
 				0,
 				18,
 				25,
-				"maschi"
+				"qualsiasi"
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
 		admin = new Utente("tester","");
-		sessione.accedi(admin);		
+		assertTrue(sessione.accedi(admin));	
+		sessione.aggiornaUtenti();
 		sessione.iscrizioneUtenteInEvento(evento);
 		
-		try {
-			Thread.sleep(2000,0);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		try {Thread.sleep(1200,0);
+		} catch (InterruptedException e) {e.printStackTrace();}
 		
 		sessione.aggiorna();
+		sessione.aggiornaUtenti();
 	
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -276,22 +276,23 @@ class FunctionalRequirmentsTest
 	@Test
 	void confermaEventoInCasoDiAdesioniMassimeRaggiunteDopoTermineRitiro()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 1, 15, 00,0);
 		Calendar dataInizioEvento = Calendar.getInstance();
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 		Calendar dataRitiroIscrizioni = Calendar.getInstance();
+		dataRitiroIscrizioni.setTime(new Date());
 	
 		Evento evento = new PartitaCalcio(
 				admin,
-				"Mompiano",
+				"Livorno",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Campionato",
 				null,
 				null,
 				null,				
@@ -304,10 +305,11 @@ class FunctionalRequirmentsTest
 		evento = sessione.aggiungiEvento(evento);
 		
 		Utente tester = new Utente("tester","");
-		sessione.accedi(tester);		
+		assertTrue(sessione.accedi(tester));		
 		sessione.iscrizioneUtenteInEvento(evento);
 		
 		sessione.aggiorna();
+		sessione.aggiornaUtenti();
 	
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -343,12 +345,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new PartitaCalcio(
 				utente,
-				"Mompiano",
+				"Brescia",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Calcio femminile",
 				null,
 				null,
 				null,				
@@ -356,7 +358,7 @@ class FunctionalRequirmentsTest
 				0,
 				18,
 				25,
-				"maschi"
+				"femmine"
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
@@ -372,17 +374,18 @@ class FunctionalRequirmentsTest
 		sessione.accedi(utente);
 		
 		Calendar termineIscrizione = Calendar.getInstance();
+		termineIscrizione.setTime(new Date());
 		Calendar dataInizioEvento = Calendar.getInstance();
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 	
 		Evento evento = new PartitaCalcio(
 				utente,
-				"Mompiano",
+				"Bovezzo",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Partita",
 				null,
 				null,
 				null,				
@@ -421,12 +424,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new PartitaCalcio(
 				utente,
-				"Mompiano",
+				"Concesio",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Partitella",
 				null,
 				null,
 				dataTermineEvento,				
@@ -453,7 +456,7 @@ class FunctionalRequirmentsTest
 //		(l'aggiornatore lo farebbe in automatico ma per ragioni di tempo viene forzato in modo da testare la logica)
 		sessione.aggiorna();
 		sessione.aggiorna();
-				
+		
 		assertTrue(sessione.getDb().selectEvento(evento.getId()).getStato().equals(StatoEvento.CONCLUSA));	
 	}
 	
@@ -553,7 +556,7 @@ class FunctionalRequirmentsTest
 	@Test
 	void iscrizioneSciiConScelte()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 1, 15, 00,0);
@@ -562,12 +565,12 @@ class FunctionalRequirmentsTest
 	
 		Evento evento = new Scii(
 				admin,
-				"Mompiano",
+				"Monte Bianco",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Parta",
+				"Sciata bianca",
 				null,
 				null,
 				null,				
@@ -596,22 +599,23 @@ class FunctionalRequirmentsTest
 	@Test
 	void promemoriaSciiConCostoDipendenteDalleProprieScelte()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 1, 15, 00,0);
 		Calendar dataInizioEvento = Calendar.getInstance();
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 		Calendar dataRitiroIscrizioni = Calendar.getInstance();
+		dataRitiroIscrizioni.setTime(new Date());
 	
 		Evento evento = new Scii(
 				admin,
-				"Mompiano",
+				"Monte Rosa",
 				termineIscrizione,
 				dataInizioEvento,
 				2,
 				5,
-				"Sciata",
+				"Sciata rosa",
 				null,
 				null,
 				null,				
@@ -629,12 +633,14 @@ class FunctionalRequirmentsTest
 		evento = sessione.aggiungiEvento(evento);
 		
 		Utente tester = new Utente("tester", "");
-		sessione.accedi(tester);				
+		assertTrue(sessione.accedi(tester));				
 		evento.setCampiOptPerUtente(tester, scelte);
 		
 		sessione.iscrizioneUtenteInEvento(evento);
 		
 		sessione.aggiorna();
+		sessione.aggiorna();
+		sessione.aggiornaUtenti();
 		
 		String titolo = String.format(Stringhe.TITOLO_CHIUSURA_EVENTO, evento.getContenutoCampo(NomeCampo.TITOLO));
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -660,7 +666,7 @@ class FunctionalRequirmentsTest
 	@After
 	void eliminaEventiDiTest()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		sessione.deleteEventiDiUtente();
 		assertTrue(sessione.getUtente_corrente().getEventi().isEmpty());
 	}
@@ -668,10 +674,10 @@ class FunctionalRequirmentsTest
 	@After
 	void eliminaNotificheDiTest()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		boolean eliminate = sessione.deleteNotificheUtenteAll();
 		Utente tester = new Utente("tester","");
-		sessione.accedi(tester);
+		assertTrue(sessione.accedi(tester));
 		eliminate = eliminate && sessione.deleteNotificheUtenteAll();
 		assertTrue(eliminate);
 	}
@@ -679,11 +685,11 @@ class FunctionalRequirmentsTest
 	@After
 	void eliminaMaterialeDiTesting()
 	{
-		sessione.accedi(admin);
+		assertTrue(sessione.accedi(admin));
 		sessione.deleteEventiDiUtente();
 		sessione.deleteNotificheUtenteAll();
 		Utente tester = new Utente("tester","");
-		sessione.accedi(tester);
+		assertTrue(sessione.accedi(tester));
 		sessione.deleteEventiDiUtente();
 		sessione.deleteNotificheUtenteAll();
 	}

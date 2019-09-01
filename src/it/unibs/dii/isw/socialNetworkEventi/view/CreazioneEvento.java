@@ -11,6 +11,7 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.model.PartitaCalcio;
 import it.unibs.dii.isw.socialNetworkEventi.model.Scii;
 import it.unibs.dii.isw.socialNetworkEventi.model.Utente;
+import it.unibs.dii.isw.socialNetworkEventi.utility.MsgBox;
 
 public class CreazioneEvento extends JPanel 
 {
@@ -411,10 +412,10 @@ public class CreazioneEvento extends JPanel
 			}
 		} 
 		catch(NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "Avete inserito testo non valido o inesistente in campi numerici", "Errore compilazione", JOptionPane.WARNING_MESSAGE); 
+			new MsgBox().messaggioAvviso("Errore compilazione", "Avete inserito testo non valido o inesistente in campi numerici"); 
 			return;
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Errore compilazione", JOptionPane.WARNING_MESSAGE); 
+			new MsgBox().messaggioAvviso("Errore compilazione", e.getMessage()); 
 			return;
 		}
 	}

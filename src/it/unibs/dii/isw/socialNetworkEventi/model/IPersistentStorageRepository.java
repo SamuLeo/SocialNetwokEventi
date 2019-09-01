@@ -51,5 +51,5 @@ public abstract interface IPersistentStorageRepository
 	public abstract void refreshDatiRAM() throws SQLException;	
 	public abstract HashMap<CategoriaEvento, ArrayList<Evento>> getEventi();	
 	public abstract boolean existUtenteInEvento(Utente utente_corrente, Evento evento) throws SQLException;
-	public abstract int getCostoEventoPerUtente(Evento evento, Utente utente) throws SQLException;	
+	public abstract int getCostoEventoPerUtente(Evento evento, Utente utente) throws SQLException;
 }

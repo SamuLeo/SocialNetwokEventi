@@ -1,27 +1,10 @@
 ﻿package it.unibs.dii.isw.socialNetworkEventi.model;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Observable;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
+import java.sql.*;
+import java.util.*;
 import com.mysql.cj.jdbc.MysqlDataSource;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-import it.unibs.dii.isw.socialNetworkEventi.utility.CategoriaEvento;
-import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
-import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
+import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 
 public class MySQLRepository extends Observable implements IPersistentStorageRepository
 {
@@ -41,17 +24,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		dataSource.setUser("admin_social");
 		dataSource.setPassword("StefanoLoveLinux");
 
-		try {con = dataSource.getConnection();}
-		catch (SQLException e) {
-			e.printStackTrace();
-			Font f = new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
-			UIManager.put("OptionPane.messageFont", f);
-			UIManager.put("OptionPane.buttonFont", f);
-			UIManager.put("Button.background", Color.white);
-			UIManager.put("Button.select", new Color(240,255,245));
-			JOptionPane.showMessageDialog(null, "Impossibile connettersi alla base di dati", "Errore di connessione", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
+		con = dataSource.getConnection();
 	}
 
 	public void refreshDatiRAM() throws SQLException
@@ -180,8 +153,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	
 	public Evento selectEvento(int id_evento) 
 	{
-		if(eventi == null)
-			return null;
+		if(eventi == null) return null;
 		for(CategoriaEvento categoria : eventi.keySet())
 			for(Evento evento : eventi.get(categoria))
 				if(evento.getId() == id_evento)
@@ -207,7 +179,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		}		
 		return utenti;
 	}
-
 	
 	public Utente selectUtente(String nome)  
 	{
@@ -253,8 +224,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	public HashMap<CategoriaEvento,LinkedList<Evento>> selectEventiDiUtente(String nome_utente) throws SQLException
 	{
 		HashMap<CategoriaEvento,LinkedList<Evento>> hashmap = new HashMap<CategoriaEvento,LinkedList<Evento>>();
-		if(eventi == null)
-			eventi = this.selectEventiAll();
+		if(eventi == null) eventi = selectEventiAll();
 		for(CategoriaEvento categoria : eventi.keySet())
 		{
 			LinkedList<Evento> list = new LinkedList<>();
@@ -336,13 +306,10 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	
 	private ResultSet selectUtentiPassatiDiUtenteCreatoreDaCategoria(String nome_utente_creatore, CategoriaEvento nome_categoria) throws SQLException
 	{
-		PreparedStatement ps = null;
-		ResultSet rs;
-		ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_UTENTI_PASSATI_EVENTO, nome_categoria));
+		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.SELECT_SQL_UTENTI_PASSATI_EVENTO, nome_categoria));
 		ps.setString(1, nome_utente_creatore);
 		ps.setString(2, nome_utente_creatore);
-		rs = ps.executeQuery();
-		return rs;
+		return ps.executeQuery();
 	}
 
 
@@ -394,7 +361,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		PreparedStatement ps = con.prepareStatement(Stringhe.DELETE_SQL_UTENTE);
 		ps.setString(1, nome_utente);
 		ps.executeUpdate();
-		utenti.remove(this.selectUtente(nome_utente));
+		utenti.remove(selectUtente(nome_utente));
 	}
 
 
@@ -451,8 +418,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	
 	private void deleteEventiDiUtenteDiCategoria(Utente utente, CategoriaEvento nome_categoria) throws SQLException
 	{
-		PreparedStatement ps = null;
-		ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.DELETE_SQL_EVENTI_UTENTE, nome_categoria));
+		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.DELETE_SQL_EVENTI_UTENTE, nome_categoria));
 		ps.setString(1, utente.getNome());
 		ps.executeUpdate();
 	}
@@ -467,7 +433,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		if(utenti.isEmpty()) return null;
 		
 		for(Utente u : utenti)
-			if(u.equals(utente)) return u;
+			if(u.equalsConPassword(utente)) return u;
 		return null;
 	}
 

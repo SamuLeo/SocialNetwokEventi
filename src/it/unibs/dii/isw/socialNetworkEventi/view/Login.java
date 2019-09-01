@@ -14,7 +14,7 @@ import javax.swing.JLabel;
 
 public class Login extends JPanel 
 {
-	private Grafica grafica;
+	private IView grafica;
 	static final Color coloreBottoni = new Color(255,255,255);
 	static final Color coloreSfondo = new Color(250,250,250);
 	private static final long serialVersionUID = 1L;
@@ -25,7 +25,7 @@ public class Login extends JPanel
 	private final ActionListener accediLambda = e -> grafica.accedi(utente.getText(), new String(password.getPassword()));
 	private final ActionListener creaUtLambda = e -> grafica.creaUtente(utente.getText(), new String(password.getPassword()));
 	
-	public Login (Grafica grafica, Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
+	public Login (IView grafica, Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
 	{
 		this.grafica = grafica;
 		JLabel img = new JLabel();

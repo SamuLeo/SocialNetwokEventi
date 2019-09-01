@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 
+import it.unibs.dii.isw.socialNetworkEventi.utility.MsgBox;
 import it.unibs.dii.isw.socialNetworkEventi.utility.Stringhe;
 import it.unibs.dii.isw.socialNetworkEventi.view.IView;
 
@@ -13,19 +14,32 @@ public class MainClass
 {	
 	private static String operatingSystem = System.getProperty("os.name").toLowerCase();
 
-	private static IController controller = null;
-	@SuppressWarnings("unused")
-	private static IView view = null;
-
 	public static void main(String[] args) throws SQLException 
 	{
-		try 
-		{configuraFileDiConfigurazione();} 
-		catch (IOException e) 
-		{e.printStackTrace();}
+		MsgBox.configuraAspetto();
 		
-		initSessione();
-		initGrafica();
+		try 
+		{
+			configuraFileDiConfigurazione();
+		} 
+		catch (IOException e) 
+		{
+			new MsgBox().messaggioErrore("Errore Avvio", "Non è stato possibile reperire i file di configurazione necessari all'avvio del programma");
+			e.printStackTrace();
+			return;
+		}
+		
+		try
+		{
+			IController controller = initSessione();
+			initGrafica(controller);
+		}
+		catch(InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) 
+		{
+			new MsgBox().messaggioErrore("Errore Avvio", "Non è stato possibile avviare il programma (impossibile istanziare le classi principali)");
+			e.printStackTrace();
+			return;
+		}
 	}
 	
 	private static void configuraFileDiConfigurazione() throws FileNotFoundException, IOException
@@ -36,29 +50,15 @@ public class MainClass
 			System.getProperties().load(new FileInputStream(Stringhe.PERCORSO_FILE_CONFIG_WIN));
 	}
 	
-	private static void initSessione()
+	private static IController initSessione() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException
 	{
-		try 
-		{
-			String className = System.getProperty("social_network.controller.class.name");
-			controller = (IController)Class.forName(className).getDeclaredConstructor().newInstance();
-		}
-		catch(InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) 
-		{
-			e.printStackTrace();
-		}
+		String className = System.getProperty("social_network.controller.class.name");
+		return (IController)Class.forName(className).getDeclaredConstructor().newInstance();
 	}
 	
-	private static void initGrafica()
+	private static IView initGrafica(IController controller) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException
 	{
-		try 
-		{
-			String className = System.getProperty("social_network.grafica.class.name");
-			view = (IView)Class.forName(className).getDeclaredConstructor(IController.class).newInstance(controller);
-		} 
-		catch(InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) 
-		{
-			e.printStackTrace();
-		}
+		String className = System.getProperty("social_network.grafica.class.name");
+		return (IView)Class.forName(className).getDeclaredConstructor(IController.class).newInstance(controller);
 	}
 }

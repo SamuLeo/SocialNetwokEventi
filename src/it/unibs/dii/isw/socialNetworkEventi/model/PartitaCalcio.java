@@ -74,23 +74,23 @@ public class PartitaCalcio extends Evento
 	{
 		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.INSERT_SQL_EVENTO, CategoriaEvento.PARTITA_CALCIO), Statement.RETURN_GENERATED_KEYS);
 		
-		String nome_utente_creatore						= this.getUtenteCreatore().getNome();
-		String luogo 									= (String) this.getCampo(NomeCampo.LUOGO).getContenuto();
-		Calendar data_ora_termine_ultimo_iscrizione		= (Calendar) this.getCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI).getContenuto();
-		Calendar data_ora_inizio_evento 				= (Calendar) this.getCampo(NomeCampo.D_O_INIZIO_EVENTO).getContenuto();
-		int partecipanti								= (Integer) this.getCampo(NomeCampo.PARTECIPANTI).getContenuto();
-		int costo										= (Integer) this.getCampo(NomeCampo.COSTO).getContenuto();
+		String nome_utente_creatore						= getUtenteCreatore().getNome();
+		String luogo 									= (String) getContenutoCampo(NomeCampo.LUOGO);
+		Calendar data_ora_termine_ultimo_iscrizione		= (Calendar) getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI);
+		Calendar data_ora_inizio_evento 				= (Calendar) getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO);
+		int partecipanti								= (Integer) getContenutoCampo(NomeCampo.PARTECIPANTI);
+		int costo										= (Integer) getContenutoCampo(NomeCampo.COSTO);
 //			Campi opzionali		
-		String titolo									= (String)( this.getCampo(NomeCampo.TITOLO) != null ? this.getCampo(NomeCampo.TITOLO).getContenuto() : null);
-		String note										= (String)( this.getCampo(NomeCampo.NOTE) != null ? this.getCampo(NomeCampo.NOTE).getContenuto() : null);
-		String benefici_quota							= (String)( this.getCampo(NomeCampo.BENEFICI_QUOTA) != null ? this.getCampo(NomeCampo.BENEFICI_QUOTA).getContenuto() : null);
-		Calendar data_ora_termine_evento				= this.getCampo(NomeCampo.D_O_TERMINE_EVENTO) != null ? (Calendar) this.getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto() : null;
-		Calendar data_ora_termine_ritiro_iscrizione		= this.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE) != null ? (Calendar) this.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto() : null;
-		int tolleranza_max								= this.getCampo(NomeCampo.TOLLERANZA_MAX) != null ? (Integer)(this.getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto()) : 0;
+		String titolo									= (String)(getCampo(NomeCampo.TITOLO) != null ? getContenutoCampo(NomeCampo.TITOLO) : null);
+		String note										= (String)(getCampo(NomeCampo.NOTE) != null ? getContenutoCampo(NomeCampo.NOTE) : null);
+		String benefici_quota							= (String)(getCampo(NomeCampo.BENEFICI_QUOTA) != null ? getContenutoCampo(NomeCampo.BENEFICI_QUOTA) : null);
+		Calendar data_ora_termine_evento				= getCampo(NomeCampo.D_O_TERMINE_EVENTO) != null ? (Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_EVENTO) : null;
+		Calendar data_ora_termine_ritiro_iscrizione		= getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE) != null ? (Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE) : null;
+		int tolleranza_max								= getCampo(NomeCampo.TOLLERANZA_MAX) != null ? (Integer)(getContenutoCampo(NomeCampo.TOLLERANZA_MAX)) : 0;
 //			Campi Partita Calcio
-		int eta_minima									= (Integer) this.getCampo(NomeCampo.ETA_MINIMA).getContenuto();
-	    int eta_massima									= (Integer) this.getCampo(NomeCampo.ETA_MASSIMA).getContenuto();
-	    String genere									= (String) this.getCampo(NomeCampo.GENERE).getContenuto();
+		int eta_minima									= (Integer) getContenutoCampo(NomeCampo.ETA_MINIMA);
+	    int eta_massima									= (Integer) getContenutoCampo(NomeCampo.ETA_MASSIMA);
+	    String genere									= (String) getContenutoCampo(NomeCampo.GENERE);
 	    
 		ps.setString	(1, nome_utente_creatore);				
 		ps.setString	(2, luogo);
@@ -101,8 +101,8 @@ public class PartitaCalcio extends Evento
 		ps.setString	(7, titolo);
 		ps.setString	(8, note);
 		ps.setString	(9, benefici_quota);
-		ps.setTimestamp	(10, this.creaTimestamp(data_ora_termine_evento));
-		ps.setTimestamp	(11, this.creaTimestamp(data_ora_termine_ritiro_iscrizione));
+		ps.setTimestamp	(10, creaTimestamp(data_ora_termine_evento));
+		ps.setTimestamp	(11, creaTimestamp(data_ora_termine_ritiro_iscrizione));
 		ps.setInt		(12, tolleranza_max);
 		ps.setString	(13, StatoEvento.APERTA.getString());
 		ps.setInt		(14, eta_minima);
@@ -118,7 +118,7 @@ public class PartitaCalcio extends Evento
 	{
 		PreparedStatement ps = con.prepareStatement(Stringhe.ottieniStringaDesiderata(Stringhe.INSERT_SQL_ISCRIZIONE_EVENTO, CategoriaEvento.PARTITA_CALCIO));
 		ps.setString(1, utente.getNome());
-		ps.setInt(2, this.getId());
+		ps.setInt(2, getId());
 		
 		return ps;
 	}
