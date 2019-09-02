@@ -49,8 +49,7 @@ public class Notifica {
 	{
 		if (!(obj instanceof Notifica)) return false;
 		Notifica notifica = (Notifica)obj;
-		boolean equals = titolo.equals(notifica.getTitolo()) && contenuto.equals(notifica.getContenuto());
-		return equals;
+		return titolo.equals(notifica.getTitolo()) && contenuto.equals(notifica.getContenuto());
 	}
 
 	public String getTitolo() {return titolo;}

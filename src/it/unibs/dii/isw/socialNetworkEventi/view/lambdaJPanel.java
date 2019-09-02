@@ -9,11 +9,11 @@ import java.awt.event.MouseListener;
 import javax.swing.JPanel;
 
 class lambdaJPanel implements MouseListener {
-	static final Color coloreNormale = new Color(220,220,220), coloreSopra = new Color(210,210,210), colorePremuto = new Color(200,200,200);
-	JPanel jp;
-	Class<? extends JPanel> classe;
-	lambdaJPanel aggiuntivo;
-	ActionListener eventoClick;
+	private static final Color coloreNormale = new Color(220,220,220), coloreSopra = new Color(210,210,210), colorePremuto = new Color(200,200,200);
+	private JPanel jp;
+	private Class<? extends JPanel> classe;
+	private lambdaJPanel aggiuntivo;
+	private ActionListener eventoClick;
 	
 	lambdaJPanel (JPanel jp, Class<? extends JPanel> classe, lambdaJPanel aggiuntivo, ActionListener eventoClick){
 		this.jp=jp;

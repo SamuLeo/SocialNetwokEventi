@@ -16,8 +16,7 @@ import it.unibs.dii.isw.socialNetworkEventi.model.Evento;
 import it.unibs.dii.isw.socialNetworkEventi.utility.NomeCampo;
 import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 
-
-public class Bacheca extends JPanel {
+class Bacheca extends JPanel {
 	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private static final Color sfondo = new Color(240,240,240);

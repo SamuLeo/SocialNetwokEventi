@@ -94,7 +94,7 @@ public class Utente
 		else return nome.equals(((Utente)utente).getNome());
 	}
 	
-	boolean equalsConPassword(Utente u) {
+	public boolean equalsConPassword(Utente u) {
 		if (!u.equals(this)) return false;
 		else if (u.getPassword().equals(password)) return true;
 		else return false;

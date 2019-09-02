@@ -13,60 +13,29 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.*;
 public class Scii extends Evento
 {
 	public Scii(
-			Utente creatore,
-			String luogo,
-			Calendar data_ora_termine_ultimo_iscrizione,	
-			Calendar data_ora_inizio_evento,
-			Integer partecipanti,
-			Integer costo,
-		    
-			String titolo,				
-			String note,
-			String benefici_quota,
-		    Calendar data_ora_termine_evento,
-		    Calendar data_ora_termine_ritiro_iscrizione,
-		    Integer tolleranza_max,
-		    
+			Utente creatore, String luogo, Calendar data_ora_termine_ultimo_iscrizione,	Calendar data_ora_inizio_evento, Integer partecipanti, Integer costo,
+		    String titolo, String note, String benefici_quota, Calendar data_ora_termine_evento, Calendar data_ora_termine_ritiro_iscrizione, Integer tolleranza_max,
 		    Integer biglietto_bus,
 		    Integer pranzo,
 		    Integer affitto_scii
-			)
-	throws IllegalArgumentException
-	{
+			) throws IllegalArgumentException {
 		super(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento, data_ora_termine_ritiro_iscrizione, tolleranza_max);
-		
+		setNomeCategoria(CategoriaEvento.SCII);
 		if(biglietto_bus < 0) throw new IllegalArgumentException("Necessario inserire costo biglietto bus superiore o uguale a 0");
 		if(pranzo < 0) throw new IllegalArgumentException("Necessario inserire costo pranzo superiore o uguale a 0");	
 		if(affitto_scii < 0) throw new IllegalArgumentException("Necessario inserire costo affitto sci superiore o uguale a 0");
 		aggiungiCampo(biglietto_bus, false, NomeCampo.BIGLIETTO_BUS, "Costo biglietto bus");
 		aggiungiCampo(pranzo, false, NomeCampo.PRANZO, "Costo pranzo");
 		aggiungiCampo(affitto_scii, false, NomeCampo.AFFITTO_SCII, "Costo affitto sci");
-		
-		setNomeCategoria(CategoriaEvento.SCII);
 	}
 
 	public Scii(
 			Integer id_sciata,
-			Utente creatore,
-			String luogo,
-			Calendar data_ora_termine_ultimo_iscrizione,	
-			Calendar data_ora_inizio_evento,
-			Integer partecipanti,
-			Integer costo,
-		    
-			String titolo,				
-			String note,
-			String benefici_quota,
-		    Calendar data_ora_termine_evento,
-		    Calendar data_ora_termine_ritiro_iscrizione,
-		    Integer tolleranza_max,
+			Utente creatore, String luogo, Calendar data_ora_termine_ultimo_iscrizione,	Calendar data_ora_inizio_evento, Integer partecipanti, Integer costo,
+			String titolo, String note, String benefici_quota,  Calendar data_ora_termine_evento, Calendar data_ora_termine_ritiro_iscrizione, Integer tolleranza_max,
 		    StatoEvento stato,
-		    
-		    Integer biglietto_bus,
-		    Integer pranzo,
-		    Integer affitto_scii
-			)
-	{
+		    Integer biglietto_bus, Integer pranzo, Integer affitto_scii
+			){
 		this(creatore,luogo,data_ora_termine_ultimo_iscrizione,data_ora_inizio_evento,partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento,data_ora_termine_ritiro_iscrizione, tolleranza_max, biglietto_bus, pranzo, affitto_scii);
 		setId(id_sciata);
 		setStato(stato);

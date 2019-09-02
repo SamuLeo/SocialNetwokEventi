@@ -19,11 +19,11 @@ public class PannelloNotifiche extends JPanel
 	private static final long serialVersionUID = 1L;
 	private int X=0, Y=20, altezzaStringhe;
 	private static final Color sfondo = new Color(240,240,240);
-	Font testo, testoBottoni;
-	CardNotifica[] cards;
-	Graphics g;
+	private Font testo, testoBottoni;
+	private CardNotifica[] cards;
+	private Graphics g;
 
-	public PannelloNotifiche(Grafica grafica, LinkedList<Notifica> notifiche, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
+	PannelloNotifiche(Grafica grafica, LinkedList<Notifica> notifiche, int larghezza, Font testo, Font testoBottoni, int altezzaStringhe) 
 	{
 		super();
 		this.grafica = grafica;
@@ -66,11 +66,11 @@ public class PannelloNotifiche extends JPanel
 	class CardNotifica extends JPanel {
 		private static final long serialVersionUID = 1L;
 		Color sfondoCard = new Color(220,220,220);
-		Notifica n;
-		int w;
-		JLabel titolo, data, contenuto;
-		JButton elimina;
-		int Y=0, nRighe;
+		private Notifica n;
+		private int w;
+		private JLabel titolo, data, contenuto;
+		private JButton elimina;
+		private int Y=0, nRighe;
 		
 		CardNotifica (Notifica n, int w) {
 			this.n=n;

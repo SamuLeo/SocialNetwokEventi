@@ -21,10 +21,11 @@ import it.unibs.dii.isw.socialNetworkEventi.utility.StatoEvento;
 class FunctionalRequirmentsTest
 {
 	Sessione sessione =  new Sessione();
-	Utente admin = sessione.getDb().selectUtente("admin");
+	Utente 	admin = sessione.getDb().selectUtente("admin"),
+			tester = sessione.getDb().selectUtente("tester");
 	
 	@Test
-	void accessoConInserimentoPartitaDiCalcioNelDB()
+	synchronized void accessoConInserimentoPartitaDiCalcioNelDB()
 	{
 		assertTrue(sessione.accedi(admin));
 		
@@ -65,7 +66,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void accessoConTentativoInserimentoPartitaCalcioNonValida()
+	synchronized void accessoConTentativoInserimentoPartitaCalcioNonValida()
 	{
 		assertTrue(sessione.accedi(admin));		
 		Calendar dataInizioEvento = Calendar.getInstance();
@@ -98,10 +99,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void adesionePartitaDiCalcio()
+	synchronized void adesionePartitaDiCalcio()
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 15, 15, 00,0);
@@ -109,7 +109,7 @@ class FunctionalRequirmentsTest
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 	
 		Evento evento = new PartitaCalcio(
-				utente,
+				admin,
 				"Stromboli",
 				termineIscrizione,
 				dataInizioEvento,
@@ -126,19 +126,17 @@ class FunctionalRequirmentsTest
 				"qualsiasi"
 				);
 		evento = sessione.aggiungiEvento(evento);
-
-		utente = new Utente("tester","");
-		sessione.accedi(utente);
+		
+		assertTrue(sessione.accedi(tester));
 		sessione.iscrizioneUtenteInEvento(evento);
 
 		assertTrue(sessione.utenteIscrittoInEvento(evento));
 	}
 	
 	@Test
-	void doppiaAdesionePartitaDiCalcio()
+	synchronized void doppiaAdesionePartitaDiCalcio()
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 15, 15, 00,0);
@@ -146,7 +144,7 @@ class FunctionalRequirmentsTest
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 	
 		Evento evento = new PartitaCalcio(
-				utente,
+				admin,
 				"Monte Etna",
 				termineIscrizione,
 				dataInizioEvento,
@@ -155,17 +153,16 @@ class FunctionalRequirmentsTest
 				"Calcio bollente",
 				null,
 				null,
-				null,				
-				null,				
+				null,
+				null,
 				2,
 				18,
 				25,
 				"maschi"
 				);
 		evento = sessione.aggiungiEvento(evento);
-
-		utente = new Utente("tester","");
-		sessione.accedi(utente);		
+		
+		assertTrue(sessione.accedi(tester));		
 		sessione.iscrizioneUtenteInEvento(evento);
 		sessione.iscrizioneUtenteInEvento(evento);
 
@@ -175,7 +172,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void disiscrizioneEntroDataDiRitiro()
+	synchronized void disiscrizioneEntroDataDiRitiro()
 	{
 		assertTrue(sessione.accedi(admin));
 		
@@ -205,8 +202,7 @@ class FunctionalRequirmentsTest
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
-		admin = new Utente("tester","");
-		assertTrue(sessione.accedi(admin));		
+		assertTrue(sessione.accedi(tester));		
 		sessione.iscrizioneUtenteInEvento(evento);
 		sessione.disiscrizioneUtenteEvento(evento);
 
@@ -216,7 +212,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void confermaEventoInCasoDiAdesioniSufficientiRaggiunteAlTermineIscrizioni()
+	synchronized void confermaEventoInCasoDiAdesioniSufficientiRaggiunteAlTermineIscrizioni()
 	{
 		assertTrue(sessione.accedi(admin));
 		
@@ -245,8 +241,7 @@ class FunctionalRequirmentsTest
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
-		admin = new Utente("tester","");
-		assertTrue(sessione.accedi(admin));	
+		assertTrue(sessione.accedi(tester));	
 		sessione.aggiornaUtenti();
 		sessione.iscrizioneUtenteInEvento(evento);
 		
@@ -274,7 +269,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void confermaEventoInCasoDiAdesioniMassimeRaggiunteDopoTermineRitiro()
+	synchronized void confermaEventoInCasoDiAdesioniMassimeRaggiunteDopoTermineRitiro()
 	{
 		assertTrue(sessione.accedi(admin));
 		
@@ -304,7 +299,6 @@ class FunctionalRequirmentsTest
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
-		Utente tester = new Utente("tester","");
 		assertTrue(sessione.accedi(tester));		
 		sessione.iscrizioneUtenteInEvento(evento);
 		
@@ -331,10 +325,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void ritiroEventoPrimaDellaDataDiRitiro()
+	synchronized void ritiroEventoPrimaDellaDataDiRitiro()
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 1, 15, 00,0);
@@ -344,7 +337,7 @@ class FunctionalRequirmentsTest
 		dataRitiroIscrizioni.set(2030, 2, 1, 10, 00,0);
 	
 		Evento evento = new PartitaCalcio(
-				utente,
+				admin,
 				"Brescia",
 				termineIscrizione,
 				dataInizioEvento,
@@ -368,10 +361,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void fallimentoInCasoDiMancatoRaggiungimentoNumeroIscrizioni()
+	synchronized void fallimentoInCasoDiMancatoRaggiungimentoNumeroIscrizioni()
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.setTime(new Date());
@@ -379,7 +371,7 @@ class FunctionalRequirmentsTest
 		dataInizioEvento.set(2030, 3, 1, 15, 00,0);
 	
 		Evento evento = new PartitaCalcio(
-				utente,
+				admin,
 				"Bovezzo",
 				termineIscrizione,
 				dataInizioEvento,
@@ -409,10 +401,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void passaggioChiusoConcluso() 
+	synchronized void passaggioChiusoConcluso() 
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.add(Calendar.SECOND,1);
@@ -423,7 +414,7 @@ class FunctionalRequirmentsTest
 
 	
 		Evento evento = new PartitaCalcio(
-				utente,
+				admin,
 				"Concesio",
 				termineIscrizione,
 				dataInizioEvento,
@@ -441,8 +432,7 @@ class FunctionalRequirmentsTest
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
-		utente = new Utente("tester","");
-		sessione.accedi(utente);		
+		assertTrue(sessione.accedi(tester));		
 		sessione.iscrizioneUtenteInEvento(evento);
 		
 		try {
@@ -461,10 +451,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void modificaCampiFacoltativiUtente()
+	synchronized void modificaCampiFacoltativiUtente()
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);
+		assertTrue(sessione.accedi(admin));
 		int eta_min = Math.abs(new Random().nextInt()%30);
 		int eta_max = eta_min+1;
 		sessione.updateFasciaEta(eta_min, eta_max);
@@ -473,10 +462,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void notificaPerNuovoEventoNellaCategoriaDiInteresse()
+	synchronized void notificaPerNuovoEventoNellaCategoriaDiInteresse()
 	{
-		Utente utente = new Utente("admin","");
-		sessione.accedi(utente);		
+		assertTrue(sessione.accedi(admin));		
 		sessione.eliminaInteresseUtenteCorrente(CategoriaEvento.PARTITA_CALCIO);
 		boolean check = !sessione.getUtente_corrente().getCategorieInteressi().contains(CategoriaEvento.PARTITA_CALCIO);
 		sessione.aggiungiInteresseUtenteCorrente(CategoriaEvento.PARTITA_CALCIO);
@@ -486,10 +474,9 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void invitoAgliAderentiPassatiDiUnProprioEvento()
+	synchronized void invitoAgliAderentiPassatiDiUnProprioEvento()
 	{
-		Utente utente_mittente = new Utente("admin","");
-		sessione.accedi(utente_mittente);
+		assertTrue(sessione.accedi(admin));
 		
 		Calendar termineIscrizione = Calendar.getInstance();
 		termineIscrizione.set(2030, 2, 1, 15, 00,0);
@@ -498,7 +485,7 @@ class FunctionalRequirmentsTest
 		Calendar dataRitiroIscrizioni = Calendar.getInstance();
 	
 		Evento evento = new PartitaCalcio(
-				utente_mittente,
+				admin,
 				"Mompiano",
 				termineIscrizione,
 				dataInizioEvento,
@@ -516,28 +503,27 @@ class FunctionalRequirmentsTest
 				);
 		evento = sessione.aggiungiEvento(evento);
 		
-		Utente utente_destinatario = new Utente("tester","");
-		sessione.accedi(utente_destinatario);		
+		assertTrue(sessione.accedi(tester));
 		sessione.iscrizioneUtenteInEvento(evento);
 
-		sessione.accedi(utente_mittente);
+		assertTrue(sessione.accedi(admin));
 		evento = sessione.aggiungiEvento(evento);
 		try 
 		{
 			HashMap<CategoriaEvento,LinkedList<Utente>> hash_map= new HashMap<>();
-			hash_map = sessione.getDb().selectUtentiDaEventiPassati(utente_mittente.getNome());
-			if(hash_map != null && hash_map.get(CategoriaEvento.PARTITA_CALCIO).contains(utente_destinatario))
-				sessione.getMessagesFactory().segnalaEventoPerUtente(evento, utente_mittente, utente_destinatario);
+			hash_map = sessione.getDb().selectUtentiDaEventiPassati(admin.getNome());
+			if(hash_map != null && hash_map.get(CategoriaEvento.PARTITA_CALCIO).contains(tester))
+				sessione.getMessagesFactory().segnalaEventoPerUtente(evento, admin, tester);
 		} 
 		catch (SQLException e) 
 		{
 			e.printStackTrace();
 		}
 		
-		sessione.accedi(utente_destinatario);
+		assertTrue(sessione.accedi(tester));
 		String nome_categoria = evento.getNomeCategoria().getString().replaceAll("_", " di ");
 		String titolo = String.format(Stringhe.TITOLO_INVITO_EVENTO, nome_categoria);
-		String messaggio = String.format(Stringhe.NOTIFICA_PER_INVITO_UTENTE, utente_mittente.getNome(), evento.getContenutoCampo(NomeCampo.TITOLO));	
+		String messaggio = String.format(Stringhe.NOTIFICA_PER_INVITO_UTENTE, admin.getNome(), evento.getContenutoCampo(NomeCampo.TITOLO));	
 
 		Notifica notifica = new Notifica(titolo, messaggio);
 		
@@ -554,7 +540,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void iscrizioneSciiConScelte()
+	synchronized void iscrizioneSciiConScelte()
 	{
 		assertTrue(sessione.accedi(admin));
 		
@@ -597,7 +583,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@Test
-	void promemoriaSciiConCostoDipendenteDalleProprieScelte()
+	synchronized void promemoriaSciiConCostoDipendenteDalleProprieScelte()
 	{
 		assertTrue(sessione.accedi(admin));
 		
@@ -632,7 +618,6 @@ class FunctionalRequirmentsTest
 		evento.setCampiOptPerUtente(admin, scelte);
 		evento = sessione.aggiungiEvento(evento);
 		
-		Utente tester = new Utente("tester", "");
 		assertTrue(sessione.accedi(tester));				
 		evento.setCampiOptPerUtente(tester, scelte);
 		
@@ -664,7 +649,7 @@ class FunctionalRequirmentsTest
 	}
 	
 	@After
-	void eliminaEventiDiTest()
+	synchronized void eliminaEventiDiTest()
 	{
 		assertTrue(sessione.accedi(admin));
 		sessione.deleteEventiDiUtente();
@@ -672,23 +657,21 @@ class FunctionalRequirmentsTest
 	}
 	
 	@After
-	void eliminaNotificheDiTest()
+	synchronized void eliminaNotificheDiTest()
 	{
 		assertTrue(sessione.accedi(admin));
 		boolean eliminate = sessione.deleteNotificheUtenteAll();
-		Utente tester = new Utente("tester","");
 		assertTrue(sessione.accedi(tester));
 		eliminate = eliminate && sessione.deleteNotificheUtenteAll();
 		assertTrue(eliminate);
 	}
 	
 	@After
-	void eliminaMaterialeDiTesting()
+	synchronized void eliminaMaterialeDiTesting()
 	{
 		assertTrue(sessione.accedi(admin));
 		sessione.deleteEventiDiUtente();
 		sessione.deleteNotificheUtenteAll();
-		Utente tester = new Utente("tester","");
 		assertTrue(sessione.accedi(tester));
 		sessione.deleteEventiDiUtente();
 		sessione.deleteNotificheUtenteAll();

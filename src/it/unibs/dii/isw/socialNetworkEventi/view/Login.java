@@ -15,8 +15,7 @@ import javax.swing.JLabel;
 public class Login extends JPanel 
 {
 	private IView grafica;
-	static final Color coloreBottoni = new Color(255,255,255);
-	static final Color coloreSfondo = new Color(250,250,250);
+	private static final Color coloreSfondo = new Color(250,250,250);
 	private static final long serialVersionUID = 1L;
 	private int X=0, Y=0;
 	private JTextField utente;
@@ -25,7 +24,7 @@ public class Login extends JPanel
 	private final ActionListener accediLambda = e -> grafica.accedi(utente.getText(), new String(password.getPassword()));
 	private final ActionListener creaUtLambda = e -> grafica.creaUtente(utente.getText(), new String(password.getPassword()));
 	
-	public Login (IView grafica, Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
+	Login (IView grafica, Font testoBottoni, Font testo, int pswdWidth, int wordHeight, int fieldWidth) 
 	{
 		this.grafica = grafica;
 		JLabel img = new JLabel();
@@ -38,7 +37,6 @@ public class Login extends JPanel
 		JButton accedi = new JButton("Accedi"), nuovoUt = new JButton("Registrati");
 		utente = new JTextField(); password = new JPasswordField();
 		JLabel utlabel = new JLabel("Utente: "), pswdlabel = new JLabel("Password: ");
-		accedi.setBackground(coloreBottoni); nuovoUt.setBackground(coloreBottoni);
 		utlabel.setFont(testo); pswdlabel.setFont(testo);
 		utente.setFont(testo); password.setFont(testo);
 		accedi.setFont(testoBottoni); nuovoUt.setFont(testoBottoni);
@@ -67,7 +65,7 @@ public class Login extends JPanel
 		add(nuovoUt); add(accedi);
 	}
 	
-	public void focus() {
+	void focus() {
 		if (utente != null) utente.grabFocus();
 	}
 	
@@ -78,7 +76,7 @@ public class Login extends JPanel
 		return Y;
 	}
 	
-	public void ripulisci() {
-		password.setText(""); utente.setText("");
+	void ripulisci() {
+		 password.setText(""); utente.setText("");
 	}
 }

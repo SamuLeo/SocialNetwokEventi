@@ -28,26 +28,26 @@ public class CreazioneEvento extends JPanel
 	public static final int cordinataX = 35;
 	private Font testo;
 	private int X=0, Y=0;
-	JComboBox<String> comboBox = new JComboBox<>(), sesso;
-	JLabel lblCategorie = new JLabel("Categoria");
+	private JComboBox<String> comboBox = new JComboBox<>(), sesso;
+	private JLabel lblCategorie = new JLabel("Categoria");
 	
-	JLabel[] campiComuni = new JLabel[nomeCampiComuni.length];
-	JTextField[] testoCampiComuni = new JTextField[nomeCampiComuni.length];
+	private JLabel[] campiComuni = new JLabel[nomeCampiComuni.length];
+	private JTextField[] testoCampiComuni = new JTextField[nomeCampiComuni.length];
 	
-	JLabel[] campiComuniData = new JLabel[nomeCampiComuniData.length];
-	JButton[] campiComuniCALENDARIO = new JButton[nomeCampiComuniData.length];
+	private JLabel[] campiComuniData = new JLabel[nomeCampiComuniData.length];
+	private JButton[] campiComuniCALENDARIO = new JButton[nomeCampiComuniData.length];
 	JTextField[][] testoCampiComuniData = new JTextField[nomeCampiComuniData.length][3];
-	JLabel[][] giornoMeseAnno = new JLabel[nomeCampiComuniData.length][3];
+	private JLabel[][] giornoMeseAnno = new JLabel[nomeCampiComuniData.length][3];
 	
-	JLabel[] campiComuniOra = new JLabel[nomeCampiComuniOra.length];
-	JLabel[][] oreMinuti = new JLabel[nomeCampiComuniOra.length][2];
-	JTextField[][] testoCampiComuniOra = new JTextField[nomeCampiComuniOra.length][2];
+	private JLabel[] campiComuniOra = new JLabel[nomeCampiComuniOra.length];
+	private JLabel[][] oreMinuti = new JLabel[nomeCampiComuniOra.length][2];
+	private JTextField[][] testoCampiComuniOra = new JTextField[nomeCampiComuniOra.length][2];
 	
-	JLabel[] campiPartitaCalcio;
-	JTextField[] testoCampiPartitaCalcio;
+	private JLabel[] campiPartitaCalcio;
+	private JTextField[] testoCampiPartitaCalcio;
 	
-	JLabel[] campiSciata;
-	JTextField[] testoCampiSciata;
+	private JLabel[] campiSciata;
+	private JTextField[] testoCampiSciata;
 	
 	/**
 	 * @param testo Font usato per il testo

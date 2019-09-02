@@ -13,18 +13,20 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	private ArrayList<Utente> utenti = new ArrayList<>();
 	public HashMap<CategoriaEvento,ArrayList<Evento>> getEventi() {return eventi;}
 	public ArrayList<Utente> getUtenti() {return utenti;}
-
+	private SimpleFactoryEvento factory;
+	
 	public MySQLRepository() throws SQLException
 	{
 		MysqlDataSource dataSource = new MysqlDataSource();
-		//	specifica dei dettagli necessari alla connessione
-		dataSource.setDatabaseName("social_network_db");
-		dataSource.setPortNumber(3306);
-		dataSource.setServerName("localhost");
-		dataSource.setUser("admin_social");
-		dataSource.setPassword("StefanoLoveLinux");
-
+		//Caricamento dei dettagli necessari alla connessione
+		dataSource.setDatabaseName(System.getProperty("nome_database"));
+		dataSource.setPortNumber(Integer.parseInt(System.getProperty("porta_tcp")));
+		dataSource.setServerName(System.getProperty("nome_server"));
+		dataSource.setUser(System.getProperty("utente_server"));
+		dataSource.setPassword(System.getProperty("password_server"));
+		
 		con = dataSource.getConnection();
+		factory = new SimpleFactoryEvento(this);
 	}
 
 	public void refreshDatiRAM() throws SQLException
@@ -67,7 +69,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
  */
 	
 	public Evento insertEvento(Evento evento) throws SQLException
-	{	
+	{
 		PreparedStatement ps = evento.getPSInsertEvento(con);		
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();
@@ -91,14 +93,10 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	
 	public Notifica insertNotifica(Notifica notifica) throws SQLException
 	{
-		String titolo = notifica.getTitolo();
-		String contenuto = notifica.getContenuto();
-		Calendar data = notifica.getData();
-	    
 		PreparedStatement ps = con.prepareStatement(Stringhe.INSERT_SQL_NOTIFICA, Statement.RETURN_GENERATED_KEYS);
-		ps.setString(1, titolo);
-		ps.setString(2, contenuto);		
-		ps.setTimestamp(3, this.creaTimestamp(data));
+		ps.setString(1, notifica.getTitolo());
+		ps.setString(2, notifica.getContenuto());		
+		ps.setTimestamp(3, creaTimestamp(notifica.getData()));
 		
 		ps.executeUpdate();
 		ResultSet rs = ps.getGeneratedKeys();	
@@ -112,7 +110,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	{	
 		PreparedStatement ps = evento.getPSInsertIscrizioneUtenteInEvento(utente, con);
 		ps.executeUpdate();
-		this.refreshDatiRAM();
+		refreshDatiRAM();
 	}
 	
 	
@@ -139,7 +137,6 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	
 	public HashMap<CategoriaEvento,ArrayList<Evento>> selectEventiAll() throws SQLException
 	{
-		SimpleFactoryEvento factory = new SimpleFactoryEvento(this);
 		HashMap<CategoriaEvento,ArrayList<Evento>> eventi = new HashMap<CategoriaEvento,ArrayList<Evento>>();
 		//Toglie la categoria "default"
 		CategoriaEvento[] categorie = Arrays.copyOfRange(CategoriaEvento.values(), 1, CategoriaEvento.values().length);
@@ -370,7 +367,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		PreparedStatement ps = con.prepareStatement(Stringhe.DELETE_SQL_NOTIFICA);
 		ps.setInt(1, id_notifica);
 		ps.executeUpdate();
-		this.refreshDatiRAM();
+		refreshDatiRAM();
 	}
 	
 	
@@ -433,7 +430,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 		if(utenti.isEmpty()) return null;
 		
 		for(Utente u : utenti)
-			if(u.equalsConPassword(utente)) return u;
+			if(u.equals(utente)) return u;
 		return null;
 	}
 
@@ -453,8 +450,7 @@ public class MySQLRepository extends Observable implements IPersistentStorageRep
 	
 	public int getCostoEventoPerUtente(Evento evento, Utente utente) throws SQLException
 	{
-		if(existUtenteInEvento(utente, evento) == false)
-			return 0;
+		if(existUtenteInEvento(utente, evento) == false) return 0;
 		int costo = (Integer)evento.getCampo(NomeCampo.COSTO).getContenuto();
 		HashMap<NomeCampo, Boolean> campi_opt = evento.getCampiOptDiUtente(utente);
 		if(campi_opt != null)

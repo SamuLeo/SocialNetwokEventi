@@ -11,15 +11,14 @@ import javax.swing.table.*;
  
 public class Calendario extends JFrame {
 	private static final long serialVersionUID = 1L;
-	static final Font font=new Font("sans", Font.PLAIN, Toolkit.getDefaultToolkit().getScreenResolution()/6);
-	Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
-	int screenW = (int)(screenSize.getWidth());
-	int screenH = (int)(screenSize.getHeight());
-	DefaultTableModel model;
-	Calendar cal = new GregorianCalendar();
-	JLabel nomeMese;
-	JTable table;
-	int lato;
+	private Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
+	private int screenW = (int)(screenSize.getWidth());
+	private int screenH = (int)(screenSize.getHeight());
+	private DefaultTableModel model;
+	private Calendar cal = new GregorianCalendar();
+	private JLabel nomeMese;
+	private JTable table;
+	private int lato;
 	 
 	Calendario(Font font, int lato, Consumer<Calendar> azione) {
 		this.lato=lato;

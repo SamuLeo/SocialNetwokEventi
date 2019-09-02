@@ -50,9 +50,7 @@ public class AltriTest {
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testValoriLimite_DATE_UGUALI() {
-		Calendar cal1 = Calendar.getInstance();
 		Calendar cal2 = Calendar.getInstance();
-		cal1.add(Calendar.MINUTE, 1);
 		cal2.add(Calendar.MINUTE, 2);
 		new PartitaCalcio(new Utente("Prova"), "Luogo", cal2, cal2, 2, 0, null, null, null, null, null, null, 10, 11, "qualsiasi");
 	}
@@ -76,7 +74,7 @@ public class AltriTest {
 	}
 	
 
-	@Test //(expected = IllegalArgumentException.class)
+	@Test (expected = IllegalArgumentException.class)
 	public void testValoriLimite_COSTO_NEGATIVO() {
 		Calendar cal1 = Calendar.getInstance();
 		Calendar cal2 = Calendar.getInstance();

@@ -34,34 +34,25 @@ public abstract class Evento
 		campi = new HashMap<>();
 		partecipanti_campiOpt = new HashMap<Utente,HashMap<NomeCampo,Boolean>>();
 		
-		if(luogo == null) 																				throw new IllegalArgumentException("Necessario inserire un luogo");
-		if(data_ora_termine_ultimo_iscrizione == null) 													throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni");
-		//Rimosso questo controllo per non forzare che gli eventi siano tutti nel futuro, perché vanno ricreati ogni volta che vengono estratti dalla base dati. Vengono imposti vincoli solo sulla relativa posizione delle date
-		//if(!dataNelFuturo(data_ora_termine_ultimo_iscrizione)) 										throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni posteriore alla data odierna");
-		if(!data1PrecedenteData2(data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento))			throw new IllegalArgumentException("Necessario inserire una data di inizio evento nel futuro e posteriore alla data di termine iscrizione");
-		if(partecipanti < 2) 																			throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
-		if(creatore == null) 																			throw new IllegalArgumentException("Necessario inserire un utente creatore");
-		//if(costo < 0)																					throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
+		if(luogo == null) 																throw new IllegalArgumentException("Necessario inserire un luogo");
+		if(data_ora_termine_ultimo_iscrizione == null) 									throw new IllegalArgumentException("Necessario inserire una data di chiusura delle iscrizioni");
+		if(data_ora_inizio_evento.compareTo(data_ora_termine_ultimo_iscrizione)<=0)		throw new IllegalArgumentException("Necessario inserire una data di inizio evento posteriore alla data di termine iscrizione");
+		if(partecipanti < 2) 															throw new IllegalArgumentException("Necessario inserire un numero di partecipanti superiore o uguale a 2");
+		if(creatore == null) 															throw new IllegalArgumentException("Necessario inserire un utente creatore");
+		if(costo < 0)																	throw new IllegalArgumentException("Necessario inserire un costo superiore o uguale a 0");
 		//inserimento dei campi obbligatori nella HashMap dei campi	
 		aggiungiCampo(luogo, true, NomeCampo.LUOGO, "Locazione evento");
 		aggiungiCampo(data_ora_termine_ultimo_iscrizione, true, NomeCampo.D_O_CHIUSURA_ISCRIZIONI, "Termine iscrizioni");
 		aggiungiCampo(data_ora_inizio_evento, true, NomeCampo.D_O_INIZIO_EVENTO, "Inizio evento");
-		aggiungiCampo(partecipanti, true, NomeCampo.PARTECIPANTI, "Numero partecipanti");
-		aggiungiCampo(costo, true, NomeCampo.COSTO, "Costo unitario");
-		this.setUtenteCreatore(creatore);
-		//partecipanti_campiOpt.add(creatore);
+		aggiungiCampo(partecipanti, true, NomeCampo.PARTECIPANTI, "Numero minimo partecipanti");
+		aggiungiCampo(costo, true, NomeCampo.COSTO, "Quota adesione");
+		setUtenteCreatore(creatore);
 	}
 	
 	/** Costruttore con parametri obbligatori e facoltativi */
 	public Evento(
-			Utente creatore,
-			String luogo,
-			Calendar data_ora_termine_ultimo_iscrizione,	
-			Calendar data_ora_inizio_evento,
-			Integer partecipanti,
-			Integer costo,
-		    
-			String titolo,				
+			Utente creatore, String luogo, Calendar data_ora_termine_ultimo_iscrizione,	Calendar data_ora_inizio_evento, Integer partecipanti, Integer costo,
+			String titolo,	
 			String note,
 			String benefici_quota,
 		    Calendar data_ora_termine_evento,
@@ -79,11 +70,11 @@ public abstract class Evento
 		if(tolleranza != null && tolleranza>=0) aggiungiCampo(tolleranza, false, NomeCampo.TOLLERANZA_MAX, "Iscrizioni in esubero");
 		if(tolleranza != null && tolleranza<0) throw new IllegalArgumentException("Il numero di partecipanti in esubero può essere solo positivo");
 		if(data_ora_termine_evento != null)	{
-			if(data1PrecedenteData2(data_ora_termine_evento, data_ora_inizio_evento)) throw new IllegalArgumentException("Necessario inserire una data di termine evento nel futuro e posteriore alla data di inizio evento");
+			if(data_ora_termine_evento.before(data_ora_inizio_evento)) throw new IllegalArgumentException("Necessario inserire una data di termine evento nel futuro e posteriore alla data di inizio evento");
 				aggiungiCampo(data_ora_termine_evento, false, NomeCampo.D_O_TERMINE_EVENTO, "Fine evento");						
 		}	
 		if(data_ora_termine_ritiro_iscrizione != null) {
-			if(data1PrecedenteData2(data_ora_termine_ultimo_iscrizione, data_ora_termine_ritiro_iscrizione)) throw new IllegalArgumentException("Necessario inserire una data di termine di ritiro delle iscrizioni nel futuro e anteriore alla data di termine delle iscrizioni");
+			if(data_ora_termine_ultimo_iscrizione.before(data_ora_termine_ritiro_iscrizione)) throw new IllegalArgumentException("Necessario inserire una data di termine di ritiro delle iscrizioni nel futuro e anteriore alla data di termine delle iscrizioni");
 				aggiungiCampo(data_ora_termine_ritiro_iscrizione, false, NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE, "Termine ritiro iscrizioni");						
 		}
 		else aggiungiCampo(data_ora_termine_ultimo_iscrizione, false, NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE, "Termine ritiro iscrizioni");
@@ -94,19 +85,8 @@ public abstract class Evento
 	 */
 	public Evento(
 			Integer id,
-			Utente creatore,
-			String luogo,
-			Calendar data_ora_termine_ultimo_iscrizione,	
-			Calendar data_ora_inizio_evento,
-			Integer partecipanti,
-			Integer costo,
-		    
-			String titolo,				
-			String note,
-			String benefici_quota,
-		    Calendar data_ora_termine_evento,
-		    Calendar data_ora_ritiro_iscrizione,
-		    Integer tolleranza_max,
+			Utente creatore, String luogo, Calendar data_ora_termine_ultimo_iscrizione,	Calendar data_ora_inizio_evento, Integer partecipanti, Integer costo,
+			String titolo, String note, String benefici_quota, Calendar data_ora_termine_evento, Calendar data_ora_ritiro_iscrizione, Integer tolleranza_max,
 		    StatoEvento stato
 			){
 		this(creatore, luogo, data_ora_termine_ultimo_iscrizione, data_ora_inizio_evento, partecipanti, costo, titolo, note, benefici_quota, data_ora_termine_evento,data_ora_ritiro_iscrizione,tolleranza_max);
@@ -122,50 +102,55 @@ public abstract class Evento
 	 * Prima questa responsabilità era relegata al controller. Ora, per Expert, è stata relegata ad evento.
 	 * 
 	 * @return true se lo stato cambia
-	 * @throws SQLException 
 	 */
 	public final boolean controllaStatoEvento() 
 	{
+		int n_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
+		int n_massimo_iscritti = n_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
+		StatoEvento nuovoStato = null;
+		//Ritirata, Fallita e Conclusa sono stati terminali. Gli unici con possibile evoluzione sono Aperta e Chiusa (e Valida)
+		if (getStato().equals(StatoEvento.APERTA) && !dataChiusuraIscrizioniNelFuturo() && getNumeroPartecipanti() < n_minimo_iscritti)
+			nuovoStato = StatoEvento.FALLITA;
+		else if (getStato().equals(StatoEvento.APERTA) && !dataChiusuraIscrizioniNelFuturo() && getNumeroPartecipanti() >= n_minimo_iscritti)
+			nuovoStato = StatoEvento.CHIUSA;
+		else if (getStato().equals(StatoEvento.APERTA) && !dataTermineRitiroNelFuturo() && getNumeroPartecipanti() == n_massimo_iscritti)
+			nuovoStato = StatoEvento.CHIUSA;
+		else if(getStato().equals(StatoEvento.CHIUSA) && !dataFineEventoNelFuturo())
+			nuovoStato = StatoEvento.CONCLUSA;
+		
+		if (nuovoStato == null) return false;
+		setStato(nuovoStato);
+		return true;
+	}
+	
+	public boolean dataChiusuraIscrizioniNelFuturo() {
 		Calendar oggi = Calendar.getInstance();
-		boolean DataChiusuraIscrizioniNelFuturo = oggi.before((Calendar)getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI));
-		boolean termine_ritiro_scaduto = oggi.after((Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE));
-		boolean DataFineEventoNelFuturo;		
-		if (getCampo(NomeCampo.D_O_TERMINE_EVENTO)==null) 
+		return oggi.before((Calendar)getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI));
+	}
+	
+	public boolean dataTermineRitiroNelFuturo() {
+		Calendar oggi = Calendar.getInstance();
+		return oggi.before((Calendar) getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE));
+	}
+	
+	public boolean dataFineEventoNelFuturo() {
+		Calendar oggi = Calendar.getInstance();
+		boolean ritorno;
+		if (getCampo(NomeCampo.D_O_TERMINE_EVENTO) != null)
+			ritorno = oggi.before((Calendar)getContenutoCampo(NomeCampo.D_O_TERMINE_EVENTO));
+		else
 		{
 			Calendar giorno_dopo_inizio_evento = ((Calendar)getContenutoCampo(NomeCampo.D_O_INIZIO_EVENTO));
 			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,1);
-			DataFineEventoNelFuturo= oggi.before(giorno_dopo_inizio_evento);
+			ritorno = oggi.before(giorno_dopo_inizio_evento);
 			giorno_dopo_inizio_evento.add(Calendar.DAY_OF_YEAR,-1);	//Non togliere, altrimenti i dati diventano incoerenti (passaggio per referenza)
 		}
-		else 
-			DataFineEventoNelFuturo = oggi.before((Calendar)getCampo(NomeCampo.D_O_TERMINE_EVENTO).getContenuto());
-		int n_iscritti_attuali = getNumeroPartecipanti();
-		int n_minimo_iscritti = (Integer)getCampo(NomeCampo.PARTECIPANTI).getContenuto();
-		int n_massimo_iscritti = n_minimo_iscritti + (Integer)getCampo(NomeCampo.TOLLERANZA_MAX).getContenuto();
-		
-		StatoEvento statoEvento = getStato();
-		//Ritirata, Fallita e Conclusa sono stati terminali. Gli unici con possibile evoluzione sono Aperta e Chiusa (e Valida)
-		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && n_iscritti_attuali < n_minimo_iscritti)
-		{
-			setStato(StatoEvento.FALLITA);
-			return true;
-		}
-		if (statoEvento.getString().equals("Aperta") && !DataChiusuraIscrizioniNelFuturo && n_iscritti_attuali >= n_minimo_iscritti)
-		{
-			setStato(StatoEvento.CHIUSA);
-			return true;
-		}
-		if (statoEvento.getString().equals("Aperta") && termine_ritiro_scaduto && n_iscritti_attuali == n_massimo_iscritti)
-		{
-			setStato(StatoEvento.CHIUSA);
-			return true;
-		}
-		if(DataFineEventoNelFuturo == false && (statoEvento.getString().equals("Chiusa")))
-		{
-			setStato(StatoEvento.CONCLUSA);
-			return true;
-		}
-		return false;
+		return ritorno;
+	}
+	
+	public boolean ciSonoPostiLiberi() {
+		if (getCampo(NomeCampo.TOLLERANZA_MAX) == null) return getNumeroPartecipanti() < (Integer)getContenutoCampo(NomeCampo.PARTECIPANTI);
+		else return getNumeroPartecipanti() < (Integer)getContenutoCampo(NomeCampo.PARTECIPANTI) + (Integer)getContenutoCampo(NomeCampo.TOLLERANZA_MAX);
 	}
 	
 	
@@ -228,20 +213,18 @@ public abstract class Evento
 	}
 	
 	protected <T> void aggiungiCampo(T campo, boolean obbligatorio, NomeCampo titolo, String descrizione) {campi.put(titolo, new Campo<T>(campo, obbligatorio, descrizione));}
-	//serve per fare controlli NullPointer
+	//Serve per fare controlli NullPointer
 	public Campo getCampo(NomeCampo nomeCampo)	{return campi.get(nomeCampo);}
-	public Object getContenutoCampo(NomeCampo nomeCampo) {return getCampo(nomeCampo).getContenuto();}
+	public Object getContenutoCampo(NomeCampo nomeCampo) {return campi.get(nomeCampo).getContenuto();}
 	
 	public boolean aggiungiFruitore(Utente utente)
 	{
-		Calendar adesso = Calendar.getInstance();
-		boolean termineIscrizioni = ((Calendar)(getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI))).before(adesso);
-		if((Integer)getContenutoCampo(NomeCampo.PARTECIPANTI) + (Integer)getContenutoCampo(NomeCampo.TOLLERANZA_MAX) > getNumeroPartecipanti() && !termineIscrizioni)
+		if(ciSonoPostiLiberi() && dataChiusuraIscrizioniNelFuturo())
 		{
 			if (utente_creatore.equals(utente)) return false;
 			for (Utente u: partecipanti_campiOpt.keySet())
 				if (u.equals(utente)) return false;
-			partecipanti_campiOpt.put(utente,null);
+			partecipanti_campiOpt.put(utente, null);
 			return true;
 		}
 		else return false;
@@ -249,10 +232,8 @@ public abstract class Evento
 	
 	public void rimuoviFruitore(Utente utente)
 	{
-		Calendar adesso = Calendar.getInstance();
-		boolean termineRitiroScaduto = ((Calendar)(getContenutoCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE))).before(adesso);
-		if(getNumeroPartecipanti() == 0 || termineRitiroScaduto) return;
-			partecipanti_campiOpt.remove(utente);
+		if(getNumeroPartecipanti() == 0 || !dataTermineRitiroNelFuturo()) return;
+		partecipanti_campiOpt.remove(utente);
 	}
 	
 	public int getNumeroPartecipanti() {
@@ -332,7 +313,5 @@ public abstract class Evento
 		return toString().equals(obj.toString());
 	}
 	
-	//Utili per manipolazione date
-	private boolean data1PrecedenteData2(Calendar data1, Calendar data2){return data1.compareTo(data2) < 0;}
 	protected Timestamp creaTimestamp(Calendar c) {if (c==null) return null; else return new Timestamp (c.getTimeInMillis());}
 }

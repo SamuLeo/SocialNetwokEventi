@@ -16,24 +16,22 @@ public class SceltaInviti extends JPanel
 {
 	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
-	int X, Y, nRighe=1;
-	Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
-	int screenW = (int)(screenSize.getWidth());
-	int screenH = (int)(screenSize.getHeight());
-	JCheckBox[] utenti;
-	LinkedList<Utente> invitabili;
-	JLabel intestazione;
-	JButton chiudi;
-	Font font;
-	Evento evento;
+	private int X, Y;
+	private Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
+	private int screenW = (int)(screenSize.getWidth());
+	private int screenH = (int)(screenSize.getHeight());
+	private JCheckBox[] utenti;
+	private LinkedList<Utente> invitabili;
+	private JLabel intestazione;
+	private JButton chiudi;
+	private Evento evento;
 
-	public SceltaInviti(Grafica grafica, Evento e, LinkedList<Utente> invitabili, Font font, int larghezza, int altezzaStr) {
+	SceltaInviti(Grafica grafica, Evento e, LinkedList<Utente> invitabili, Font font, int larghezza, int altezzaStr) {
 		super();
 		this.grafica = grafica;
 		evento = e;
 		this.invitabili=invitabili;
 		X = larghezza;
-		this.font=font;
 		setLayout(null);
 		setBackground(Grafica.coloreSfondo);
 		
@@ -54,12 +52,6 @@ public class SceltaInviti extends JPanel
 				utenti[i].setText(invitabili.get(i).getNome());
 			}
 		}
-		//invita=new JButton ("Invita un fruitore specifico"); 
-		//invita.setFont(font); 
-		//invita.setBackground(Grafica.coloreBottoni); 
-		//invita.setBounds(20, Y, X-40, (int)(altezzaStr * 1.1));
-		//Y+= 30 + altezzaStr * 1.1;
-		//add(invita);
 		chiudi = new JButton("Conferma ✔");
 		chiudi.setBackground(Grafica.coloreBottoni);
 		chiudi.setFont(font);
@@ -76,15 +68,6 @@ public class SceltaInviti extends JPanel
 		X=larghezza;
 		for (Component c: getComponents())
 			c.setSize(X-40, c.getHeight());
-		/*int altezzaStringhe = partecipatoInPassato.getHeight()/nRighe;
-		int altezzaprima = partecipatoInPassato.getHeight();
-		nRighe=((int)font.getStringBounds(partecipatoInPassato.getText(), ((Graphics2D)getGraphics()).getFontRenderContext()).getWidth() / (X - 40) + 1);
-		int delta = nRighe*altezzaStringhe - altezzaprima;
-		Y+=delta;
-		intestazione.setSize(X - 40, intestazione.getHeight());
-		partecipatoInPassato.setSize(X - 40, nRighe*altezzaStringhe);
-		invita.setBounds(20, invita.getY()+delta, X-40, invita.getHeight());
-		chiudi.setBounds(20, chiudi.getY()+delta, X-40, chiudi.getHeight());*/
 		setPreferredSize(new Dimension(X,Y));
 	}
 	

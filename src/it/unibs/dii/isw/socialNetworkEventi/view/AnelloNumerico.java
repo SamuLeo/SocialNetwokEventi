@@ -8,13 +8,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-public class AnelloNumerico extends JPanel {
+class AnelloNumerico extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final Color sfondoAnello = new Color(190,190,190);
 	Color sfondoCard;
-	int totale, n, lato, altezzaStringhe;
-	JLabel capienza;
-	Font testo;
+	private int totale, n, lato, altezzaStringhe;
+	private JLabel capienza;
+	private Font testo;
 	
 	AnelloNumerico (int w, int totale, int n, Font testo, int altezzaStringhe, Color sfondo) {
 		lato=w;

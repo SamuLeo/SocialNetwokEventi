@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Observable;
@@ -89,7 +88,7 @@ public class Sessione implements IController
 		try 
 		{
 			u = db.existUtente(utente);
-			if(u != null) {
+			if(u != null && utente.equalsConPassword(u)) {
 				utente_corrente = u;
 				logger.scriviLog("Effettuato accesso da parte di " + utente.getNome());
 				return true;
@@ -169,7 +168,7 @@ public class Sessione implements IController
 		catch(Exception e) 
 		{
 			new MsgBox().messaggioErrore("Impossibile aggiungere Evento", "Non è stato possibile creare l'evento");
-			error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getCampo(NomeCampo.TITOLO).getContenuto()));
+			error_logger.scriviLog(String.format(Stringhe.E_INSERT_E,evento.getContenutoCampo(NomeCampo.TITOLO)));
 		}
 		return null;
 	}
@@ -255,16 +254,10 @@ public class Sessione implements IController
 		try
 		{
 			if(utenteIscrittoInEvento(evento)) return;
-			int numero_iscritti_attuali = evento.getNumeroPartecipanti();
-			int tolleranza;
-			if (evento.getCampo(NomeCampo.TOLLERANZA_MAX) == null) tolleranza = 0; else tolleranza = (Integer)evento.getContenutoCampo(NomeCampo.TOLLERANZA_MAX);
+			int tolleranza = evento.getCampo(NomeCampo.TOLLERANZA_MAX) == null ? 0 : (Integer)evento.getContenutoCampo(NomeCampo.TOLLERANZA_MAX);
 			int numero_massimo_iscritti_possibili = (Integer)evento.getContenutoCampo(NomeCampo.PARTECIPANTI) + tolleranza;
-			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();
-			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
-			Calendar chiusura_iscrizioni = (Calendar) evento.getContenutoCampo(NomeCampo.D_O_CHIUSURA_ISCRIZIONI);
-			boolean chiusura_iscrizioni_superato = Calendar.getInstance().compareTo(chiusura_iscrizioni)>0;
-			//se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
-			if(numero_iscritti_attuali == numero_massimo_iscritti_possibili && termine_ritiro_scaduto)
+			//Se il giocatore occupa l'ultimo posto disponibile e il termine ritiro è scaduto allora si notificano gli altri giocatori che la partita è chiusa, ossia si farà
+			if(evento.getNumeroPartecipanti() == numero_massimo_iscritti_possibili && !evento.dataTermineRitiroNelFuturo())
 			{
 				db.collegaUtenteEvento(utente_corrente, evento);
 				evento = db.selectEvento(evento.getId());
@@ -273,7 +266,7 @@ public class Sessione implements IController
 				db.updateEvento(evento);
 				logger.scriviLog(String.format(Stringhe.APERTO_CHIUSO, evento.getId()));
 			}
-			else if ((numero_iscritti_attuali <= numero_massimo_iscritti_possibili && !chiusura_iscrizioni_superato)) 
+			else if (evento.getNumeroPartecipanti() <= numero_massimo_iscritti_possibili && evento.dataChiusuraIscrizioniNelFuturo()) 
 				db.collegaUtenteEvento(utente_corrente, evento);	
 			else return;
 			utente_corrente = db.selectUtente(utente_corrente.getNome());
@@ -396,10 +389,8 @@ public class Sessione implements IController
 	
 	public  void disiscrizioneUtenteEvento(Evento evento) throws RuntimeException{
 		if(utente_corrente == null) throw new RuntimeException("L'utente corrente è null");
-
-		Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
-		boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
-		if(termine_ritiro_scaduto) throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
+		
+		if(!evento.dataTermineRitiroNelFuturo()) throw new RuntimeException("L'iscrizione non può essere annullata a causa del superamento del termine della possibilità di ritiro");
 		try 
 		{
 			if(!utenteIscrittoInEvento(evento)) throw new RuntimeException ("Utente non iscritto alla partita");	
@@ -432,9 +423,7 @@ public class Sessione implements IController
 	{
 		try
 		{
-			Calendar termine_ritiro_iscrizioni = (Calendar) evento.getCampo(NomeCampo.D_O_TERMINE_RITIRO_ISCRIZIONE).getContenuto();	
-			boolean termine_ritiro_scaduto = Calendar.getInstance().compareTo(termine_ritiro_iscrizioni)>0;
-			if(termine_ritiro_scaduto)
+			if(!evento.dataTermineRitiroNelFuturo())
 				throw new RuntimeException("L'evento non può essere annullato a causa del superamento della data massima per poter effettuare questa operazione");
 			else
 			{

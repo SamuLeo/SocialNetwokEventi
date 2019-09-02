@@ -16,12 +16,12 @@ class PannelloUtente extends JPanel {
 	private Grafica grafica;
 	private static final long serialVersionUID = 1L;
 	private static final int xInizio = 20;
-	int Y, nRighe=1;
-	JLabel nomignolo, eta, cat, info;
-	JTextField etamin, etamas;
-	JButton salva;
-	LinkedList<JCheckBox> categorie;
-	Font testo;
+	private int Y, nRighe=1;
+	private JLabel nomignolo, eta, cat, info;
+	private JTextField etamin, etamas;
+	private JButton salva;
+	private LinkedList<JCheckBox> categorie;
+	private Font testo;
 	
 	PannelloUtente (Grafica grafica, Utente u, Font testo, Font testoBottoni, int altezzaStringhe, int larghezza) {
 		super();
@@ -117,7 +117,7 @@ class PannelloUtente extends JPanel {
 		setPreferredSize(new Dimension(larghezza,Y));
 	}
 	
-	void impostaPreferito(ActionEvent e) {
+	private void impostaPreferito(ActionEvent e) {
 		try {
 			Integer etm = (etamin.getText().equals("") ? -1 : Integer.parseInt(etamin.getText())),
 					etM = (etamas.getText().equals("") ? -1 : Integer.parseInt(etamas.getText()));
@@ -129,6 +129,7 @@ class PannelloUtente extends JPanel {
 				selezionata[i] = categorie.get(i).isSelected();
 			}
 			grafica.aggiornaDatiUtente(etm, etM, elenco, selezionata);
+			new MsgBox().messaggioSemplice("Profilo utente", "Modifiche salvate");
 		} catch (NumberFormatException ex) {
 			new MsgBox().messaggioAvviso("Errore di compilazione", "Sono stati inseriti dati scorretti nei campi riguardanti l'età");
 		}
